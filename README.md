@@ -93,7 +93,8 @@ The function of the system is:
   - create the **new** *loop**s.
   - add the newly created *loop**s to *loops*.
   - returns a time increment.
-- *output*
+- *output*${r_n}_{n \in [0,k]} : an array<array<3>,k> of the position of all binding points called r
+
   - sort the loop by their value of $\mathbf{R}$.
   - return three vectors that corresponds to $\mathcal{C}$.
 
@@ -101,8 +102,8 @@ The function of the system is:
 
 The main part of the system is a **vector<loop>** of loop. Each loop $i$ contains the following private variables:
 - $\mathbf{R}$ : is a **array<double,3>** the right crosslinker. is called *R*
-- $\ell$ : the length of the loop is a double called *ell*
-- $\{r_n\}_{n \in [0,k]} : an **array<array<3>,k>** of the position of all binding points called *r*
+- $\ell$ : the length of the loop is a double called *ell_loop*
+- $\{r_n\}_{n \in [0,k]} : an **vector<array<3>,k>** of the position of all binding points called *r*
 
 The following variables accessible by accessor:
 
@@ -112,8 +113,11 @@ The following variables accessible by accessor:
 The following functions:
 
 - a function the compute the binding rate of the loop to a crosslinker located to $\mathbf{r}_i$ at the length $\ell$.
-- a function that compute the square of a 3D vector.
 - a function that select a crosslinker and a length (according to their respective rates) and returns the position of the crosslinker and the length selected. we call it *select_link_length*
 - The constructor:
   - take a right crosslinker position *R*, a length *ell*.
   - generate a **array<array<3>,k>** *r* by drawing a $k$ from the Poisson distribution
+
+## Function
+
+- a function that compute the square of a 3D vector.  

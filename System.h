@@ -3,7 +3,8 @@
 class System{
 public:
   System(); // constructor
-  ~System(); // destructor
+  System(double ell_tot,double D,double rho0,double kbT) // constructor with the Parameters
+  ~System(); // destructor that have to delete all the loops
   double evolve(); // make the system evolve and return the time increment.
   int get_N() const; // return N the number of loop.
   void get_R(double* R, int size) const; // return the position of the anchored points
