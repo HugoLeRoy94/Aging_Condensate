@@ -103,7 +103,7 @@ The function of the system is:
 The main part of the system is a **vector<loop>** of loop. Each loop $i$ contains the following private variables:
 - $\mathbf{R}$ : is a **array<double,3>** the right crosslinker. is called *R*
 - $\ell$ : the length of the loop is a double called *ell_loop*
-- $\{r_n\}_{n \in [0,k]} : an **vector<array<3>,k>** of the position of all binding points called *r*
+- $\{r_n\}_{n \in [0,k]}$ : an **vector<array<3>,k>** of the position of all binding points called *r*
 
 The following variables accessible by accessor:
 
