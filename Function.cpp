@@ -1,5 +1,9 @@
 #include "Header.h"
-
-double get_square(array<double,3> v1, array<double,3> v2){
-  return 0;
+using namespace std;
+double get_square(array<double,3> v1){
+  double res;
+  for(auto it:v1){
+    res+=it*it;
+  }
+  return res;
 };

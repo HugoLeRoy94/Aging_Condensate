@@ -3,7 +3,7 @@
 class System{
 public:
   System(); // constructor
-  System(double ell_tot,double D,double rho0,double kbT) // constructor with the Parameters
+  System(double ell_tot,double distance_anchor,double rho0,double temperature); // constructor with the Parameters
   ~System(); // destructor that have to delete all the loops
   double evolve(); // make the system evolve and return the time increment.
   int get_N() const; // return N the number of loop.
@@ -11,6 +11,7 @@ public:
   void get_ell(double* ells, int size) const;// return the list of length of the loops.
 
 private:
-  std::vector<loop*> loops;
+  std::vector<Loop*> loops;
+  double ell,D,rho,kBT;
 };
 #endif
