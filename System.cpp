@@ -32,9 +32,10 @@ double System::evolve(){
 // -----------------------------accessor----------------------------------------
 // -----------------------------------------------------------------------------
 int System::get_N() const{return loops.size();}
+
 void System::get_R(double* R, int size) const{
   if(size!=3*loops.size()){
-    throw invalid_argument("Error in System::get_R wrong size argument: size=3.Nloop");}
+    throw invalid_argument("invalid size in System::get_R");}
   // fill the vector R with the value of R of each loops
   for(int n=0;n<loops.size();n++){
     R[3*n] = loops[n]->get_Rright()[0];
@@ -42,9 +43,9 @@ void System::get_R(double* R, int size) const{
     R[3*n+2] = loops[n]->get_Rright()[2];
   }
 }
+
 void System::get_ell(double* ells,int size) const{
-  if(size!=loops.size()){
-    throw invalid_argument("Error in System::get_ell wrong size argument : size=Nloop");}
+  if(size!=loops.size()){throw invalid_argument("invalid size in System::get_ell");}
   for(int n=0;n<size;n++){
     ells[n] = loops[n]->get_ell();
   }

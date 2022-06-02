@@ -1,12 +1,12 @@
 CC =g++ #compilateur
 VERSION = -std=c++1y #derniere version de c++
 OPT = -O3 #optimisation de ouf
-SharedLib = libRand.so
+SharedLib = lib.so
 DEBUG=no
 NAME=Aight
 MEMCHECK= #-g
 
-SRC=$(wildcard *.cpp) $(wildcard *.c)
+SRC=$(wildcard *.cpp)# $(wildcard *.c)
 
 
 OBJ=$(SRC:.cpp=.o) #convertie la liste de .cpp en une liste de .o

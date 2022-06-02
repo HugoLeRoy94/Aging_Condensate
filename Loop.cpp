@@ -3,8 +3,8 @@ using namespace std;
 
 Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop){
   // the right anchoring point of the loop
-  R0 = Rleft;
-  R1 = Rright;
+  Rleft=R0;
+  Rright=R1;
   ell = ell_loop;
   // create r by randmoly generating positions
   generate_binding_sites();
