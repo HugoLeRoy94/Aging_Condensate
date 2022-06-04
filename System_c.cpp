@@ -1,6 +1,9 @@
 #include "Header.h"
 extern "C"
 {
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
   void* create_system(double ell_tot,double distance_anchor,double rho0,double temperature)
   {
     return new System(ell_tot, distance_anchor, rho0, temperature);
@@ -22,4 +25,20 @@ extern "C"
     System* system = reinterpret_cast<System*>(ptr);
     return system->evolve();
   }
+  int get_r_size(void* ptr){
+    System* system = reinterpret_cast<System*>(ptr);
+    return system->get_r_size();
+  }
+  void get_r(void* ptr, double* r, int size){
+    System* system = reinterpret_cast<System*>(ptr);
+    system->get_r(r,size);
+  }
+  void Print_Loop_positions(void* ptr){
+    System* system = reinterpret_cast<System*>(ptr);
+    system->Print_Loop_positions();
+  }
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+
 }

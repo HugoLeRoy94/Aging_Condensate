@@ -11,7 +11,7 @@ SRC=$(wildcard *.cpp)# $(wildcard *.c)
 
 OBJ=$(SRC:.cpp=.o) #convertie la liste de .cpp en une liste de .o
 
-HEAD=$(filter-out main.h Function.h System_c.h $(wildcard *.c) , $(SRC:.cpp=.h)) #converti tout les .cpp en .h sauf main.cpp et certains autres...
+HEAD=$(filter-out main.h System_c.h $(wildcard *.c) , $(SRC:.cpp=.h)) #converti tout les .cpp en .h sauf main.cpp et certains autres...
 
 ifeq ($(DEBUG),yes)
 	FLAG=-DDEBUG

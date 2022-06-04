@@ -9,7 +9,9 @@ public:
   int get_N() const; // return N the number of loop.
   void get_R(double* R, int size) const; // return the position of the anchored points
   void get_ell(double* ells, int size) const;// return the list of length of the loops.
-
+  void get_r(double* r,int size) const;
+  int get_r_size()const;
+  void Print_Loop_positions();
 private:
   std::vector<Loop*> loops;
   double ell,D,rho,kBT;
