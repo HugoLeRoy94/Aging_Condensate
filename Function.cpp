@@ -48,9 +48,6 @@ array<double,3> random_in_ellipse(double a,double b,double c,double xg,double yg
     if(pow(x/a,2)+pow(y/b,2)+pow(z/c,2)<=1){OUT=false;}
   }
   double theta(atan2(yg,xg)),phi(atan2(xg,zg)-Pi/2.);
-  x+=xg;
-  y+=yg;
-  z+=zg;
   //cout<<"xg yg zg ="<<xg<<" "<<yg<<" "<<zg<<endl;
   //cout<< "theta phi ="<<theta<<" "<<phi<<endl;
   //cout<<x<<" "<<y<<" "<<z<<endl;
@@ -58,6 +55,9 @@ array<double,3> random_in_ellipse(double a,double b,double c,double xg,double yg
   array<double,3> res{cos(phi)*(cos(theta)*x-sin(theta)*y+sin(phi)*z),
                       sin(theta)*x+cos(theta)*y,
                       -sin(phi)*(cos(theta)*x-sin(theta)*y)+cos(phi)*z};
+  res[0]+=xg;
+  res[1]+=yg;
+  res[2]+=zg;
   //cout<<res[0]<<" "<<res[1]<<" "<<res[2]<<endl;
   return res;
 }

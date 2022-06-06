@@ -35,7 +35,8 @@ class System:
         size = (self.get_N_loop()+1)*3
         R = np.zeros(size,dtype=np.double)
         lib.get_R(self.Address,R.ctypes.data_as(POINTER(c_double)),size)
-        return np.reshape(R, (-1, 3))
+        R = np.reshape(R, (-1, 3))
+        return R[np.argsort(R[:,0])]
     def get_ell(self):
         size = self.get_N_loop()
         ell = np.zeros(size,dtype=np.double)
