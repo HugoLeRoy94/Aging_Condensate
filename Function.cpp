@@ -2,6 +2,7 @@
 using namespace std;
 double Pi = acos(-1);
 //default_random_engine generator;
+std::mt19937 generator;
 double get_square_diff(array<double,3> v1,array<double,3> v2){
   double res;
   for(auto it:v1){

@@ -14,11 +14,11 @@ public:
   void Print_Loop_positions();
 private:
   double add_bond(std::vector<double>& cum_rates, std::vector<double>::iterator& rates_selec);
-  double unbind_loop(std::vector<Loop*>::iterator& loop_select_left, std::vector<Loop*>::iterator& loop_select_left);
-
-  std::mt19937_64 generator;
+  double unbind_loop(std::set<Loop>::iterator& loop_select_left, std::set<Loop>::iterator& loop_select_right);
+  double reset_crosslinkers();
+  //std::mt19937_64 generator;
   std::uniform_int_distribution<int> distrib;
-  std::vector<Loop*> loops;
+  std::set<Loop> loops;
   double ell,D,rho,kBT;
 };
 #endif

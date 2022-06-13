@@ -2,12 +2,12 @@
 using namespace std;
 
 
-Loop::Loop(double ell_loop,double rho,int seed){
+Loop::Loop(double ell_loop,double rho){
   // a looop with a single crosslink, will be defined as a normal loop
   // with ell loop = 2x a normal loop and both anchorring point at the same
   // place
   IF(true){cout<<"Loop : creator with a single crosslink"<<endl;}
-  generator.seed(seed);
+  //generator.seed(seed);
 
   rho0 = rho;
   Rright = {0.,0.,0.};
@@ -42,9 +42,9 @@ Loop::Loop(double ell_loop,double rho,int seed){
     //cout<<endl;
   }
 }
-Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho,int seed){
+Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho){
   IF(true){cout<<"Loop : creator"<<endl;}
-  generator.seed(seed);
+  //generator.seed(seed);
   // the right anchoring point of the loop
   rho0 = rho;
   Rleft=R0;
@@ -68,6 +68,38 @@ Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho,int
   generate_binding_sites();
   // compute the array of binding rate to any crosslinker at any length
   IF(true){cout<<"loop : compute the unbinding rates for every ell"<<endl;}
+
+}
+Loop::Loop(const Loop& loop){
+  Rleft = loop.Rleft;
+  Rright = loop.Rright;
+  rho0 = loop.rho0;
+  ell = loop.ell;
+  V = loop.V;
+  a = loop.a;
+  b = loop.b;
+  generate_binding_sites();
+  compute_all_rates();
+}
+Loop::~Loop(){}
+bool Loop::operator<(const Loop& loop_right) const{
+  return Rright[0]<loop_right.Rright[0];
+}
+// ---------------------------------------------------------------------------
+//-----------------------------------accessor---------------------------------
+// ---------------------------------------------------------------------------
+std::array<double,3> Loop::get_Rright() const{return Rright;}
+std::array<double,3> Loop::get_Rleft() const{return Rleft;}
+std::vector<array<double,3>> Loop::get_r() const{return r;}
+double Loop::get_theta()const{return atan2(0.5*(Rright[1]-Rleft[1]),0.5*(Rright[0]-Rleft[0]));}
+double Loop::get_phi()const{return atan2(0.5*(Rright[0]-Rleft[0]),0.5*(Rright[2]-Rleft[2]))-Pi/2.;}
+array<double,3> Loop::get_Rg()const{return {0.5*(Rright[0]+Rleft[0]),0.5*(Rright[1]+Rleft[1]),0.5*(Rright[2]+Rleft[2])};}
+double Loop::get_ell() const{return ell;}
+double Loop::get_V()const{return V;}
+double Loop::get_total_binding_rates() const{return total_rates;}
+// ---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+void Loop::compute_all_rates(){
   for(auto& rlink : r){
     vector<double> rates_ell;
     rates_ell.reserve((int)ell);
@@ -86,27 +118,12 @@ Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho,int
     }
     //cout<<endl;
   }
-}
-Loop::~Loop(){}
-// ---------------------------------------------------------------------------
-//-----------------------------------accessor---------------------------------
-// ---------------------------------------------------------------------------
-std::array<double,3> Loop::get_Rright() const{return Rright;}
-std::array<double,3> Loop::get_Rleft() const{return Rleft;}
-std::vector<array<double,3>> Loop::get_r() const{return r;}
-double Loop::get_theta()const{return atan2(0.5*(Rright[1]-Rleft[1]),0.5*(Rright[0]-Rleft[0]));}
-double Loop::get_phi()const{return atan2(0.5*(Rright[0]-Rleft[0]),0.5*(Rright[2]-Rleft[2]))-Pi/2.;}
-array<double,3> Loop::get_Rg()const{return {0.5*(Rright[0]+Rleft[0]),0.5*(Rright[1]+Rleft[1]),0.5*(Rright[2]+Rleft[2])};}
-double Loop::get_ell() const{return ell;}
-double Loop::get_V()const{return V;}
-double Loop::get_total_binding_rates() const{return total_rates;}
-// ---------------------------------------------------------------------------
-// ---------------------------------------------------------------------------
+};
 double Loop::compute_binding_rate(int r_index, double ell){
 
   return 0;
 }
-void Loop::select_link_length(double& length, array<double,3>& r_selected,double& time){
+void Loop::select_link_length(double& length, array<double,3>& r_selected,double& time) const{
   // check if there is a neighboring crosslinker, it shouldn't be possible
   if(r.size() == 0){throw out_of_range("No crosslinker in the vicinity");}
   IF(true){cout<<"Loop : start selecting a link and a length"<<endl;}
@@ -123,6 +140,7 @@ void Loop::select_link_length(double& length, array<double,3>& r_selected,double
   length =ell_distrib(generator);
   IF(true){cout<<"Loop : compute the associated time"<<endl;}
   time = 1/(Omega(Rleft,r_selected,length)*Omega(r_selected,Rright,ell-length));
+  time=1.;
 
 }
 void Loop::generate_binding_sites(){
@@ -134,7 +152,7 @@ void Loop::generate_binding_sites(){
   //cout<<"size of r "<<r.size()<<endl;
   //for(auto& it : r){cout<<it[0]<<" "<<it[1]<<" "<<it[2]<<endl;}
 }
-double Loop::Omega(array<double,3> r1,array<double,3> r2,double ell){
+double Loop::Omega(array<double,3> r1,array<double,3> r2,double ell) const{
   //return pow(4*Pi,ell)*pow(3/(2*Pi*ell),1.5)*exp(-3/2*(get_square_diff(Rleft,Rright))/ell);
   return pow(3/(2*Pi*ell),1.5)*exp(-3/2*(get_square_diff(Rleft,Rright))/ell);
 }

@@ -2,6 +2,7 @@
 #define Function_h
 extern double Pi;
 //extern std::default_random_engine generator;
+extern std::mt19937 generator;
 double get_square_diff(std::array<double,3> v1,std::array<double,3> v2);
 double diff(std::array<double,3> v1,std::array<double,3> v2);
 struct {

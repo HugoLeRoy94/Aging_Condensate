@@ -18,13 +18,12 @@ System::System(double ell_tot,double distance_anchor,double rho0,double temperat
   // ---------------------------------------------------------------------------
   //-----------------------------initialize loops-------------------------------
   // *reserve* makes the vector to never reallocate memory, and fasten the push_backs
-  loops.reserve(ell_tot); // maximum number of loop that can be inserted
   array<double,3> Rf={D,0.,0.},R0={0.,0.,0.};
-  loops.push_back(new Loop(R0,Rf,ell,rho0,distrib(generator))); // create the first loop.
+  loops.insert(loops.begin(),Loop(R0,Rf,ell,rho)); // create the first loop.
   //loops.push_back(new Loop(ell,rho0,distrib(generator))); // create the first loop.
 }
 System::~System(){
-  for(auto& it : loops){delete it;}
+  //for(auto& it : loops){delete it;}
   loops.clear();
 }
 // -----------------------------------------------------------------------------
@@ -32,46 +31,69 @@ System::~System(){
 // -----------------------------------------------------------------------------
 double System::evolve(){
   // cumpute the cumulative transition rates for each loop
-  // !!!!!!!!!!!! only binding move implemented!!!!!!!!!!!!
+  double time(0);
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
   vector<double> cum_rates(loops.size()+1); // the +1 is for removing a bond
   IF(true){cout<<"System : Start computing the cumulative probability array"<<endl;}
-  cum_rates[0]=loops[0]->get_total_binding_rates();
-  for(int n=1; n<loops.size();n++){
-    cum_rates[n] = cum_rates[n-1]+loops[n]->get_total_binding_rates();//+exp(1/kBT);
+  int n(0);
+  for(auto& it : loops){
+    if( n ==0 ){ cum_rates[n] = it.get_total_binding_rates();}
+    else{cum_rates[n] = cum_rates[n-1]+it.get_total_binding_rates();}
+    n++;
   }
-  cum_rates.back() = loops.size()*exp(-1/kBT)+cum_rates.rbegin()[1];
+  cum_rates.back() = (loops.size()-1)*exp(-1/kBT)+cum_rates.rbegin()[1];
+  if(cum_rates.back() == 0){
+    // if the system is blocked, we remake a loop with the possibility of having a crosslinker this time
+    time = reset_crosslinkers();
+    return time;
+  }
   // pick a random process
   IF(true){cout<<"System : draw a random process"<<endl;}
   uniform_real_distribution<double> distribution(0,cum_rates.back());
+  double pick_rate = distribution(generator);
     // becareful : if the rate_selec number is higher than cum_rates.back()  lower_bound returns cum_rates.back()
-  vector<double>::iterator rate_selec = lower_bound(cum_rates.begin(),cum_rates.end(),distribution(generator));
-  int time(0);
-  if(*rate_selec != cum_rates.back()){
-    time = add_bond(cum_rates,rate_selec);}
+  vector<double>::iterator rate_selec = lower_bound(cum_rates.begin(),cum_rates.end(),pick_rate);
+  if(rate_selec != cum_rates.end()-1){
+    IF(true){cout<<"System : add a bond"<<endl;}
+    try{time = add_bond(cum_rates,rate_selec);}
+    catch(out_of_range& e){
+      for(auto& it : cum_rates){
+        cout<<it<<endl;
+      }
+      throw;
+    }
+  }
   else{
     // select a random loop:
+    IF(true){cout<<"System : remove a bond"<<endl;}
     uniform_int_distribution<int> distribution(0,loops.size()-2);
-    vector<Loop*>::iterator loop_selec_left(loops.begin());
-    vector<Loop*>::iterator loop_selec_right(loops.begin());
+    set<Loop>::iterator loop_selec_left(loops.begin());
+    set<Loop>::iterator loop_selec_right(loops.begin());
     int index(distribution(generator));
     advance(loop_selec_left,index);
     advance(loop_selec_right,index+1);
     // unbind
-    time = unbind_loop(loop_selec_left, loop_select_right);
+    time = unbind_loop(loop_selec_left, loop_selec_right);
   }
   return time;
 }
 // -----------------------------------------------------------------------------
 //------------------------------Remove a bond-----------------------------------
 // -----------------------------------------------------------------------------
-double System::unbind_loop(vector<Loop*>::iterator& loop_selec_left,vector<Loop*>::iterator& loop_selec_left){
+double System::unbind_loop(set<Loop>::iterator& loop_selec_left,set<Loop>::iterator& loop_selec_right){
   double time(0);
   IF(true){cout<<"unbind loop"<<endl;}
   if(loops.size()==1){return time;} // skip the unbinding if it's the last loop
-  // the unbinding of a loop
-
+  // create a new loop that is the combination of both inputs
+  Loop loop = Loop(loop_selec_left->get_Rleft(),
+                   loop_selec_right->get_Rright(),
+                   loop_selec_left->get_ell()+loop_selec_right->get_ell(),
+                   rho);
+  loops.erase(loop_selec_right);
+  loops.insert(loop_selec_left,loop);
+  loops.erase(loop_selec_left);
+  time = 1.;
   return time;
 }
 // -----------------------------------------------------------------------------
@@ -79,7 +101,7 @@ double System::unbind_loop(vector<Loop*>::iterator& loop_selec_left,vector<Loop*
 // -----------------------------------------------------------------------------
 double System::add_bond(vector<double>& cum_rates, vector<double>::iterator& rate_selec){
   IF(true){cout<<"System : select the associated loop"<<endl;}
-  Loop* loop_selec(loops[distance(cum_rates.begin(),rate_selec)]);
+  set<Loop>::iterator loop_selec(next(loops.begin(),distance(cum_rates.begin(),rate_selec)));
   // ask the loop for a random linker, and a random length
   double length;
   double time;
@@ -89,7 +111,7 @@ double System::add_bond(vector<double>& cum_rates, vector<double>::iterator& rat
   catch(const exception& e){
     cout<<e.what()<<"\n print all the crosslinkers r \n";
     cout<<"loops size :"<<loops.size()<<endl;
-    for(auto& loop : loops){cout<<"loop.r.size = " << loop->get_r().size()<<endl;}//;for(auto& it : loop->get_r()){
+    for(auto& loop : loops){cout<<"loop.r.size = " << loop.get_r().size()<<endl;}//;for(auto& it : loop->get_r()){
         //cout<<it[0]<<" "<<it[1]<<" "<<it[2]<<endl;
       //}
     throw;
@@ -97,19 +119,32 @@ double System::add_bond(vector<double>& cum_rates, vector<double>::iterator& rat
   //cout<<length<<" "<<diff(loop_selec->get_Rleft(),r_selected)<<endl;
   // create the two new loops
   IF(true){cout<<"System : create two new loops"<<endl;}
-  Loop* l1 = new Loop(loop_selec->get_Rleft(),r_selected,length,rho,distrib(generator));
-  Loop* l2 = new Loop(r_selected,loop_selec->get_Rright(),loop_selec->get_ell()-length,rho,distrib(generator));
+  Loop l1 = Loop(loop_selec->get_Rleft(),r_selected,length,rho);
+  Loop l2 = Loop(r_selected,loop_selec->get_Rright(),loop_selec->get_ell()-length,rho);
   // delete the loop
   IF(true){cout<<"System : delete the old loop"<<endl;}
-  loops.erase(loops.begin()+distance(cum_rates.begin(),rate_selec));
-  delete loop_selec;
+  //loops.erase(loops.begin()+distance(cum_rates.begin(),rate_selec));
+  //delete loop_selec;
+  set<Loop>::iterator hint = loops.erase(loop_selec);
   // add the newly created loop to the vector of loops
   IF(true){cout<<"System : add the two newly created loop"<<endl;}
-  loops.push_back(l1);
-  loops.push_back(l2);
+  loops.insert(hint,l1);
+  loops.insert(hint,l2);
   return time;
 }
-
+// -----------------------------------------------------------------------------
+//-------reset the crosslinkers if no adding or removing is possible------------
+// -----------------------------------------------------------------------------
+double System::reset_crosslinkers(){
+  // it basically consist in remaking every loops
+  set<Loop> new_loops;
+  for(auto& it : loops){
+    Loop newloop(it);
+    new_loops.insert(new_loops.end(),newloop);
+  }
+  loops = new_loops;
+  return 0.;
+}
 // -----------------------------------------------------------------------------
 // -----------------------------accessor----------------------------------------
 // -----------------------------------------------------------------------------
@@ -119,36 +154,26 @@ void System::get_R(double* R, int size) const{
   if(size!=3*(loops.size()+1)){
     throw invalid_argument("invalid size in System::get_R");}
   // We construct an vector of the x,y,z coordinates to sort them according to x
-  vector<array<double,3>> R_to_sort(loops.size()+1);
-  // fill the vector R with the value of R of each loops
-  R_to_sort[0][0] = 0.;
-  R_to_sort[0][1] = 0.;
-  R_to_sort[0][2] = 0.;
-  for(int n=1;n<loops.size()+1;n++){
-    R_to_sort[n][0] = loops[n-1]->get_Rright()[0];
-    R_to_sort[n][1] = loops[n-1]->get_Rright()[1];
-    R_to_sort[n][2] = loops[n-1]->get_Rright()[2];
-  }
-  // sort according to the value in 0
-  sort(R_to_sort.begin(),R_to_sort.end(),customLess);
   //for( auto& it : R_to_sort){for(auto& it2 : it){cout<<it2<<" ";}cout<<endl;}
   // fill the R array
-  for(int n =0;n<loops.size()+1;n++){
-    for(int k=0;k<3;k++){R[3*n+k] = R_to_sort[n][k];}
+  R[0] = 0.;
+  R[1] = 0.;
+  R[2] = 0.;
+  int n(3);
+  for(auto& it : loops){
+    R[n] = it.get_Rright()[0];
+    R[n+1] = it.get_Rright()[1];
+    R[n+2] = it.get_Rright()[2];
+    n+=3;
   }
 }
 
 void System::get_ell(double* ells,int size) const{
   if(size!=loops.size()){throw invalid_argument("invalid size in System::get_ell");}
-  vector<pair<double,double>> ells_R_to_sort(size);
-  for(int n=0;n<size;n++){
-    ells_R_to_sort[n].first = loops[n]->get_ell();
-    ells_R_to_sort[n].second = loops[n]->get_Rright()[0];
-  }
-  sort(ells_R_to_sort.begin(),ells_R_to_sort.end(),customLess2);
-  //for(auto& it : ells_R_to_sort){cout<<it.first<<" "<<it.second<<endl;}
-  for(int n = 0;n<size;n++){
-    ells[n] = ells_R_to_sort[n].first;
+  int n(0);
+  for(auto& it : loops){
+    ells[n] = it.get_ell();
+    n++;
   }
 }
 
@@ -156,7 +181,7 @@ void System::get_r(double* r, int size) const{
   if(size!=get_r_size()){throw invalid_argument("invalid size in System::get_r");}
   int n(0);
   for(auto& loop :loops ){
-    for(auto& link : loop->get_r()){
+    for(auto& link : loop.get_r()){
       r[3*n] = link[0];
       r[3*n+1] = link[1];
       r[3*n+2] = link[2];
@@ -168,24 +193,24 @@ void System::get_r(double* r, int size) const{
 int System::get_r_size()const{
   int size(0);
   for(auto& it :loops){
-    size+=it->get_r().size();
+    size+=it.get_r().size();
   }
   return 3*size;
 }
 
 void System::Print_Loop_positions(){
   for(auto& loop : loops){
-    cout<<"theta Phi "<<loop->get_theta()<<" "<<loop->get_phi()<<endl;
-    cout<<"xg,yg,zg "<<loop->get_Rg()[0]<<" "<<loop->get_Rg()[1]<<" "<<loop->get_Rg()[2]<<endl;
-    cout<< "volume "<<loop->get_V()<<endl;
-    cout<<"ell "<<loop->get_ell()<<endl;
-    cout<< "anchoring points. left :"<<loop->get_Rleft()[0]<<" "<<
-                                       loop->get_Rleft()[1]<<" "<<
-                                       loop->get_Rleft()[2]<<
+    cout<<"theta Phi "<<loop.get_theta()<<" "<<loop.get_phi()<<endl;
+    cout<<"xg,yg,zg "<<loop.get_Rg()[0]<<" "<<loop.get_Rg()[1]<<" "<<loop.get_Rg()[2]<<endl;
+    cout<< "volume "<<loop.get_V()<<endl;
+    cout<<"ell "<<loop.get_ell()<<endl;
+    cout<< "anchoring points. left :"<<loop.get_Rleft()[0]<<" "<<
+                                       loop.get_Rleft()[1]<<" "<<
+                                       loop.get_Rleft()[2]<<
                                        " right : "<<
-                                       loop->get_Rright()[0]<<" "<<
-                                       loop->get_Rright()[1]<<" "<<
-                                       loop->get_Rright()[2]<<endl;
-    cout<<"number of crosslinkers of this loop :"<<loop->get_r().size()<<endl<<endl;
+                                       loop.get_Rright()[0]<<" "<<
+                                       loop.get_Rright()[1]<<" "<<
+                                       loop.get_Rright()[2]<<endl;
+    cout<<"number of crosslinkers of this loop :"<<loop.get_r().size()<<endl<<endl;
   }
 }
