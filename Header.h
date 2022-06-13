@@ -2,9 +2,9 @@
 #define HEADER
 
 #ifdef DEBUG
-#define DEBUG_IF(X) if(X)
+#define IF(X) if(X)
 #else
-#define DEBUG_IF(X) if(false)
+#define IF(X) if(false)
 #endif
 
 #include <iostream>

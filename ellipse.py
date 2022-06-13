@@ -59,14 +59,15 @@ def ellipse_from_main_ax(main_ax,a,b,ctr):
     y = np.outer(np.sin(u), np.sin(v))
     x = np.outer(np.ones_like(u), np.cos(v))
     #make sure that main_ax is normalized
-    main_ax = main_ax/np.linalg.norm(main_ax)
+    if np.linalg.norm(main_ax)!=0:
+        main_ax = main_ax/np.linalg.norm(main_ax)
     #compute theta and phi from the ax orientation:
     theta = np.arctan2(main_ax[1],main_ax[0])
     #compute the rotation matrix needed to rotate the elipse
     OmZ = omegaZ(theta)
     #phi = np.arctan2(main_ax[0],main_ax[2])-np.arccos(-1)/2
     phi = np.arctan2(np.sqrt(main_ax[0]**2+main_ax[1]**2),main_ax[2])-np.arccos(-1)/2
-    print(theta,phi)
+    #print(theta,phi)
     OmY = omegaY(phi)
     #main_ax = np.dot(OmZ,main_ax)
     #create the two other normalize ax:

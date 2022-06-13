@@ -3,7 +3,7 @@
 class System{
 public:
   System(); // constructor
-  System(double ell_tot,double distance_anchor,double rho0,double temperature); // constructor with the Parameters
+  System(double ell_tot,double distance_anchor,double rho0,double temperature,int seed); // constructor with the Parameters
   ~System(); // destructor that have to delete all the loops
   double evolve(); // make the system evolve and return the time increment.
   int get_N() const; // return N the number of loop.
@@ -13,6 +13,11 @@ public:
   int get_r_size()const;
   void Print_Loop_positions();
 private:
+  double add_bond(std::vector<double>& cum_rates, std::vector<double>::iterator& rates_selec);
+  double unbind_loop(std::vector<Loop*>::iterator& loop_select_left, std::vector<Loop*>::iterator& loop_select_left);
+
+  std::mt19937_64 generator;
+  std::uniform_int_distribution<int> distrib;
   std::vector<Loop*> loops;
   double ell,D,rho,kBT;
 };

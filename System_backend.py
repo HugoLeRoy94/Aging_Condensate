@@ -8,7 +8,7 @@ from ctypes import c_void_p
 from ctypes import c_char_p
 lib = cdll.LoadLibrary(str(pathlib.Path(__file__).parent.absolute())+'/lib.so')
 
-lib.create_system.argtypes=[c_double,c_double,c_double,c_double]
+lib.create_system.argtypes=[c_double,c_double,c_double,c_double,c_int]
 lib.create_system.restype=POINTER(c_void_p)
 
 lib.evolve.argtypes=[POINTER(c_void_p)]
@@ -24,9 +24,9 @@ lib.get_ell.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
 lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
 
 class System:
-    def __init__(self,ell_tot,distance,rho0,temperature):
+    def __init__(self,ell_tot,distance,rho0,temperature,seed=19874):
         self.ell_tot,self.D,self.rho0,self.T = ell_tot,distance,rho0,temperature
-        self.Address = lib.create_system(self.ell_tot,self.D,self.rho0,self.T)
+        self.Address = lib.create_system(self.ell_tot,self.D,self.rho0,self.T,seed)
     def evolve(self):
         return lib.evolve(self.Address)
     def get_N_loop(self):
@@ -36,7 +36,8 @@ class System:
         R = np.zeros(size,dtype=np.double)
         lib.get_R(self.Address,R.ctypes.data_as(POINTER(c_double)),size)
         R = np.reshape(R, (-1, 3))
-        return R[np.argsort(R[:,0])]
+        #return R[np.argsort(R[:,0])]
+        return R
     def get_ell(self):
         size = self.get_N_loop()
         ell = np.zeros(size,dtype=np.double)

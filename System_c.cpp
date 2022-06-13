@@ -4,9 +4,9 @@ extern "C"
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
-  void* create_system(double ell_tot,double distance_anchor,double rho0,double temperature)
+  void* create_system(double ell_tot,double distance_anchor,double rho0,double temperature,int seed)
   {
-    return new System(ell_tot, distance_anchor, rho0, temperature);
+    return new System(ell_tot, distance_anchor, rho0, temperature,seed);
   }
   void get_R(void* ptr, double* R, int size){
     System* system = reinterpret_cast<System*>(ptr);
