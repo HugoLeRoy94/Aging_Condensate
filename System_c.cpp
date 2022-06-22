@@ -20,10 +20,10 @@ extern "C"
     System* system = reinterpret_cast<System*>(ptr);
     return system->get_N();
   }
-  double evolve(void* ptr)
+  double evolve(void* ptr, bool* bind)
   {
     System* system = reinterpret_cast<System*>(ptr);
-    return system->evolve();
+    return system->evolve(bind);
   }
   int get_r_size(void* ptr){
     System* system = reinterpret_cast<System*>(ptr);

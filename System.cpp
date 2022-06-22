@@ -13,6 +13,7 @@ System::System(double ell_tot,double distance_anchor,double rho0,double temperat
   // -----------------------constant of the simulation--------------------------
   ell = ell_tot;
   D = distance_anchor;
+  anchor = {D,0.,0.};
   rho = rho0;
   kBT = temperature;
   // ---------------------------------------------------------------------------
@@ -29,9 +30,14 @@ System::~System(){
 // -----------------------------------------------------------------------------
 // ----------------------------Main function------------------------------------
 // -----------------------------------------------------------------------------
-double System::evolve(){
+double System::evolve(bool* bind){
+/*  for(auto& it : loops){
+    for(auto& it2: it.get_rates()){for(auto& it3 : it2){cout<<it3<<" ";}}
+    cout<<endl<<it.get_ell()<<" "<<diff(it.get_Rright(),it.get_Rleft())<<" "<<it.get_r().size()<<endl;
+    for(auto& r : it.get_r()){cout<<diff(r,it.get_Rright())<<" "<<diff(r,it.get_Rleft())<<endl;}
+    cout<<endl;
+  }*/
   // cumpute the cumulative transition rates for each loop
-  double time(0);
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
   vector<double> cum_rates(loops.size()+1); // the +1 is for removing a bond
@@ -42,12 +48,12 @@ double System::evolve(){
     else{cum_rates[n] = cum_rates[n-1]+it.get_total_binding_rates();}
     n++;
   }
-  cum_rates.back() = (loops.size()-1)*exp(-1/kBT)+cum_rates.rbegin()[1];
+  cum_rates.back() = (loops.size()-1)*exp(-1/kBT)/(1-exp(-1/kBT))+cum_rates.rbegin()[1];
   if(cum_rates.back() == 0){
     // if the system is blocked, we remake a loop with the possibility of having a crosslinker this time
-    time = reset_crosslinkers();
-    return time;
+    return reset_crosslinkers();
   }
+  //for(auto& loop : loops){for(auto& it : loop.get_rates()){for(auto& it2 : it){cout<<it2<<" ";}}cout<<endl;}
   // pick a random process
   IF(true){cout<<"System : draw a random process"<<endl;}
   uniform_real_distribution<double> distribution(0,cum_rates.back());
@@ -56,13 +62,9 @@ double System::evolve(){
   vector<double>::iterator rate_selec = lower_bound(cum_rates.begin(),cum_rates.end(),pick_rate);
   if(rate_selec != cum_rates.end()-1){
     IF(true){cout<<"System : add a bond"<<endl;}
-    try{time = add_bond(cum_rates,rate_selec);}
-    catch(out_of_range& e){
-      for(auto& it : cum_rates){
-        cout<<it<<endl;
-      }
-      throw;
-    }
+    add_bond(cum_rates,rate_selec);
+    *bind = true;
+    //catch(out_of_range& e){for(auto& it : cum_rates){cout<<it<<endl;}throw;}
   }
   else{
     // select a random loop:
@@ -74,17 +76,18 @@ double System::evolve(){
     advance(loop_selec_left,index);
     advance(loop_selec_right,index+1);
     // unbind
-    time = unbind_loop(loop_selec_left, loop_selec_right);
+    unbind_loop(loop_selec_left, loop_selec_right);
+    *bind = false;
   }
-  return time;
+  //cout<<cum_rates.back()<<endl;
+  return draw_time(cum_rates.back());
 }
 // -----------------------------------------------------------------------------
 //------------------------------Remove a bond-----------------------------------
 // -----------------------------------------------------------------------------
-double System::unbind_loop(set<Loop>::iterator& loop_selec_left,set<Loop>::iterator& loop_selec_right){
-  double time(0);
+void System::unbind_loop(set<Loop>::iterator& loop_selec_left,set<Loop>::iterator& loop_selec_right){
   IF(true){cout<<"unbind loop"<<endl;}
-  if(loops.size()==1){return time;} // skip the unbinding if it's the last loop
+  if(loops.size()==1){return;} // skip the unbinding if it's the last loop
   // create a new loop that is the combination of both inputs
   Loop loop = Loop(loop_selec_left->get_Rleft(),
                    loop_selec_right->get_Rright(),
@@ -93,29 +96,28 @@ double System::unbind_loop(set<Loop>::iterator& loop_selec_left,set<Loop>::itera
   loops.erase(loop_selec_right);
   loops.insert(loop_selec_left,loop);
   loops.erase(loop_selec_left);
-  time = 1.;
-  return time;
+  //time = draw_time(exp(-1/kBT)/(1+exp(-1/kBT)));
+  //return time;
 }
 // -----------------------------------------------------------------------------
 //------------------------------Add a bond--------------------------------------
 // -----------------------------------------------------------------------------
-double System::add_bond(vector<double>& cum_rates, vector<double>::iterator& rate_selec){
+void System::add_bond(vector<double>& cum_rates, vector<double>::iterator& rate_selec){
   IF(true){cout<<"System : select the associated loop"<<endl;}
   set<Loop>::iterator loop_selec(next(loops.begin(),distance(cum_rates.begin(),rate_selec)));
   // ask the loop for a random linker, and a random length
   double length;
-  double time;
   array<double,3> r_selected;
   IF(true){cout<<"System : select a length and a r"<<endl;}
-  try{loop_selec->select_link_length(length,r_selected,time);}
-  catch(const exception& e){
+  loop_selec->select_link_length(length,r_selected);
+  /*catch(const exception& e){
     cout<<e.what()<<"\n print all the crosslinkers r \n";
     cout<<"loops size :"<<loops.size()<<endl;
     for(auto& loop : loops){cout<<"loop.r.size = " << loop.get_r().size()<<endl;}//;for(auto& it : loop->get_r()){
         //cout<<it[0]<<" "<<it[1]<<" "<<it[2]<<endl;
       //}
     throw;
-  }
+  }*/
   //cout<<length<<" "<<diff(loop_selec->get_Rleft(),r_selected)<<endl;
   // create the two new loops
   IF(true){cout<<"System : create two new loops"<<endl;}
@@ -126,11 +128,14 @@ double System::add_bond(vector<double>& cum_rates, vector<double>::iterator& rat
   //loops.erase(loops.begin()+distance(cum_rates.begin(),rate_selec));
   //delete loop_selec;
   set<Loop>::iterator hint = loops.erase(loop_selec);
+  /*cout<<"////////////////////////// two new loops /////////////////////"<<endl;
+  cout<<l1.get_ell()<<" "<<diff(l1.get_Rleft(),l1.get_Rright())<<endl;
+  cout<<l2.get_ell()<<" "<<diff(l2.get_Rleft(),l2.get_Rright())<<endl;
+  cout<<"//////////////////////////////////////////////////////////////"<<endl;*/
   // add the newly created loop to the vector of loops
   IF(true){cout<<"System : add the two newly created loop"<<endl;}
   loops.insert(hint,l1);
   loops.insert(hint,l2);
-  return time;
 }
 // -----------------------------------------------------------------------------
 //-------reset the crosslinkers if no adding or removing is possible------------
@@ -198,7 +203,7 @@ int System::get_r_size()const{
   return 3*size;
 }
 
-void System::Print_Loop_positions(){
+void System::Print_Loop_positions() const{
   for(auto& loop : loops){
     cout<<"theta Phi "<<loop.get_theta()<<" "<<loop.get_phi()<<endl;
     cout<<"xg,yg,zg "<<loop.get_Rg()[0]<<" "<<loop.get_Rg()[1]<<" "<<loop.get_Rg()[2]<<endl;
@@ -213,4 +218,10 @@ void System::Print_Loop_positions(){
                                        loop.get_Rright()[2]<<endl;
     cout<<"number of crosslinkers of this loop :"<<loop.get_r().size()<<endl<<endl;
   }
+}
+
+double System::draw_time(double rate) const{
+  uniform_real_distribution<double> distrib;
+  double xi(distrib(generator));
+  return -log(1-xi)/rate;
 }

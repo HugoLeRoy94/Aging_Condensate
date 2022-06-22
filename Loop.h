@@ -8,12 +8,13 @@ public:
   Loop(const Loop& loop);
   bool operator<(const Loop& otherloop) const;
 
-  void select_link_length(double& length, std::array<double,3>& r_selected,double& time) const;
+  void select_link_length(double& length, std::array<double,3>& r_selected) const;
 
   std::array<double,3> get_Rright() const;
   std::array<double,3> get_Rleft() const;
   std::vector<std::array<double,3>> get_r() const;
   double get_ell() const;
+  std::vector<std::vector<double>> get_rates() const;
   double get_total_binding_rates() const;
   double get_theta()const; // angle with x axis
   double get_phi() const; // angle with z axis
@@ -22,7 +23,8 @@ public:
 private:
   std::array<double,3> Rright,Rleft;
   std::vector<std::array<double,3>> r;
-  std::vector<std::vector<double>> rates;
+  std::vector<std::vector<double>> rates,cum_rates;
+  std::vector<double> sum_l_cum_rates;
   double ell,V;
   double a,b;
   double rho0;
@@ -31,7 +33,6 @@ private:
   std::array<double,3> random_in_ellipse(double a,double b,double c,double xg,double yg,double zg);
   double Omega(std::array<double,3> r1,std::array<double,3> r2,double ell) const;
   void compute_all_rates();
-  double compute_binding_rate(int r_index, double ell);
   void generate_binding_sites();
 
 };
