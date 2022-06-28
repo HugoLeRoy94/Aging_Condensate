@@ -29,10 +29,10 @@ Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho){
   IF(true){cout<<"Loop : creator"<<endl;}
   //generator.seed(seed);
   // the right anchoring point of the loop
-  rho0 = rho;
   Rleft=R0;
   Rright=R1;
   ell = ell_loop;
+  rho0 = rho+(1-rho)*diff(Rright,Rleft)/ell;
   // Compute the volume covered by the polymer
   IF(true){cout<<"Loop : compute the volume covered by the polymer"<<endl;}
   if(diff(Rleft,Rright)<0.1*ell){
