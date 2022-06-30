@@ -28,9 +28,9 @@ lib.get_ell.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
 lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
 
 class System:
-    def __init__(self,ell_tot,distance,rho0,temperature,seed=19874):
+    def __init__(self,ell_tot,distance,rho0,temperature,seed=19874,rho_adjust=True):
         self.ell_tot,self.D,self.rho0,self.T = ell_tot,distance,rho0,temperature
-        self.Address = lib.create_system(self.ell_tot,self.D,self.rho0,self.T,seed)
+        self.Address = lib.create_system(self.ell_tot,self.D,self.rho0,self.T,seed,rho_adjust)
     def evolve(self):
         bind = c_bool(False)
         time = lib.evolve(self.Address,byref(bind))
@@ -58,6 +58,14 @@ class System:
         return lib.get_r_size(self.Address)
     def Print_loop_positions(self):
         lib.Print_Loop_positions(self.Address)
+    def get_links_linear_position(self, bins=None):
+        """
+        This function returns the position of the links along the polymer
+        """
+        position = np.zeros(self.ell_tot,dtype=float)
+        for n,l in enumerate(self.get_ell()):
+            position[n] = position[n-1]+l
+        return position
     def Plot3DSystem(self,*arg,**kwargs):
         fig = plt.figure(*arg,**kwargs)
         ax = fig.add_subplot(projection='3d')

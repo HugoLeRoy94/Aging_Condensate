@@ -3,7 +3,7 @@
 class Loop{
 public:
   Loop(double ell_loop,double rho);
-  Loop(std::array<double,3> R0,std::array<double,3> R1, double ell_loop, double rho);
+  Loop(std::array<double,3> R0,std::array<double,3> R1, double ell_loop, double rho,double dsl,bool rho_adjust);
   ~Loop();
   Loop(const Loop& loop);
   bool operator<(const Loop& otherloop) const;

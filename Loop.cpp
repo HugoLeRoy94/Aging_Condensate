@@ -25,17 +25,19 @@ Loop::Loop(double ell_loop,double rho){
   IF(true){cout<<"loop : compute the unbinding rates for every ell"<<endl;}
   compute_all_rates();
 }
-Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho){
+Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho,double dsl,bool rho_adjust){
   IF(true){cout<<"Loop : creator"<<endl;}
   //generator.seed(seed);
   // the right anchoring point of the loop
   Rleft=R0;
   Rright=R1;
   ell = ell_loop;
-  rho0 = rho+(1-rho)*diff(Rright,Rleft)/ell;
+  if(rho_adjust){rho0 = rho+(0.1-rho)*(diff(Rright,Rleft)/ell-dsl);}
+  else{rho0 = rho;}
   // Compute the volume covered by the polymer
   IF(true){cout<<"Loop : compute the volume covered by the polymer"<<endl;}
-  if(diff(Rleft,Rright)<0.1*ell){
+  if(ell<2.){V=0.;}
+  else if(diff(Rleft,Rright)<0.1*ell){
     V =4/3*Pi*pow(ell,1.5);
     a=sqrt(ell)*0.5;
     b=sqrt(ell)*0.5;
@@ -138,7 +140,7 @@ void Loop::select_link_length(double& length, array<double,3>& r_selected) const
   double pick_rate_ell = distribution_ell(generator);
   vector<double> copy_cum_rates_rindex(cum_rates[rindex]);
   vector<double>::iterator rate_ell_selec = lower_bound(copy_cum_rates_rindex.begin(),copy_cum_rates_rindex.end(),pick_rate_ell);
-  int ell_index(distance(copy_cum_rates_rindex.begin(),rate_ell_selec));
+  int ell_index(distance(copy_cum_rates_rindex.begin(),rate_ell_selec)+1);
   length=(double)ell_index;
   /*cout<<"np.array([";
   for(auto& it :copy_cum_rates_rindex){cout<<it<<",";}cout<<"])";

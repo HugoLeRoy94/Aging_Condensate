@@ -6,7 +6,7 @@ using namespace std;
 // -----------------------------creator/destructor------------------------------
 // -----------------------------------------------------------------------------
 System::System(){}
-System::System(double ell_tot,double distance_anchor,double rho0,double temperature,int seed) : distrib(1,10000000){
+System::System(double ell_tot,double distance_anchor,double rho0,double temperature,int seed,bool adjust) : distrib(1,10000000){
   //srand(seed);
   generator.seed(seed);
   // ---------------------------------------------------------------------------
@@ -15,12 +15,13 @@ System::System(double ell_tot,double distance_anchor,double rho0,double temperat
   D = distance_anchor;
   anchor = {D,0.,0.};
   rho = rho0;
+  rho_adjust = adjust;
   kBT = temperature;
   // ---------------------------------------------------------------------------
   //-----------------------------initialize loops-------------------------------
   // *reserve* makes the vector to never reallocate memory, and fasten the push_backs
   array<double,3> Rf={D,0.,0.},R0={0.,0.,0.};
-  loops.insert(loops.begin(),Loop(R0,Rf,ell,rho)); // create the first loop.
+  loops.insert(loops.begin(),Loop(R0,Rf,ell,rho,D/ell,rho_adjust)); // create the first loop.
   //loops.push_back(new Loop(ell,rho0,distrib(generator))); // create the first loop.
 }
 System::~System(){
@@ -92,7 +93,9 @@ void System::unbind_loop(set<Loop>::iterator& loop_selec_left,set<Loop>::iterato
   Loop loop = Loop(loop_selec_left->get_Rleft(),
                    loop_selec_right->get_Rright(),
                    loop_selec_left->get_ell()+loop_selec_right->get_ell(),
-                   rho);
+                   rho,
+                   D/ell,rho_adjust
+                   );
   loops.erase(loop_selec_right);
   loops.insert(loop_selec_left,loop);
   loops.erase(loop_selec_left);
@@ -121,8 +124,8 @@ void System::add_bond(vector<double>& cum_rates, vector<double>::iterator& rate_
   //cout<<length<<" "<<diff(loop_selec->get_Rleft(),r_selected)<<endl;
   // create the two new loops
   IF(true){cout<<"System : create two new loops"<<endl;}
-  Loop l1 = Loop(loop_selec->get_Rleft(),r_selected,length,rho);
-  Loop l2 = Loop(r_selected,loop_selec->get_Rright(),loop_selec->get_ell()-length,rho);
+  Loop l1 = Loop(loop_selec->get_Rleft(),r_selected,length,rho,D/ell,rho_adjust);
+  Loop l2 = Loop(r_selected,loop_selec->get_Rright(),loop_selec->get_ell()-length,rho,D/ell,rho_adjust);
   // delete the loop
   IF(true){cout<<"System : delete the old loop"<<endl;}
   //loops.erase(loops.begin()+distance(cum_rates.begin(),rate_selec));

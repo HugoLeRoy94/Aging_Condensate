@@ -3,7 +3,7 @@
 class System{
 public:
   System(); // constructor
-  System(double ell_tot,double distance_anchor,double rho0,double temperature,int seed); // constructor with the Parameters
+  System(double ell_tot,double distance_anchor,double rho0,double temperature,int seed,bool rho_adjust); // constructor with the Parameters
   ~System(); // destructor that have to delete all the loops
   double evolve(bool* bind); // make the system evolve and return the time increment.
   int get_N() const; // return N the number of loop.
@@ -21,5 +21,6 @@ private:
   std::uniform_int_distribution<int> distrib;
   std::set<Loop> loops;
   double ell,D,rho,kBT;
+  bool rho_adjust;
 };
 #endif
