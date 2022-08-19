@@ -32,15 +32,9 @@ System::~System(){
 // ----------------------------Main function------------------------------------
 // -----------------------------------------------------------------------------
 double System::evolve(bool* bind){
-/*  for(auto& it : loops){
-    for(auto& it2: it.get_rates()){for(auto& it3 : it2){cout<<it3<<" ";}}
-    cout<<endl<<it.get_ell()<<" "<<diff(it.get_Rright(),it.get_Rleft())<<" "<<it.get_r().size()<<endl;
-    for(auto& r : it.get_r()){cout<<diff(r,it.get_Rright())<<" "<<diff(r,it.get_Rleft())<<endl;}
-    cout<<endl;
-  }*/
-  // cumpute the cumulative transition rates for each loop
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
+  // compute the cumulative transition rates for each loop
   vector<double> cum_rates(loops.size()+1); // the +1 is for removing a bond
   IF(true){cout<<"System : Start computing the cumulative probability array"<<endl;}
   int n(0);

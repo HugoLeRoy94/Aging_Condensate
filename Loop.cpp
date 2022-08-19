@@ -1,7 +1,7 @@
 #include "Header.h"
 using namespace std;
 
-
+/*
 Loop::Loop(double ell_loop,double rho){
   // a looop with a single crosslink, will be defined as a normal loop
   // with ell loop = 2x a normal loop and both anchorring point at the same
@@ -25,6 +25,7 @@ Loop::Loop(double ell_loop,double rho){
   IF(true){cout<<"loop : compute the unbinding rates for every ell"<<endl;}
   compute_all_rates();
 }
+*/
 Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho,double dsl,bool rho_adjust){
   IF(true){cout<<"Loop : creator"<<endl;}
   //generator.seed(seed);
@@ -52,7 +53,7 @@ Loop::Loop(array<double,3> R0,array<double,3> R1, double ell_loop,double rho,dou
   IF(true){cout<<"Loop : generate the binding sites"<<endl;}
   generate_binding_sites();
   // compute the array of binding rate to any crosslinker at any length
-  IF(true){cout<<"loop : compute the unbinding rates for every ell"<<endl;}
+  IF(true){cout<<"loop : compute the binding rates for every ell"<<endl;}
   compute_all_rates();
 }
 Loop::Loop(const Loop& loop){
@@ -83,6 +84,9 @@ array<double,3> Loop::get_Rg()const{return {0.5*(Rright[0]+Rleft[0]),0.5*(Rright
 double Loop::get_ell() const{return ell;}
 double Loop::get_V()const{return V;}
 double Loop::get_total_binding_rates() const{return total_rates;}
+double Loop::get_S() const{
+  return log(pow(3/(2*Pi*ell),1.5)) - 3/2*get_square_diff(Rleft,Rright)/ell;
+}
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 void Loop::compute_all_rates(){
@@ -95,7 +99,8 @@ void Loop::compute_all_rates(){
     double rate_sum_l(0); // initialize the double that just gives the binding rate transition to whatever length
     for(int ELL=1;ELL<(int)ell;ELL++){
       double li(ELL);
-      rates_ell.push_back(exp(1.5*log(3*ell/(2*Pi*li*(ell-li)))-log(4*Pi)-1.5*(get_square_diff(Rleft,rlink)/li+get_square_diff(rlink,Rright)/(ell-li))+unbound_term)); // push back the rate
+      //rates_ell.push_back(exp(1.5*log(3*ell/(2*Pi*li*(ell-li)))-log(4*Pi)-1.5*(get_square_diff(Rleft,rlink)/li+get_square_diff(rlink,Rright)/(ell-li))+unbound_term)); // push back the rate
+      rates_ell.push_back(exp(1.5*log(3*ell/(2*Pi*li*(ell-li)))-1.5*(get_square_diff(Rleft,rlink)/li+get_square_diff(rlink,Rright)/(ell-li))+unbound_term)); // push back the rate
       // ad it to the cumulative vector
       if(cum_rates_ell.size()== 0){cum_rates_ell.push_back(rates_ell.back());}
       else{cum_rates_ell.push_back(cum_rates_ell.back()+rates_ell.back());}
@@ -145,8 +150,6 @@ void Loop::select_link_length(double& length, array<double,3>& r_selected) const
   /*cout<<"np.array([";
   for(auto& it :copy_cum_rates_rindex){cout<<it<<",";}cout<<"])";
   cout<<endl<<ell_index<<endl;*/
-  IF(true){cout<<"Loop : access the associated rate"<<endl;}
-
 }
 
 void Loop::generate_binding_sites(){
@@ -162,9 +165,7 @@ double Loop::Omega(array<double,3> r1,array<double,3> r2,double ell) const{
   //return pow(4*Pi,ell)*pow(3/(2*Pi*ell),1.5)*exp(-3/2*(get_square_diff(Rleft,Rright))/ell);
   return pow(3/(2*Pi*ell),1.5)*exp(-3/2*get_square_diff(r1,r2)/ell);
 }
-double Loop::get_S() const{
-  return log(pow(3/(2*Pi*ell),1.5)) - 3/2*get_square_diff(Rleft,Rright)/ell;
-}
+
 
 array<double,3> Loop::random_in_ellipse(double a,double b,double c,double xg,double yg,double zg){
   /*
@@ -208,6 +209,6 @@ array<double,3> Loop::random_in_ellipse(double a,double b,double c,double xg,dou
   if(res[0]>anchor[0] | res[0]<0.){goto draw;}
   return res;
 }
-int compare(const pair<int,double> & t1, const pair<int,double>& t2){
+/*int compare(const pair<int,double> & t1, const pair<int,double>& t2){
   return (t1.second<t2.second);
-}
+}*/
