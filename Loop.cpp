@@ -160,7 +160,10 @@ void Loop::generate_binding_sites(){
 }
 double Loop::Omega(array<double,3> r1,array<double,3> r2,double ell) const{
   //return pow(4*Pi,ell)*pow(3/(2*Pi*ell),1.5)*exp(-3/2*(get_square_diff(Rleft,Rright))/ell);
-  return pow(3/(2*Pi*ell),1.5)*exp(-3/2*get_square_diff(Rleft,Rright)/ell);
+  return pow(3/(2*Pi*ell),1.5)*exp(-3/2*get_square_diff(r1,r2)/ell);
+}
+double Loop::get_S() const{
+  return log(pow(3/(2*Pi*ell),1.5)) - 3/2*get_square_diff(Rleft,Rright)/ell;
 }
 
 array<double,3> Loop::random_in_ellipse(double a,double b,double c,double xg,double yg,double zg){

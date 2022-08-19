@@ -206,6 +206,14 @@ int System::get_r_size()const{
   return 3*size;
 }
 
+double System::get_F()const{
+  double F(-get_N());
+  for(auto& it : loops){
+    F+= - kBT*it.get_S();
+  }
+  return F;
+}
+
 void System::Print_Loop_positions() const{
   for(auto& loop : loops){
     cout<<"theta Phi "<<loop.get_theta()<<" "<<loop.get_phi()<<endl;

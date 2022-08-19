@@ -20,6 +20,7 @@ public:
   double get_phi() const; // angle with z axis
   std::array<double,3> get_Rg() const;
   double get_V()const;
+  double get_S()const;
 private:
   std::array<double,3> Rright,Rleft;
   std::vector<std::array<double,3>> r;

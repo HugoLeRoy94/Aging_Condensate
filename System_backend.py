@@ -14,10 +14,14 @@ lib = cdll.LoadLibrary(str(pathlib.Path(__file__).parent.absolute())+'/lib.so')
 
 lib.create_system.argtypes=[c_double,c_double,c_double,c_double,c_int]
 lib.create_system.restype=POINTER(c_void_p)
+lib.CopySystem.argtypes = [POINTER(c_void_p)]
+lib.CopySystem.restype = POINTER(c_void_p)
 
 lib.evolve.argtypes=[POINTER(c_void_p),POINTER(c_bool)]
 lib.evolve.restype=c_double
 
+lib.get_F.argtypes = [POINTER(c_void_p)]
+lib.get_F.restype = c_double
 lib.get_r_size.argtypes=[POINTER(c_void_p)]
 lib.get_r_size.restype=c_int
 lib.get_r.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
@@ -25,24 +29,35 @@ lib.get_N.argtypes=[POINTER(c_void_p)]
 lib.get_N.restype=c_int
 lib.get_R.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
 lib.get_ell.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
+
 lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
 
 class System:
-    def __init__(self,ell_tot,distance,rho0,temperature,seed=19874,rho_adjust=True):
-        self.ell_tot,self.D,self.rho0,self.T = ell_tot,distance,rho0,temperature
-        self.Address = lib.create_system(self.ell_tot,self.D,self.rho0,self.T,seed,rho_adjust)
+    def __init__(self,ell_tot=100,distance=10,rho0=0.1,temperature=0.005,seed=19874,rho_adjust=True,old_system=None):
+        if old_system is None:
+            self.ell_tot,self.D,self.rho0,self.T = ell_tot,distance,rho0,temperature
+            self.Address = lib.create_system(self.ell_tot,self.D,self.rho0,self.T,seed,rho_adjust)
+        else:
+            self.copy(old_system)
+    def copy(self,old_system):
+        self.ell_tot = old_system.ell_tot
+        self.D = old_system.D
+        self.rho0 = old_system.rho0
+        self.T = old_system.T
+        self.Address = lib.CopySystem(old_system.Address)
     def evolve(self):
         bind = c_bool(False)
         time = lib.evolve(self.Address,byref(bind))
         return bind.value, time
     def get_N_loop(self):
         return lib.get_N(self.Address)
+    def get_F(self):
+        return lib.get_F(self.Address)
     def get_R(self):
         size = (self.get_N_loop()+1)*3
         R = np.zeros(size,dtype=np.double)
         lib.get_R(self.Address,R.ctypes.data_as(POINTER(c_double)),size)
         R = np.reshape(R, (-1, 3))
-        #return R[np.argsort(R[:,0])]
         return R
     def get_ell(self):
         size = self.get_N_loop()
@@ -62,7 +77,7 @@ class System:
         """
         This function returns the position of the links along the polymer
         """
-        position = np.zeros(self.ell_tot,dtype=float)
+        position = np.zeros(self.get_N_loop(),dtype=float)
         for n,l in enumerate(self.get_ell()):
             position[n] = position[n-1]+l
         return position

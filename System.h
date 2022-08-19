@@ -10,6 +10,8 @@ public:
   void get_R(double* R, int size) const; // return the position of the anchored points
   void get_ell(double* ells, int size) const;// return the list of length of the loops.
   void get_r(double* r,int size) const;
+  double get_S() const;
+  double get_F() const;
   int get_r_size()const;
   void Print_Loop_positions() const;
 private:
