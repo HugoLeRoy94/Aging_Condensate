@@ -1,10 +1,13 @@
 #include "Header.h"
 using namespace std;
-
+Dangling::Dangling(){}
 // dsl : distance sur ell : ratio of the two usefull to know how to adjust the concentration of linkers
-Dangling::Dangling(std::array<double,3> R0, double ell, double rho,double dsl,bool rho_adjust){
+
+Dangling::Dangling(std::array<double,3> R0, double ell_0, double ell_in, double rho,double dsl,bool rho_adjust){
   IF(true){cout<<"Dangling : creator"<<endl;}
   Rleft = R0;
+  ell = ell_in;
+  ell_coordinate_0 = ell_0;
   radius = sqrt(ell);
   if(rho_adjust){rho0 = rho+(0.1-rho)*(radius/ell-dsl);}
   else{rho0 = rho;}
@@ -14,30 +17,47 @@ Dangling::Dangling(std::array<double,3> R0, double ell, double rho,double dsl,bo
   IF(true){cout<<"Dangling : compute the binding rates" <<endl;}
   compute_all_rates();
 }
+
 Dangling::Dangling(const Dangling& dangling){
+  IF(true){cout<<"Dangling : copy constructor"<<endl;}
   Rleft = dangling.Rleft;
   rho0 = dangling.rho0;
   ell = dangling.ell;
+  ell_coordinate_0 = dangling.ell_coordinate_0;
   V=dangling.V;
   radius = dangling.radius;
   generate_binding_sites();
   compute_all_rates();
 }
+
 Dangling::~Dangling(){}
 // ---------------------------------------------------------------------------
 //-----------------------------------accessor---------------------------------
 // ---------------------------------------------------------------------------
+
 std::array<double,3> Dangling::get_Rleft() const{return Rleft;}
+
 std::vector<array<double,3>> Dangling::get_r() const{return r;}
+
 std::vector<std::vector<double>> Dangling::get_rates() const{return rates;}
+
 double Dangling::get_ell() const{return ell;}
+
+double Dangling::get_ell_coordinate_0() const{return ell_coordinate_0;}
+
 double Dangling::get_V()const{return V;}
+
 double Dangling::get_total_binding_rates() const{return total_rates;}
-double Dangling::get_S()const{return pow((4*Pi),ell);}
+
+double Dangling::get_S()const{return ell*log(4*Pi);}
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 void Dangling::compute_all_rates(){
+  //cout<<"compute all rates : r.size = "<<r.size()<<" ell : "<<ell<<endl;
+  //int N(0);
   for(auto& rlink : r){
+    //N++;
+    //if(N%(r.size()/100) == 0){cout<<N/(r.size()/100)<<"%"<<endl;}
     vector<double> rates_ell,cum_rates_ell; // rates is just a temporary vector to append the double vector of rates, cum_rates is just the corresponding cumulative array.
     rates_ell.reserve((int)ell);
     // fill the rates vector in which all rates associated to the binding of any crosslinker
@@ -64,6 +84,7 @@ void Dangling::compute_all_rates(){
   total_rates=0; // make sure it's 0 if there is no bond
   for(auto& ell_r : rates){for(auto& rate: ell_r){total_rates+=rate;}}
 }
+
 void Dangling::select_link_length(double& length, array<double,3>& r_selected) const{
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
@@ -96,6 +117,7 @@ void Dangling::select_link_length(double& length, array<double,3>& r_selected) c
   int ell_index(distance(copy_cum_rates_rindex.begin(),rate_ell_selec)+1);
   length=(double)ell_index;
 }
+
 void Dangling::generate_binding_sites(){
   poisson_distribution<int> distribution(rho0*V);
   int N_crosslinker=distribution(generator);
@@ -103,9 +125,11 @@ void Dangling::generate_binding_sites(){
     r.push_back(random_in_sphere(Rleft[0], Rleft[1],Rleft[2]));
   }
 }
+
 double Dangling::Omega(double ell) const{
   return pow(4*Pi,ell);
 }
+
 array<double,3> Dangling::random_in_sphere(double xg,double yg,double zg){
   bool OUT(true);
   double x(0),y(0),z(0);
@@ -119,8 +143,8 @@ array<double,3> Dangling::random_in_sphere(double xg,double yg,double zg){
     y = distribution(generator)*radius;
     z = distribution(generator)*radius;
 
-    if(pow(x,2)+pow(y,2)+pow(z,2)<=radius){OUT=false;}
+    if(pow(x,2)+pow(y,2)+pow(z,2)<=ell){OUT=false;}
   }
-  array<double,3> res{x,y,z};
+  array<double,3> res{x+xg,y+yg,z+zg};
   return res;
 }

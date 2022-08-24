@@ -7,7 +7,13 @@ class Dangling{
   linkers are in a sphere.
   */
 public:
-  Dangling(std::array<double,3> R0,double ell, double rho,double dsl,bool rho_adjust);
+  Dangling();
+  Dangling(std::array<double,3> R0,
+          double ell_0,  // ell_0 is the coordinate
+          double ell_in, // this is the remaining length
+          double rho,
+          double dsl,
+          bool rho_adjust);
   Dangling(const Dangling& dangling);
   ~Dangling();
   void select_link_length(double& length, std::array<double,3>& r_selected) const;
@@ -15,6 +21,7 @@ public:
   std::array<double,3> get_Rleft() const;
   std::vector<std::array<double,3>> get_r() const;
   double get_ell() const;
+  double get_ell_coordinate_0() const;
   std::vector<std::vector<double>> get_rates() const;
   double get_total_binding_rates() const;
   double get_V()const;
@@ -30,6 +37,7 @@ private:
   double rho0; // volume fraction (initial of crosslinkers)
   double total_rates; // total binding rates to crosslinkers
   double radius;
+  double ell_coordinate_0; // curvilinear coordinate of the linker
 
   // returns a random position in a sphere
   std::array<double,3> random_in_sphere(double xg,double yg,double zg);
