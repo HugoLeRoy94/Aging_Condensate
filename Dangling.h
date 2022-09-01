@@ -1,6 +1,7 @@
 #ifndef Dangling_h
 #define Dangling_h
-class Dangling{
+class Dangling : public Strand
+{
   /*
   Dangling is the extremity of the polymer. The polymer is always bound at its
   left and free at its right. This class is very similar to Loop, except that
@@ -9,44 +10,25 @@ class Dangling{
 public:
   Dangling();
   Dangling(std::array<double,3> R0,
+          map3d<double,double,double,std::array<double,3>>& linkers,
           double ell_0,  // ell_0 is the coordinate
           double ell_in, // this is the remaining length
           double rho,
-          double dsl,
           bool rho_adjust);
-  Dangling(const Dangling& dangling);
-  ~Dangling();
-  void select_link_length(double& length, std::array<double,3>& r_selected) const;
-  // Accessors :
-  std::array<double,3> get_Rleft() const;
-  std::vector<std::array<double,3>> get_r() const;
-  double get_ell() const;
-  double get_ell_coordinate_0() const;
-  std::vector<std::vector<double>> get_rates() const;
-  double get_total_binding_rates() const;
-  double get_V()const;
+  Dangling(const Dangling& dangling,map3d<double,double,double,std::array<double,3>>& linkers);
   double get_S()const; // entropy of the polymer.
 
 private:
-
-  std::array<double,3> Rleft; // Position of the left anchor
-  std::vector<std::array<double,3>> r; // position of all crosslinkers
-  std::vector<std::vector<double>> rates,cum_rates; // rate of binding at any linkers for every length
-  std::vector<double> sum_l_cum_rates; // rate of binding at any linkers
-  double ell,V; // size of the polymer and volume it can occupy
-  double rho0; // volume fraction (initial of crosslinkers)
-  double total_rates; // total binding rates to crosslinkers
-  double radius;
-  double ell_coordinate_0; // curvilinear coordinate of the linker
-
+  double radius,xg,yg,zg;
   // returns a random position in a sphere
-  std::array<double,3> random_in_sphere(double xg,double yg,double zg);
+  std::array<double,3> random_in_volume() override;
+  void get_volume_limit(double& key_0_min,double& key_0_max,
+                        double& key_1_min,double& key_1_max,
+                        double& key_2_min,double& key_2_max) override;
   // number of configuration of a polymer bound in r1 and length ell
   double Omega(double ell) const;
-  // inner function to compute all rates of the loop
-  void compute_all_rates();
   // use random_in_sphere to generate  a number of linkers
-  void generate_binding_sites();
-
+   // build le vector p_linkers from the overall map of the system:
+  double compute_rate(double li, std::array<double,3>* rlinker) override;
 };
 #endif

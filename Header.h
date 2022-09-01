@@ -30,6 +30,7 @@
 #include <set>
 
 #include "Function.h"
+#include "Strand.h"
 #include "Loop.h"
 #include "Dangling.h"
 #include "System.h"

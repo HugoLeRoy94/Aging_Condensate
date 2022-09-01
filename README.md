@@ -32,7 +32,8 @@ We start with a single polymer chain bound at its two extremities. The initializ
 >   - $$P_\text{binding} = V_\text{free} \rho_\text{stickers}$$  
 >   - with $V_\text{free}$ the free volume occupied by the ellipse of the chain, and $\rho_\text{stickers}$ the density of sticker in the system (which is a free parameter).  
 >   - draw a random number : RAND between 0 and 1.
->       - if RAND < $P_\text{binding}$ then the chain is splitted into two sub chains  
+>       - if RAND < $P_\text{binding}$ then the chain is
+ splitted into two sub chains  
 >       - if RAND > $P_\text{binding}$ the process stops for this sub-chain and the initialization continue for the next chain.
 
 > - repeat the process for the two sub-chains, and the next chains  
@@ -147,5 +148,29 @@ The end of the polymer. It is a single object owned by the System. Very similar 
 ## Miscellaneous remarks
 
 - the loops are sorted by curvilinear coordinates along the polymer length in the set
-- 
+- The system know a reference to all the crosslinkers. However it is ask to each loop and dangling to create their own linkers, at a distance set in their own object.
+- We arange the linkers in the map with : $key = x+y\ell=z\ell^2$
 
+## *Strands*, *Dangling* and *Loops*
+
+### crosslinkers :
+
+crosslinkers are generated in a volume around each loops and dangling bond, but also stored in the system. each time a loop or a strand is generated, we draw $N_\text{link}$ linkers from a Poisson distribution of mean $\rho V$ where V is the volume in which the crosslinkers are generated. We do not generate crosslinkers in the whole volume which would be very large, while the system only occupies a negligible part of the total volume.
+
+We generate crosslinkers in :
+- a cube of side $R = 2 \sqrt{\ell}$ for the dangling bond
+*warning*
+- a cube of side $R = 2 \sqrt{\ell}$ for the loops with anchoring point $\mathbf{R}_0$ and $\mathbf{R}_1$ are close so that : $|\mathbf{R}_0-\mathbf{R}_1| < 0.1 \ell$.
+- a rectangle of large side : $\ell$ and small axis $2\sqrt{\ell}$ and small side : $R2 \sqrt{\ell}$ for loops where : $|\mathbf{R}_0-\mathbf{R}_1| > 0.1 \ell$.
+*warning*
+
+- for now we will just generate crosslinkers in a cube of side $R= |\mathbf{R}_0-\mathbf{R}_1|+2\sqrt{\ell}$
+
+### Strands
+
+strands is the parent class of *Loop* and *Dangling* it basically encapsulate most of what loop and dangling do. Few specificity are handle by the child class. Mostly geometrical properties (related to the space they occupy). The following function are overwritten by the child class :
+- get_volume_limit : get the slicing limits to generate crosslinkers in the vicinity of the strand.
+- compute_rate : compute the binding rate of the strand.
+- random_in_volume : generate coordinates to create crosslinkers in the surrounding of the strand.
+
+*warning* the constructor of strands  does not call *generate_binding_sites* and *compute_all_rates* despite these function being exclusively owned by the *Strand* class. This is because other geometrical parameters need to be set before we call them. Because *Strand* constructor is called before *Loop* or *Dangling* one we have to call these function at the end of the constructor.

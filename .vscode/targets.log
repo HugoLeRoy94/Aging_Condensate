@@ -1,0 +1,641 @@
+make all --print-data-base --no-builtin-variables --no-builtin-rules --question
+# GNU Make 4.3
+# Built for x86_64-pc-linux-gnu
+# Copyright (C) 1988-2020 Free Software Foundation, Inc.
+# License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+# This is free software: you are free to change and redistribute it.
+# There is NO WARRANTY, to the extent permitted by law.
+
+# Make data base, printed on Thu Sep  1 09:53:16 2022
+
+# Variables
+
+# makefile (from 'makefile', line 12)
+OBJ = $(SRC:.cpp=.o) 
+# environment
+GDK_BACKEND = x11
+# environment
+AS = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-as
+# environment
+LC_ALL = C
+# makefile (from 'makefile', line 9)
+SRC = $(wildcard *.cpp)
+# environment
+GNOME_SHELL_SESSION_MODE = ubuntu
+# environment
+SSH_AGENT_LAUNCHER = gnome-keyring
+# environment
+AR = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-ar
+# environment
+CMAKE_PREFIX_PATH = /home/hcleroy/anaconda3:/home/hcleroy/anaconda3/x86_64-conda-linux-gnu/sysroot/usr
+# environment
+SNAP_INSTANCE_KEY = 
+# environment
+GCC_NM = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-nm
+# environment
+GJS_DEBUG_OUTPUT = stderr
+# environment
+GXX = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-g++
+# environment
+LC_NAME = de_CH.UTF-8
+# environment
+LC_NUMERIC = de_CH.UTF-8
+# environment
+VSCODE_CWD = /home/hcleroy
+# environment
+WINDOWPATH = 2
+# environment
+LC_ADDRESS = de_CH.UTF-8
+# default
+MAKE_COMMAND := make
+# environment
+QT_ACCESSIBILITY = 1
+# environment
+CXX_FOR_BUILD = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-c++
+# automatic
+@D = $(patsubst %/,%,$(dir $@))
+# environment
+SNAP_INSTANCE_NAME = code
+# environment
+GDK_PIXBUF_MODULEDIR = /snap/code/105/usr/lib/x86_64-linux-gnu/gdk-pixbuf-2.0/2.10.0/loaders
+# environment
+VSCODE_HANDLES_UNCAUGHT_ERRORS = true
+# default
+.VARIABLES := 
+# environment
+HOST = x86_64-conda-linux-gnu
+# environment
+PWD = /home/hcleroy/PostDoc/Simulation/Aging_Condensate
+# automatic
+%D = $(patsubst %/,%,$(dir $%))
+# environment
+XDG_DATA_DIRS = /usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
+# makefile (from 'makefile', line 17)
+FLAG = -DDEBUG
+# automatic
+^D = $(patsubst %/,%,$(dir $^))
+# automatic
+%F = $(notdir $%)
+# environment
+CONDA_PROMPT_MODIFIER = (base) 
+# environment
+VSCODE_CODE_CACHE_PATH = /home/hcleroy/.config/Code/CachedData/e4503b30fc78200f846c62cf8091b76ff5547662
+# environment
+LANG = C
+# environment
+XAUTHORITY = /run/user/1001/gdm/Xauthority
+# default
+.LOADED := 
+# default
+.INCLUDE_DIRS = /usr/local/include /usr/include /usr/include
+# makefile
+MAKEFLAGS = pqrR
+# environment
+CONDA_TOOLCHAIN_BUILD = x86_64-conda-linux-gnu
+# makefile
+CURDIR := /home/hcleroy/PostDoc/Simulation/Aging_Condensate
+# environment
+APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
+# environment
+LESSOPEN = | /usr/bin/lesspipe %s
+# automatic
+*D = $(patsubst %/,%,$(dir $*))
+# makefile (from 'makefile', line 2)
+VERSION = -std=c++23
+# environment
+MFLAGS = -pqrR
+# environment
+SSH_AUTH_SOCK = /run/user/1001/keyring/ssh
+# default
+.SHELLFLAGS := -c
+# environment
+XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
+# automatic
++D = $(patsubst %/,%,$(dir $+))
+# environment
+XDG_SESSION_DESKTOP = ubuntu
+# makefile (from 'makefile', line 1)
+MAKEFILE_LIST := makefile
+# environment
+CONDA_SHLVL = 1
+# environment
+SNAP_REEXEC = 
+# automatic
+@F = $(notdir $@)
+# environment
+VSCODE_PID = 6521
+# environment
+XDG_SESSION_TYPE = x11
+# automatic
+?D = $(patsubst %/,%,$(dir $?))
+# environment
+RANLIB = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-ranlib
+# environment
+host_alias = x86_64-conda-linux-gnu
+# environment
+BAMF_DESKTOP_FILE_HINT = /var/lib/snapd/desktop/applications/code_code.desktop
+# environment
+CONDA_PYTHON_EXE = /home/hcleroy/anaconda3/bin/python
+# environment
+GCC_AR = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-ar
+# environment
+build_alias = x86_64-conda-linux-gnu
+# environment
+SESSION_MANAGER = local/LBSPC1:@/tmp/.ICE-unix/1996,unix/LBSPC1:/tmp/.ICE-unix/1996
+# automatic
+*F = $(notdir $*)
+# environment
+CHROME_DESKTOP = code-url-handler.desktop
+# environment
+DBUS_SESSION_BUS_ADDRESS = unix:path=/run/user/1001/bus
+# automatic
+<D = $(patsubst %/,%,$(dir $<))
+# environment
+VSCODE_NLS_CONFIG = {"locale":"en-us","availableLanguages":{},"_languagePackSupport":true}
+# environment
+GPROF = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gprof
+# default
+MAKE_HOST := x86_64-pc-linux-gnu
+# environment
+GNOME_DESKTOP_SESSION_ID = this-is-deprecated
+# environment
+CONDA_PREFIX = /home/hcleroy/anaconda3
+# makefile
+SHELL = /bin/sh
+# default
+MAKECMDGOALS := all
+# environment
+XMODIFIERS = @im=ibus
+# environment
+CONDA_TOOLCHAIN_HOST = x86_64-conda-linux-gnu
+# environment
+GJS_DEBUG_TOPICS = JS ERROR;JS LOG
+# environment
+SHLVL = 0
+# environment
+STRINGS = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-strings
+# environment
+MAKELEVEL := 0
+# environment
+_CONDA_PYTHON_SYSCONFIGDATA_NAME = _sysconfigdata_x86_64_conda_cos6_linux_gnu
+# environment
+OBJDUMP = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-objdump
+# default
+MAKE = $(MAKE_COMMAND)
+# environment
+SNAP_COOKIE = Qj_fwzsC3JnprAlocHTs8r2KyIiftaOspt5bcSWTyLkZ-SYycG5d
+# environment
+PATH = /home/hcleroy/anaconda3/bin:/home/hcleroy/anaconda3/condabin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/snap/bin
+# default
+MAKEFILES := 
+# environment
+CMAKE_ARGS = -DCMAKE_AR=/home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-ar -DCMAKE_CXX_COMPILER_AR=/home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-ar -DCMAKE_C_COMPILER_AR=/home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-ar -DCMAKE_RANLIB=/home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-ranlib -DCMAKE_CXX_COMPILER_RANLIB=/home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-ranlib -DCMAKE_C_COMPILER_RANLIB=/home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-ranlib -DCMAKE_LINKER=/home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-ld -DCMAKE_STRIP=/home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-strip
+# environment
+LC_MONETARY = de_CH.UTF-8
+# automatic
+^F = $(notdir $^)
+# environment
+GCC_RANLIB = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-ranlib
+# environment
+SNAP_USER_COMMON = /home/hcleroy/snap/code/common
+# environment
+LC_TIME = de_CH.UTF-8
+# environment
+SNAP = /snap/code/105
+# environment
+INVOCATION_ID = d61fbc89efbe48e18263721f31f9c8c7
+# environment
+CPP = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-cpp
+# environment
+SNAP_REVISION = 105
+# environment
+SNAP_REAL_HOME = /home/hcleroy
+# environment
+DEBUG_CFLAGS = -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-all -fno-plt -Og -g -Wall -Wextra -fvar-tracking-assignments -ffunction-sections -pipe -isystem /home/hcleroy/anaconda3/include
+# environment
+USERNAME = hcleroy
+# environment
+SIZE = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-size
+# environment
+CXXFILT = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-c++filt
+# environment
+ELFEDIT = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-elfedit
+# environment
+LC_TELEPHONE = de_CH.UTF-8
+# environment
+LESSCLOSE = /usr/bin/lesspipe %s %s
+# automatic
+?F = $(notdir $?)
+# makefile (from 'makefile', line 6)
+NAME = Aight
+# environment
+XDG_CURRENT_DESKTOP = Unity
+# environment
+READELF = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-readelf
+# environment
+LS_COLORS = 
+# automatic
++F = $(notdir $+)
+# environment
+DESKTOP_SESSION = ubuntu
+# environment
+ORIGINAL_XDG_CURRENT_DESKTOP = ubuntu:GNOME
+# 'override' directive
+GNUMAKEFLAGS := 
+# environment
+CONDA_DEFAULT_ENV = base
+# environment
+LOGNAME = hcleroy
+# makefile (from 'makefile', line 3)
+OPT = -O3 
+# environment
+CPPFLAGS = -DNDEBUG -D_FORTIFY_SOURCE=2 -O2 -isystem /home/hcleroy/anaconda3/include
+# environment
+GIO_LAUNCHED_DESKTOP_FILE = /var/lib/snapd/desktop/applications/code_code.desktop
+# environment
+SNAP_ARCH = amd64
+# makefile
+.DEFAULT_GOAL := all
+# environment
+SYSTEMD_EXEC_PID = 2019
+# environment
+DISPLAY = :1
+# environment
+USER = hcleroy
+# environment
+GTK_MODULES = gail:atk-bridge
+# default
+ 
+MAKE_VERSION := 4.3
+# environment
+DISABLE_WAYLAND = 1
+# environment
+SNAP_DATA = /var/snap/code/105
+# environment
+SNAP_CONTEXT = Qj_fwzsC3JnprAlocHTs8r2KyIiftaOspt5bcSWTyLkZ-SYycG5d
+# environment
+BUILD = x86_64-conda-linux-gnu
+# environment
+LDFLAGS = -Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,--disable-new-dtags -Wl,--gc-sections -Wl,-rpath,/home/hcleroy/anaconda3/lib -Wl,-rpath-link,/home/hcleroy/anaconda3/lib -L/home/hcleroy/anaconda3/lib
+# environment
+MANAGERPID = 1787
+# environment
+CONDA_BUILD_SYSROOT = /home/hcleroy/anaconda3/x86_64-conda-linux-gnu/sysroot
+# environment
+LC_MEASUREMENT = de_CH.UTF-8
+# environment
+GIO_LAUNCHED_DESKTOP_FILE_PID = 6478
+# environment
+PYTHONPATH = /home/hcleroy/PostDoc/Simulation/KMCLib/python/src:
+# makefile (from 'makefile', line 7)
+MEMCHECK = 
+# environment
+_ = /snap/code/105/usr/share/code/code
+# environment
+LC_PAPER = de_CH.UTF-8
+# environment
+XDG_RUNTIME_DIR = /run/user/1001
+# environment
+CFLAGS = -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /home/hcleroy/anaconda3/include
+# environment
+GCC = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc
+# environment
+GPG_AGENT_INFO = /run/user/1001/gnupg/S.gpg-agent:0:1
+# makefile (from 'makefile', line 14)
+HEAD = $(filter-out main.h System_c.h $(wildcard *.c) , $(SRC:.cpp=.h)) 
+# environment
+GDK_PIXBUF_MODULE_FILE = /home/hcleroy/snap/code/common/.cache/gdk-pixbuf-loaders.cache
+# environment
+_CE_M = 
+# environment
+DEBUG_CPPFLAGS = -D_DEBUG -D_FORTIFY_SOURCE=2 -Og -isystem /home/hcleroy/anaconda3/include
+# environment
+JOURNAL_STREAM = 8:35616
+# environment
+XDG_SESSION_CLASS = user
+# environment
+VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
+# environment
+HOME = /home/hcleroy
+# environment
+QT_IM_MODULE = ibus
+# environment
+DEBUG_CXXFLAGS = -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-all -fno-plt -Og -g -Wall -Wextra -fvar-tracking-assignments -ffunction-sections -pipe -isystem /home/hcleroy/anaconda3/include
+# environment
+ELECTRON_RUN_AS_NODE = 1
+# environment
+VSCODE_IPC_HOOK = /run/user/1001/vscode-a08c0e43-1.70.2-main.sock
+# environment
+SNAP_NAME = code
+# environment
+GSETTINGS_SCHEMA_DIR = /snap/code/105/usr/share/glib-2.0/schemas
+# environment
+MATHEMATICA_HOME = /usr/local/Wolfram/Mathematica/12.3
+# environment
+NM = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-nm
+# environment
+IM_CONFIG_PHASE = 1
+# default
+.RECIPEPREFIX := 
+# environment
+CC_FOR_BUILD = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-cc
+# automatic
+<F = $(notdir $<)
+# environment
+SNAP_VERSION = e4503b30
+# default
+SUFFIXES := 
+# environment
+LD = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-ld
+# environment
+VSCODE_CLI = 1
+# environment
+ELECTRON_NO_ATTACH_CONSOLE = 1
+# environment
+SNAP_COMMON = /var/snap/code/common
+# environment
+CXXFLAGS = -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /home/hcleroy/anaconda3/include
+# environment
+LD_GOLD = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-ld.gold
+# makefile (from 'makefile', line 5)
+DEBUG = yes
+# environment
+STRIP = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-strip
+# default
+.FEATURES := target-specific order-only second-expansion else-if shortest-stem undefine oneshell nocomment grouped-target extra-prereqs archives jobserver output-sync check-symlink load
+# environment
+CXX = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-c++
+# environment
+ADDR2LINE = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-addr2line
+# makefile (from 'makefile', line 1)
+CC = g++ 
+# environment
+OBJCOPY = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-objcopy
+# makefile (from 'makefile', line 4)
+SharedLib = lib.so
+# environment
+SNAP_USER_DATA = /home/hcleroy/snap/code/105
+# environment
+XDG_MENU_PREFIX = gnome-
+# environment
+CONDA_EXE = /home/hcleroy/anaconda3/bin/conda
+# environment
+_CE_CONDA = 
+# environment
+GDMSESSION = ubuntu
+# environment
+LC_IDENTIFICATION = de_CH.UTF-8
+# environment
+SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd/void
+# variable set hash-table stats:
+# Load=188/1024=18%, Rehash=0, Collisions=21/239=9%
+
+# Pattern-specific Variable Values
+
+# No pattern-specific variable values.
+
+# Directories
+
+# . (device 66309, inode 13376578): 39 files, no impossibilities.
+
+# 39 files, no impossibilities in 1 directories.
+
+# Implicit Rules
+
+# No implicit rules.
+
+# Files
+
+# Not a target:
+System_c.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-25 15:56:22.88184093
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Loop.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:03:37.325014574
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Loop.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-30 15:15:17.825933987
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Dangling.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-30 15:16:48.538567815
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Strand.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:03:14.392861801
+#  File has been updated.
+#  Successfully updated.
+
+EXEC: Dangling.o Function.o Loop.o Strand.o System.o System_c.o main.o
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 37):
+	$(CC) $(OPT) $(OBJ)  -o $(NAME) $(FLAG) $(MEMCHECK)
+
+# Not a target:
+System_c.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:03:41.089039736
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Dangling.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:08:42.943120999
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+System.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-30 16:34:04.408918406
+#  File has been updated.
+#  Successfully updated.
+
+clean:
+#  Phony target (prerequisite of .PHONY).
+#  Implicit rule search has not been done.
+#  File does not exist.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 33):
+	rm -rf *.o *~ $(SharedLib)
+
+.cpp.o:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+#  recipe to execute (from 'makefile', line 28):
+	$(CC) $(VERSION) -fPIC $(OPT) -c $< -o $@ $(FLAG) $(MEMCHECK)
+
+# Not a target:
+Function.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:03:36.277007573
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.DEFAULT:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Dangling.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-09-01 09:53:16.144045868
+#  File has been updated.
+#  Successfully updated.
+
+all: lib.so
+#  Command line target.
+#  Implicit rule search has been done.
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# variable set hash-table stats:
+# Load=0/32=0%, Rehash=0, Collisions=0/10=0%
+
+# Not a target:
+main.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:07:20.950544958
+#  File has been updated.
+#  Successfully updated.
+
+lib.so: Dangling.o Function.o Loop.o Strand.o System.o System_c.o main.o
+#  Implicit rule search has not been done.
+#  Implicit/static pattern stem: ''
+#  File does not exist.
+#  File has been updated.
+#  Needs to be updated (-q is set).
+# automatic
+# @ := lib.so
+# automatic
+# * := 
+# automatic
+# < := Dangling.o
+# automatic
+# + := Dangling.o Function.o Loop.o Strand.o System.o System_c.o main.o
+# automatic
+# % := 
+# automatic
+# ^ := Dangling.o Function.o Loop.o Strand.o System.o System_c.o main.o
+# automatic
+# ? := Dangling.o Function.o Loop.o Strand.o System.o System_c.o main.o
+# automatic
+# | := 
+# variable set hash-table stats:
+# Load=8/32=25%, Rehash=0, Collisions=4/18=22%
+#  recipe to execute (from 'makefile', line 24):
+	     $(CC) $(OPT) -shared -Wl,-soname,$(SharedLib) -o $(SharedLib) $(OBJ) $(FLAG)
+
+# Not a target:
+Strand.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:03:39.937032033
+#  File has been updated.
+#  Successfully updated.
+
+ 
+main.o: Dangling.cpp Function.cpp Loop.cpp Strand.cpp System.cpp System_c.cpp main.cpp Dangling.h Function.h Loop.h Strand.h System.h
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:08:43.79112699
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Function.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 15:16:31.722698005
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Loop.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 13:50:33.279703935
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+makefile:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:03:31.436975263
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+System.o:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:08:45.519139203
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+.SUFFIXES:
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+.PHONY: clean EXEC
+#  Implicit rule search has not been done.
+#  Modification time never checked.
+#  File has not been updated.
+
+# Not a target:
+Strand.h:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-30 16:31:31.827465598
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+System.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-31 17:08:32.407046611
+#  File has been updated.
+#  Successfully updated.
+
+# Not a target:
+Function.cpp:
+#  Implicit rule search has been done.
+#  Last modified 2022-08-29 16:05:24.485898617
+#  File has been updated.
+#  Successfully updated.
+
+# files hash-table stats:
+# Load=28/1024=3%, Rehash=0, Collisions=0/74=0%
+# VPATH Search Paths
+
+# No 'vpath' search paths.
+
+# No general ('VPATH' variable) search path.
+
+# strcache buffers: 1 (0) / strings = 49 / storage = 563 B / avg = 11 B
+# current buf: size = 8162 B / used = 563 B / count = 49 / avg = 11 B
+
+# strcache performance: lookups = 94 / hit rate = 47%
+# hash-table stats:
+# Load=49/8192=1%, Rehash=0, Collisions=1/94=1%
+# Finished Make data base on Thu Sep  1 09:53:16 2022
+
+ 

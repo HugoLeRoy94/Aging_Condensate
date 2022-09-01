@@ -5,8 +5,6 @@ using namespace std;
 // -----------------------------------------------------------------------------
 // -----------------------------creator/destructor------------------------------
 // -----------------------------------------------------------------------------
-System::System() {}
-
 System::System(double ell_tot, double rho0, double temperature, int seed, bool adjust) : distrib(1, 10000000)
 {
   IF(true) { cout << "System : creator" << endl; }
@@ -19,15 +17,18 @@ System::System(double ell_tot, double rho0, double temperature, int seed, bool a
   rho_adjust = adjust;
   kBT = temperature;
   // ---------------------------------------------------------------------------
+  //-----------------------------initialize crosslinkers------------------------
+
+  // ---------------------------------------------------------------------------
   //-----------------------------initialize dangling----------------------------
+  IF(true){cout<< "System : create dangling" << endl;}
   array<double, 3> R0 = {0, 0, 0};
-  dangling = Dangling(R0, 0., ell, rho, 1., rho_adjust);
+  dangling = Dangling(R0,linkers, 0., ell, rho, rho_adjust);
   IF(true) { cout << "System : created" << endl; }
 }
 
 System::~System()
 {
-  // for(auto& it : loops){delete it;}
   loops.clear();
 }
 // -----------------------------------------------------------------------------
@@ -53,7 +54,8 @@ double System::evolve(bool *bind)
   if (cum_rates.back() == 0)
   {
     // if the system is blocked, we remake a loop with the possibility of having a crosslinker this time
-    return reset_crosslinkers();
+    reset_crosslinkers();
+    return 0;
   }
   // pick a random process
   IF(true) { cout << "System : draw a random process" << endl; }
@@ -113,12 +115,17 @@ void System::unbind_loop(set<Loop>::iterator &loop_selec_left, set<Loop>::iterat
   // create a new loop that is the combination of both inputs
   Loop loop = Loop(loop_selec_left->get_Rleft(),
                    loop_selec_right->get_Rright(),
+                   linkers,
                    loop_selec_left->get_ell_coordinate_0(),
                    loop_selec_right->get_ell_coordinate_1(),
                    rho,
-                   0.5, 
                    rho_adjust);
+
   //cout << loop_selec_left->get_ell()<<" "<<loop_selec_right->get_ell()<<" "<<loop.get_ell()<<endl;
+  linkers.add(loop_selec_right->get_Rleft()[0],
+              loop_selec_right->get_Rleft()[1],
+              loop_selec_right->get_Rleft()[2],
+              loop_selec_right->get_Rleft());
   loops.erase(loop_selec_right);
   loops.erase(loop_selec_left);
   loops.insert(loop);
@@ -130,11 +137,16 @@ void System::unbind_extremity(set<Loop>::iterator &loop_selec_left)
 {
   IF(true) { cout << "System : unbind the extremity" << endl; }
   dangling = Dangling(loop_selec_left->get_Rleft(),
+                      linkers,
                       loop_selec_left->get_ell_coordinate_0(),
                       loop_selec_left->get_ell() + dangling.get_ell(),
                       rho,
-                      0.5,
                       rho_adjust);
+  // ad the linkers from which we just unbind to the list
+  linkers.add(loop_selec_left->get_Rright()[0],
+            loop_selec_left->get_Rright()[1],
+            loop_selec_left->get_Rright()[2],
+            loop_selec_left->get_Rright());
   loops.erase(loop_selec_left);
 }
 
@@ -164,18 +176,21 @@ void System::add_bond(vector<double> &cum_rates, vector<double>::iterator &rate_
   IF(true) { cout << "System : create two new loops" << endl; }
   Loop l1 = Loop(loop_selec->get_Rleft(),
                  r_selected,
+                 linkers,
                  loop_selec->get_ell_coordinate_0(),
                  loop_selec->get_ell_coordinate_0() + length,
                  rho,
-                 0.5,
                  rho_adjust);
   Loop l2 = Loop(r_selected,
                  loop_selec->get_Rright(),
+                 linkers,
                  loop_selec->get_ell_coordinate_0() + length,
                  loop_selec->get_ell_coordinate_1(),
                  rho,
-                 0.5,
                  rho_adjust);
+  //---------------------------------------------------------------------------------
+  //------------------------------Actualize the linkers------------------------------
+  linkers.remove(r_selected[0],r_selected[1],r_selected[2]);
   // delete the loop
   IF(true) { cout << "System : delete the old loop" << endl; }
   // loops.erase(loops.begin()+distance(cum_rates.begin(),rate_selec));
@@ -196,35 +211,37 @@ void System::add_bond_to_dangling()
   IF(true) { cout << "System : create a new loop and a new dangling" << endl; }
   Loop l = Loop(dangling.get_Rleft(),
                 r_selected,
+                linkers,
                 dangling.get_ell_coordinate_0(),
                 dangling.get_ell_coordinate_0() + length,
                 rho,
-                0.5,
                 rho_adjust);
   dangling = Dangling(r_selected,
+                      linkers,
                       dangling.get_ell_coordinate_0() + length,
                       dangling.get_ell() - length,
                       rho,
-                      0.5,
                       rho_adjust);
-  IF(true) { cout << "System : add the newly created loop" << endl; }
-  loops.insert(loops.end(), l);
+  linkers.remove(r_selected[0],r_selected[1],r_selected[2]);
+  loops.insert(loops.end(),l);
 }
 // -----------------------------------------------------------------------------
 //-------reset the crosslinkers if no adding or removing is possible------------
 // -----------------------------------------------------------------------------
-double System::reset_crosslinkers()
+void System::reset_crosslinkers()
 {
+  
+  linkers.clear();
   // it basically consist in remaking every loops
   set<Loop> new_loops;
   for (auto &it : loops)
   {
-    Loop newloop(it);
+    Loop newloop(it,linkers);
     new_loops.insert(new_loops.end(), newloop);
   }
   loops = new_loops;
   dangling = Dangling(dangling);
-  return 0.;
+
 }
 // -----------------------------------------------------------------------------
 // -----------------------------accessor----------------------------------------
@@ -278,17 +295,17 @@ void System::get_r(double *r, int size) const
   {
     for (auto &link : loop.get_r())
     {
-      r[3 * n] = link[0];
-      r[3 * n + 1] = link[1];
-      r[3 * n + 2] = link[2];
+      r[3 * n] = (*link)[0];
+      r[3 * n + 1] = (*link)[1];
+      r[3 * n + 2] = (*link)[2];
       n++;
     }
   }
   for (auto &link : dangling.get_r())
   {
-    r[3 * n] = link[0];
-    r[3 * n + 1] = link[1];
-    r[3 * n + 2] = link[2];
+    r[3 * n] = (*link)[0];
+    r[3 * n + 1] = (*link)[1];
+    r[3 * n + 2] = (*link)[2];
     n++;
   }
 }

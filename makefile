@@ -1,8 +1,8 @@
 CC =g++ #compilateur
-VERSION = -std=c++1y #derniere version de c++
+VERSION = -std=c++23#derniere version de c++
 OPT = -O3 #optimisation de ouf
 SharedLib = lib.so
-DEBUG=no
+DEBUG=yes
 NAME=Aight
 MEMCHECK= #-g
 
@@ -25,7 +25,7 @@ $(SharedLib) : $(OBJ)
 main.o: $(SRC) $(HEAD)
 
 .cpp.o:
-	$(CC) $(Version) -fPIC $(OPT) -c $< -o $@ $(FLAG) $(MEMCHECK)
+	$(CC) $(VERSION) -fPIC $(OPT) -c $< -o $@ $(FLAG) $(MEMCHECK)
 
 .PHONY: clean
 
