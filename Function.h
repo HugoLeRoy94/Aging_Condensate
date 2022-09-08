@@ -23,7 +23,7 @@ class map3d {
 public:
     map3d() = default;
     map3d(map3d const&) = default;
-    void set_sizes(T0 x,T1 y,T2 z){size_x = x;size_y=y;size_z=z;}
+    //void set_sizes(T0 x,T1 y,T2 z){size_x = x;size_y=y;size_z=z;}
     constexpr T& operator()(T0 x, T1 y, T2 z) { // C++23 required
         return m[x][y][z];
     }
@@ -108,6 +108,11 @@ public:
     void add(T0 key1, T1 key2, T2 key3, T value)
     {
         m[key1][key2][key3] = value;
+    }
+    T* add_return_address(T0 key1, T1 key2, T2 key3, T value)
+    {
+      m[key1][key2][key3] = value;
+      return &m[key1][key2][key3];
     }
     void remove(T0 key1, T1 key2, T2 key3)
     {

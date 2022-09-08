@@ -184,8 +184,13 @@ void Strand::generate_binding_sites(map3d<double,double,double,array<double,3>>&
     for(int n=0;n<N_crosslinker-p_linkers.size();n++)
     {
       array<double,3> new_linker(random_in_volume());
-      p_linkers.push_back(&new_linker);
-      linkers.add(new_linker[0],new_linker[1],new_linker[2],new_linker);
+      //p_linkers.push_back(&new_linker);
+      //linkers.add(new_linker[0],new_linker[1],new_linker[2],new_linker);
+      p_linkers.push_back(linkers.add_return_address(
+                            new_linker[0],
+                            new_linker[1],
+                            new_linker[2],
+                            new_linker));
     }
   }
   else

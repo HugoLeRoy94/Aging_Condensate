@@ -14,7 +14,8 @@ Dangling::Dangling(std::array<double, 3> R0,
   ell = ell_in;
   radius = 2*sqrt(ell);
   rho0 = rho;
-  V = 4 / 3 * Pi * pow(2 * ell, 1.5);
+  //V = 4 / 3 * Pi * pow(2 * ell, 1.5);
+  V = pow(radius,3); // linkers are generated into a squared box
   xg = R0[0];
   yg = R0[1];
   zg = R0[2];

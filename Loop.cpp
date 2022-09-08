@@ -46,15 +46,17 @@ Loop::Loop(array<double, 3> R0,
   }
   else if (diff(Rleft, Rright) < 0.1 * ell)
   {
-    V = 4 / 3 * Pi * pow(2*ell, 1.5);
+    //V = 4 / 3 * Pi * pow(2*ell, 1.5);
     a = sqrt(ell);
     b = sqrt(ell);
+    V = a*b*b;
   }
   else
   {
-    V = Pi / 6 * diff(Rleft, Rright)*1.5 * ell*2;
+    //V = Pi / 6 * diff(Rleft, Rright)*1.5 * ell*2;
     a = diff(Rleft, Rright) *3/4;
     b = sqrt(ell);
+    V = a*b*b;
   }
   xg = 0.5 * (Rright[0] + Rleft[0]);
   yg = 0.5 * (Rright[1] + Rleft[1]);
