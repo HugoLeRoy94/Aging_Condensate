@@ -6,11 +6,13 @@ class Strand
         Strand();
         Strand(std::array<double, 3> R0,
                 map3d<double,double,double,std::array<double,3>>& linkers,
+                std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
                 double ell_coordinate_0,
                 double rho,
                 bool rho_adjust);
         ~Strand();
-        Strand(const Strand& strand,map3d<double,double,double,std::array<double,3>>& linkers);
+        Strand(const Strand& strand,map3d<double,double,double,std::array<double,3>>& linkers,
+                std::map<array<double,3>*,vector<Strand*>> linker_to_strand);
         bool operator<(const Strand &otherstrand) const;
         // main function for the evolution
         void select_link_length(double &length, std::array<double, 3>& r_selected) const;

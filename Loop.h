@@ -7,6 +7,7 @@ public:
   Loop(std::array<double, 3> R0,
        std::array<double, 3> R1,
        map3d<double,double,double,std::array<double,3>>& linkers,
+       std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
        double ell_coordinate_0,
        double ell_coordinate_1,
        double rho,

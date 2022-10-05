@@ -21,18 +21,19 @@ public:
 private:
   void add_bond(std::vector<double>& cum_rates, std::vector<double>::iterator& rates_selec);
   void add_bond_to_dangling();
-  void unbind_loop(std::set<Loop>::iterator& loop_select_left, std::set<Loop>::iterator& loop_select_right);
-  void unbind_extremity(std::set<Loop>::iterator& loop_selec_left);
+  void unbind_loop(std::set<Loop*>::iterator& loop_select_left, std::set<Loop*>::iterator& loop_select_right);
+  void unbind_extremity(std::set<Loop*>::iterator& loop_selec_left);
   void generate_crosslinkers();
   double draw_time(double rate) const;
   void check_loops_integrity() const;
   double get_key(std::array<double,3>* p);
   //std::mt19937_64 generator;
   std::uniform_int_distribution<int> distrib;
-  std::set<Loop> loops;
+  std::set<Loop*> loops;
   double ell,D,rho,kBT;
   bool rho_adjust;
   Dangling dangling;
   map3d<double,double,double,std::array<double,3>> linkers;
+  std::map<array<double,3>*,vector<Strand*>> linker_to_strand;
 };
 #endif

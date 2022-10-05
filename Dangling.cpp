@@ -5,10 +5,11 @@ Dangling::Dangling() : Strand()
 // dsl : distance sur ell : ratio of the two usefull to know how to adjust the concentration of linkers
 Dangling::Dangling(std::array<double, 3> R0,
                   map3d<double,double,double,array<double,3>>& linkers,
+                  std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
                   double ell_0,
                   double ell_in,
                   double rho,
-                  bool rho_adjust) : Strand(R0,linkers,ell_0,rho,rho_adjust)
+                  bool rho_adjust) : Strand(R0,linkers,linker_to_strand,ell_0,rho,rho_adjust)
 {
   IF(true) { cout << "Dangling : creator" << endl; }
   ell = ell_in;

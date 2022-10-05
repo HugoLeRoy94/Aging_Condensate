@@ -4,6 +4,7 @@ using namespace std;
 Strand::Strand(){}
 Strand::Strand(array<double, 3> R0,
             map3d<double,double,double,array<double,3>>& linkers,
+            std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
             double ell_0,
             double rho,
             bool rho_adjust)
@@ -22,7 +23,8 @@ Strand::~Strand()
     //for(auto& p : p_linkers){delete p;} 
 }
 
-Strand::Strand(const Strand& strand,map3d<double,double,double,array<double,3>>& linkers)
+Strand::Strand(const Strand& strand,map3d<double,double,double,array<double,3>>& linkers,
+              std::map<array<double,3>*,vector<Strand*>> linker_to_strand)
 {
     Rleft = strand.Rleft;
     rho0 = strand.rho0;

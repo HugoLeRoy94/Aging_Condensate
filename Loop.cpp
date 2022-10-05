@@ -29,10 +29,11 @@ Loop::Loop(double ell_loop,double rho){
 Loop::Loop(array<double, 3> R0,
            array<double, 3> R1,
            map3d<double,double,double,array<double,3>>& linkers,
+           std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
            double ell_0,
            double ell_1,
            double rho,
-           bool rho_adjust) : Strand(R0,linkers,ell_0,rho,rho_adjust)
+           bool rho_adjust) : Strand(R0,linkers,linker_to_strand,ell_0,rho,rho_adjust)
 {
   IF(true) { cout << "Loop : creator" << endl; }
   Rright = R1;

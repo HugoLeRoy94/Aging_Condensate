@@ -11,6 +11,7 @@ public:
   Dangling();
   Dangling(std::array<double,3> R0,
           map3d<double,double,double,std::array<double,3>>& linkers,
+          std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
           double ell_0,  // ell_0 is the coordinate
           double ell_in, // this is the remaining length
           double rho,
