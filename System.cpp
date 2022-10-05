@@ -16,13 +16,14 @@ System::System(double ell_tot, double rho0, double temperature, int seed, bool a
   rho = rho0;
   rho_adjust = adjust;
   kBT = temperature;
+  array<double, 3> R0 = {0, 0, 0};
+  dangling = Dangling(R0,linkers, 0., ell, rho, rho_adjust); // dummy dangling that helps generate crosslinkers but has none initially
   // ---------------------------------------------------------------------------
   //-----------------------------initialize crosslinkers------------------------
-
+  generate_crosslinkers();
   // ---------------------------------------------------------------------------
   //-----------------------------initialize dangling----------------------------
   IF(true){cout<< "System : create dangling" << endl;}
-  array<double, 3> R0 = {0, 0, 0};
   dangling = Dangling(R0,linkers, 0., ell, rho, rho_adjust);
   IF(true) { cout << "System : created" << endl; }
 }
@@ -163,6 +164,7 @@ void System::add_bond(vector<double> &cum_rates, vector<double>::iterator &rate_
   array<double, 3> r_selected;
   IF(true) { cout << "System : select a length and a r" << endl; }
   loop_selec->select_link_length(length, r_selected);
+  linkers.remove(r_selected[0],r_selected[1],r_selected[2]);
   /*catch(const exception& e){
     cout<<e.what()<<"\n print all the crosslinkers r \n";
     cout<<"loops size :"<<loops.size()<<endl;
@@ -190,7 +192,6 @@ void System::add_bond(vector<double> &cum_rates, vector<double>::iterator &rate_
                  rho_adjust);
   //---------------------------------------------------------------------------------
   //------------------------------Actualize the linkers------------------------------
-  linkers.remove(r_selected[0],r_selected[1],r_selected[2]);
   // delete the loop
   IF(true) { cout << "System : delete the old loop" << endl; }
   // loops.erase(loops.begin()+distance(cum_rates.begin(),rate_selec));
@@ -208,6 +209,7 @@ void System::add_bond_to_dangling()
   array<double, 3> r_selected;
   IF(true) { cout << "System : select a length and r in dangling" << endl; }
   dangling.select_link_length(length, r_selected);
+  linkers.remove(r_selected[0],r_selected[1],r_selected[2]);
   IF(true) { cout << "System : create a new loop and a new dangling" << endl; }
   Loop l = Loop(dangling.get_Rleft(),
                 r_selected,
@@ -222,7 +224,6 @@ void System::add_bond_to_dangling()
                       dangling.get_ell() - length,
                       rho,
                       rho_adjust);
-  linkers.remove(r_selected[0],r_selected[1],r_selected[2]);
   loops.insert(loops.end(),l);
 }
 // -----------------------------------------------------------------------------
@@ -232,6 +233,7 @@ void System::reset_crosslinkers()
 {
   
   linkers.clear();
+  generate_crosslinkers();
   // it basically consist in remaking every loops
   set<Loop> new_loops;
   for (auto &it : loops)
@@ -268,6 +270,17 @@ void System::get_R(double *R, int size) const
     R[n + 2] = it.get_Rright()[2];
     n += 3;
   }
+}
+
+void System::get_ell_coordinates(double* ell_coordinate,int size)const 
+{
+  if(size != loops.size()+1){throw invalid_argument("invalid size in System::get_R");}
+int n(0);
+  for(auto& loop : loops){
+    ell_coordinate[n] = loop.get_ell_coordinate_0();
+    n++;
+  }
+  ell_coordinate[n] = dangling.get_ell_coordinate_0();
 }
 
 void System::get_ell(double *ells, int size) const
@@ -376,4 +389,73 @@ void System::check_loops_integrity() const
     }
   }
   cout<<" r vector i working"<<endl;
+}
+
+void System::get_r_system(double *r, int size)const
+{
+  if (size != get_r_system_size())
+  {
+    throw invalid_argument("invalid size in System::get_r");
+  }
+  int n(0);
+  for(auto& it : linkers.underlying_array())
+  {
+    for(auto& it2 : it.second)
+    {
+      for(auto& it3 : it2.second)
+      {
+        r[3*n] = it3.second[0];
+        r[3*n+1] = it3.second[1];
+        r[3*n+2] = it3.second[2];
+        n++;
+      }
+    }
+  }
+}
+
+int System::get_r_system_size() const
+{
+  return 3*linkers.get_number_of_elements();
+}
+
+void System::print_random_stuff() const{
+  cout<<"dangling linkers : "<<endl;
+  for(auto& it : dangling.get_r()){
+    cout<<(*it)[0]<< " " << (*it)[1] << " "<<(*it)[2]<<endl;
+  } 
+  cout<<"loops linkers : "<<endl;
+  for(auto& it : loops){for(auto& link : it.get_r()){
+    cout<<(*link)[0]<< " " << (*link)[1] << " "<<(*link)[2]<<endl;
+  }}
+}
+
+void System::generate_crosslinkers(){
+  set<double> xminl,xmaxl,yminl,ymaxl,zminl,zmaxl;
+  for(auto& loop : loops){
+    double ximin,ximax,yimin,yimax,zimin,zimax;
+    loop.get_volume_limit(ximin,ximax,yimin,yimax,zimin,zimax);
+    xminl.insert(ximin);xmaxl.insert(ximax);yminl.insert(yimin);ymaxl.insert(yimax);zminl.insert(zimin);zmaxl.insert(zimax);
+  }
+  double dxmin,dxmax,dymin,dymax,dzmin,dzmax;
+  dangling.get_volume_limit(dxmin,dxmax,dymin,dymax,dzmin,dzmax);
+  xminl.insert(dxmin);xmaxl.insert(dxmax);yminl.insert(dymin);ymaxl.insert(dymax);zmaxl.insert(dzmax);zminl.insert(dzmin);
+  double  xmin(*(xminl.begin())),xmax(*(xmaxl.rbegin()));
+  double ymin(*(yminl.begin())),ymax(*(ymaxl.rbegin()));
+  double zmin(*(zminl.begin())),zmax(*(zmaxl.rbegin()));
+  double V((xmax-xmin)*(ymax-ymin)*(zmax-zmin));
+  /*cout<<V<<endl;
+  cout<<xmin<<" "<<xmax<<endl;
+  cout<<ymin<<" "<<ymax<<endl;
+  cout<<zmin<<" "<<zmax<<endl;*/
+  poisson_distribution<int> distribution(rho * V);
+  int N_crosslinker = distribution(generator);
+  for(int n =0; n<N_crosslinker;n++)
+  {
+    uniform_real_distribution<double> distribution(-1, 1); // doubles from -1 to 1
+    double x(distribution(generator) * (xmax-xmin)+xmin);
+    double y(distribution(generator) * (ymax-ymin)+ymin);
+    double z(distribution(generator) * (zmax-zmin)+zmin);
+    array<double,3> link({x,y,z});
+    linkers.add(x,y,z,link);
+  }
 }

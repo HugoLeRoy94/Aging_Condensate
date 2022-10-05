@@ -145,7 +145,7 @@ array<double,3> Strand::random_in_volume(){return {0,0,0};} // dummy function th
 
 void Strand::get_volume_limit(double& key_0_min,double& key_0_max,
                               double& key_1_min,double& key_1_max,
-                              double& key_2_min,double& key_2_max){}
+                              double& key_2_min,double& key_2_max) const{}
 
 void Strand::reset_p_linkers(map3d<double,double,double,array<double,3>>& linkers)
 {
@@ -160,13 +160,12 @@ void Strand::reset_p_linkers(map3d<double,double,double,array<double,3>>& linker
 
 void Strand::generate_binding_sites(map3d<double,double,double,array<double,3>>& linkers)
 {
-  for(auto& p : p_linkers){delete p;}
   p_linkers.clear();
   //---------------------------------------------------------------
   //-----------------draw a number of crosslinkers ----------------
   //---------------------------------------------------------------
-  poisson_distribution<int> distribution(rho0 * V);
-  int N_crosslinker = distribution(generator);
+  //poisson_distribution<int> distribution(rho0 * V);
+  //int N_crosslinker = distribution(generator);
   //---------------------------------------------------------------
   //_________________store the crosslinkers that are already ______
   //_____________________in the vicinity___________________________
@@ -178,6 +177,7 @@ void Strand::generate_binding_sites(map3d<double,double,double,array<double,3>>&
   //---------------------------------------------------------------
   //_____________if there are less crosslinkers than needed :______
   //---------------------------------------------------------------
+  /*
   if(N_crosslinker>p_linkers.size())
   {
     // add new ones
@@ -191,6 +191,7 @@ void Strand::generate_binding_sites(map3d<double,double,double,array<double,3>>&
                             new_linker[1],
                             new_linker[2],
                             new_linker));
+      //cout<<linkers(new_linker[0],new_linker[1],new_linker[2])[0]<<endl;
     }
   }
   else
@@ -204,4 +205,5 @@ void Strand::generate_binding_sites(map3d<double,double,double,array<double,3>>&
       p_linkers.erase(linker_select);
     }
   }
+  */
 }

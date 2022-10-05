@@ -23,10 +23,10 @@ class Strand
         double get_total_binding_rates() const;
         double get_V() const;
         void reset_p_linkers(map3d<double,double,double,std::array<double,3>>& linkers);
-    protected:
         virtual void get_volume_limit(double& key_0_min,double& key_0_max,
                                       double& key_1_min,double& key_1_max,
-                                      double& key_2_min,double& key_2_max);
+                                      double& key_2_min,double& key_2_max) const;
+    protected:
         virtual std::array<double,3> random_in_volume();
         std::array<double, 3> Rleft;               // Position of the right and left anchor
         std::vector<std::array<double, 3>*> p_linkers;     // position of all crosslinkers

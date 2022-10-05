@@ -22,6 +22,9 @@ public:
   std::array<double, 3> get_Rg() const;
 
   double get_S() const;
+  void get_volume_limit(double& key_0_min,double& key_0_max,
+                        double& key_1_min,double& key_1_max,
+                        double& key_2_min,double& key_2_max) const override;
 
 private:
   std::array<double, 3> Rright;
@@ -30,9 +33,6 @@ private:
   double a,b,c,xg,yg,zg;                                       // small and large axis
   // returns a random position in an ellipse
   std::array<double, 3> random_in_volume() override;
-  void get_volume_limit(double& key_0_min,double& key_0_max,
-                        double& key_1_min,double& key_1_max,
-                        double& key_2_min,double& key_2_max) override;
   // number of configuration of a polymer bound in r1 and r2 and length ell
   double Omega(std::array<double, 3> r1, std::array<double, 3> r2, double ell) const;
   // inner function to compute all rates of the loop

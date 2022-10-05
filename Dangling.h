@@ -17,14 +17,14 @@ public:
           bool rho_adjust);
   Dangling(const Dangling& dangling,map3d<double,double,double,std::array<double,3>>& linkers);
   double get_S()const; // entropy of the polymer.
+  void get_volume_limit(double& key_0_min,double& key_0_max,
+                        double& key_1_min,double& key_1_max,
+                        double& key_2_min,double& key_2_max) const override;
 
 private:
   double radius,xg,yg,zg;
   // returns a random position in a sphere
   std::array<double,3> random_in_volume() override;
-  void get_volume_limit(double& key_0_min,double& key_0_max,
-                        double& key_1_min,double& key_1_max,
-                        double& key_2_min,double& key_2_max) override;
   // number of configuration of a polymer bound in r1 and length ell
   double Omega(double ell) const;
   // use random_in_sphere to generate  a number of linkers

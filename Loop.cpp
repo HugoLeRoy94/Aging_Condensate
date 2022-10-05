@@ -162,7 +162,7 @@ array<double, 3> Loop::random_in_volume()
 
 void Loop::get_volume_limit(double& key_0_min,double& key_0_max,
                             double& key_1_min,double& key_1_max,
-                            double& key_2_min,double& key_2_max)
+                            double& key_2_min,double& key_2_max) const
 {
   // gives the slicing limits(must be a square) in which crosslinkers are going to be 
   // constructed and destructed when forming a loop

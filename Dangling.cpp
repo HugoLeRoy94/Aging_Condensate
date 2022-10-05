@@ -84,7 +84,7 @@ array<double, 3> Dangling::random_in_volume()
 
 void Dangling::get_volume_limit(double& key_0_min,double& key_0_max,
                                 double& key_1_min,double& key_1_max,
-                                double& key_2_min,double& key_2_max)
+                                double& key_2_min,double& key_2_max) const
 {
   key_0_min = xg - radius;
   key_0_max = xg + radius;

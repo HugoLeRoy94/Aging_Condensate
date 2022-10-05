@@ -27,7 +27,7 @@ public:
     constexpr T& operator()(T0 x, T1 y, T2 z) { // C++23 required
         return m[x][y][z];
     }
-    constexpr auto& underlying_array() { return m; }
+    auto& underlying_array() const { return m; }
     std::vector<T*> slice(T0 key_0_min, T0 key_0_max, 
                         T1 key_1_min,T1 key_1_max,
                         T2 key_2_min, T2 key_2_max)
@@ -117,6 +117,15 @@ public:
     void remove(T0 key1, T1 key2, T2 key3)
     {
         m[key1][key2].erase(key3);
+    }
+    int get_number_of_elements() const
+    {
+      int size(0);
+      for(auto& it : m){
+        for(auto& it2 : it.second){
+          size+=it2.second.size();
+        }}
+      return size;
     }
 };
 #endif

@@ -1,3 +1,4 @@
+from ctypes.wintypes import POINT
 import numpy as np
 import ellipse as ell # module to plot the system
 import matplotlib.pyplot as plt
@@ -19,18 +20,24 @@ lib.CopySystem.restype = POINTER(c_void_p)
 
 lib.evolve.argtypes=[POINTER(c_void_p),POINTER(c_bool)]
 lib.evolve.restype=c_double
+lib.reset_crosslinkers.argypes = POINTER(c_void_p)
 
 lib.get_F.argtypes = [POINTER(c_void_p)]
 lib.get_F.restype = c_double
 lib.get_r_size.argtypes=[POINTER(c_void_p)]
 lib.get_r_size.restype=c_int
+lib.get_r_system_size.argtypes=[POINTER(c_void_p)]
+lib.get_r_system_size.restype=c_int
 lib.get_r.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
+lib.get_r_system.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
 lib.get_N.argtypes=[POINTER(c_void_p)]
 lib.get_N.restype=c_int
 lib.get_R.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
+lib.get_ell_coordinates.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
 lib.get_ell.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
 
 lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
+lib.print_random_stuff.argtypes=[POINTER(c_void_p)]
 
 class System:
     def __init__(self,ell_tot=100,rho0=0.1,temperature=0.005,seed=19874,rho_adjust=False,old_system=None):
@@ -63,11 +70,23 @@ class System:
         R = np.reshape(R, (-1, 3))
         return R
     
+    def get_ell_coordinates(self):
+        size = self.get_N_loop()+1
+        ell_coordinates = np.zeros(size,dtype=np.double)
+        lib.get_ell_coordinates(self.Address,ell_coordinates.ctypes.data_as(POINTER(c_double)),size)
+        return ell_coordinates
+    
     def get_ell(self):
         size = self.get_N_loop()
         ell = np.zeros(size,dtype=np.double)
         lib.get_ell(self.Address,ell.ctypes.data_as(POINTER(c_double)),size)
         return ell
+
+    def get_r_system(self):    
+        size = lib.get_r_system_size(self.Address)
+        r = np.zeros(size,dtype=np.double)
+        lib.get_r_system(self.Address,r.ctypes.data_as(POINTER(c_double)),size)
+        return np.reshape(r,(-1,3))
     
     def get_r(self):
         size = lib.get_r_size(self.Address)
@@ -77,6 +96,9 @@ class System:
     
     def get_r_size(self):
         return lib.get_r_size(self.Address)
+    
+    def get_r_system_size(self):
+        return lib.get_r_system_size(self.Address)
     
     def Print_loop_positions(self):
         lib.Print_Loop_positions(self.Address)
@@ -121,3 +143,9 @@ class System:
         ax.set_ylabel('y')
         ax.set_zlabel('z')
         return fig,ax
+
+    def print_random_stuff(self):
+        lib.print_random_stuff(self.Address)
+
+    def reset_crosslinkers(self):
+        lib.reset_crosslinkers(self.Address)
