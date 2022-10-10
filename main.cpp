@@ -8,7 +8,11 @@ int main(int argc, char* argv[]){
   double temperature(0.1);
   bool bind(true);
   System* S = new System(ell_tot,rho0,temperature,19830,false);
-  S->evolve(&bind);
+  for(int n = 0;n<100;n++){cout<<n<<endl;S->evolve(&bind);}
+  double R[3 * (S->get_N() + 1)];
+  S->get_R(R,3 * (S->get_N() + 1));
+  int n = 0;
+  for(auto& it :R){cout<<it<<" ";n++;if(n%3==0){cout<<endl;}}cout<<endl;
 //for(auto& it : S->get_r()){for(auto r : it){cout<<r<<" ";}cout<<endl;}
   //cout<<S->evolve(&bind)<<endl;
   //S->print_random_stuff();

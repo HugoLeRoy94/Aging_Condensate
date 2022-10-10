@@ -7,13 +7,13 @@ public:
   Loop(std::array<double, 3> R0,
        std::array<double, 3> R1,
        map3d<double,double,double,std::array<double,3>>& linkers,
-       std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
+       map_r_strand& linker_to_strand,
        double ell_coordinate_0,
        double ell_coordinate_1,
        double rho,
        bool rho_adjust);
   // main function for the evolution
-  Loop(const Loop &loop,map3d<double,double,double,std::array<double,3>>& linkers);
+  Loop(const Loop &loop,map3dR& linkers,map_r_strand& linker_to_strand);
   // Accessors :
   std::array<double, 3> get_Rright() const;
   
@@ -26,7 +26,7 @@ public:
   void get_volume_limit(double& key_0_min,double& key_0_max,
                         double& key_1_min,double& key_1_max,
                         double& key_2_min,double& key_2_max) const override;
-
+  void Check_integrity() const;
 private:
   std::array<double, 3> Rright;
   double unbound_term;

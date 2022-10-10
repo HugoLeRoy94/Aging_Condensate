@@ -1,12 +1,12 @@
 make --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/hcleroy/PostDoc/Simulation/Aging_Condensate'
-g++  -std=c++23 -fPIC -O3  -c Dangling.cpp -o Dangling.o  
-g++  -std=c++23 -fPIC -O3  -c Function.cpp -o Function.o  
-g++  -std=c++23 -fPIC -O3  -c Loop.cpp -o Loop.o  
-g++  -std=c++23 -fPIC -O3  -c Strand.cpp -o Strand.o  
-g++  -std=c++23 -fPIC -O3  -c System.cpp -o System.o  
-g++  -std=c++23 -fPIC -O3  -c System_c.cpp -o System_c.o  
-g++  -std=c++23 -fPIC -O3  -c main.cpp -o main.o  
-g++  -O3  -shared -Wl,-soname,lib.so -o lib.so Dangling.o Function.o Loop.o Strand.o System.o System_c.o main.o  
+g++  -std=c++23 -fPIC -O3  -c Dangling.cpp -o Dangling.o -DDEBUG 
+g++  -std=c++23 -fPIC -O3  -c Function.cpp -o Function.o -DDEBUG 
+g++  -std=c++23 -fPIC -O3  -c Loop.cpp -o Loop.o -DDEBUG 
+g++  -std=c++23 -fPIC -O3  -c Strand.cpp -o Strand.o -DDEBUG 
+g++  -std=c++23 -fPIC -O3  -c System.cpp -o System.o -DDEBUG 
+g++  -std=c++23 -fPIC -O3  -c System_c.cpp -o System_c.o -DDEBUG 
+g++  -std=c++23 -fPIC -O3  -c main.cpp -o main.o -DDEBUG 
+g++  -O3  -shared -Wl,-soname,lib.so -o lib.so Dangling.o Function.o Loop.o Strand.o System.o System_c.o main.o  -DDEBUG
 make: Leaving directory '/home/hcleroy/PostDoc/Simulation/Aging_Condensate'
  

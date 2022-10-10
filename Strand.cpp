@@ -4,7 +4,6 @@ using namespace std;
 Strand::Strand(){}
 Strand::Strand(array<double, 3> R0,
             map3d<double,double,double,array<double,3>>& linkers,
-            std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
             double ell_0,
             double rho,
             bool rho_adjust)
@@ -23,8 +22,7 @@ Strand::~Strand()
     //for(auto& p : p_linkers){delete p;} 
 }
 
-Strand::Strand(const Strand& strand,map3d<double,double,double,array<double,3>>& linkers,
-              std::map<array<double,3>*,vector<Strand*>> linker_to_strand)
+Strand::Strand(const Strand& strand,map3d<double,double,double,array<double,3>>& linkers)
 {
     Rleft = strand.Rleft;
     rho0 = strand.rho0;
@@ -54,16 +52,23 @@ double Strand::get_total_binding_rates() const { return total_rates; }
 
 void Strand::compute_all_rates()
 {
-  IF(true) { cout << "Strand : compute all the unbinding rates" << endl; }
+  IF(true){cout<<"Strand : clean the rates"<<endl;}
+  rates.clear();
+  cum_rates.clear();
+  sum_l_cum_rates.clear();
+  IF(true) { cout << "Strand : compute all the binding rates" << endl; }
   for (auto &rlink : p_linkers)
   {
     vector<double> rates_ell, cum_rates_ell; // rates is just a temporary vector to append the double vector of rates, cum_rates is just the corresponding cumulative array.
-    rates_ell.reserve((int)ell);
+    try{rates_ell.reserve((int)ell);}
+    catch(length_error){cout<<(int)ell<<" "<<this<<" "<<Rleft[0]<<" "<<Rleft[1]<<" "<<Rleft[2]<<endl;throw length_error("ell does not have a correct value");}
     // fill the rates vector in which all rates associated to the binding of any crosslinker
     // at any length ell
     double rate_sum_l(0);                                            // initialize the double that just gives the binding rate transition to whatever length
+    //IF(true){cout<<"Compute rate for each Ell"<<endl;}
     for (int ELL = 1; ELL < (int)ell; ELL++)
     {
+
       double li(ELL);
       // rates_ell.push_back(exp(1.5*log(3*ell/(2*Pi*li*(ell-li)))-log(4*Pi)-1.5*(get_square_diff(Rleft,rlink)/li+get_square_diff(rlink,Rright)/(ell-li))+unbound_term)); // push back the rate
       rates_ell.push_back(compute_rate(li,rlink)); // push back the rate
@@ -78,6 +83,7 @@ void Strand::compute_all_rates()
       }
       rate_sum_l += rates_ell.back();
     }
+    //IF(true){cout<<"compute the comulative array"<<endl;}
     rates.push_back(rates_ell);
     cum_rates.push_back(cum_rates_ell);
     if (sum_l_cum_rates.size() == 0)
@@ -101,8 +107,9 @@ void Strand::compute_all_rates()
   }
 }
 
-void Strand::select_link_length(double &length, array<double, 3>& r_selected) const
+void Strand::select_link_length(double &length, array<double, 3>*& r_selected) const
 {
+  
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////////select a crosslinker////////////////////////////////
@@ -114,6 +121,7 @@ void Strand::select_link_length(double &length, array<double, 3>& r_selected) co
     throw out_of_range("No crosslinker in the vicinity");
   }
   IF(true) { cout << "Strand : start selecting a link and a length" << endl; }
+  //Check_integrity();
   IF(true) { cout << "Strand : select a r" << endl; }
   uniform_real_distribution<double> distribution(0, sum_l_cum_rates.back());
   double pick_rate = distribution(generator);
@@ -123,7 +131,8 @@ void Strand::select_link_length(double &length, array<double, 3>& r_selected) co
   /*cout<<"np.array([";
   for(auto& it : copy_sum_l_cum_rates){cout<<it<<",";}cout<<"])";
   cout<<endl<<rindex<<endl;*/
-  r_selected = *p_linkers[rindex];
+  r_selected = p_linkers[rindex];
+  //cout<<"rindex = "<<rindex<<" p_linkers size = "<<p_linkers.size()<<" "<<p_linkers[rindex]<<" "<<r_selected<<endl;
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////////select a length/////////////////////////////////////
@@ -136,18 +145,29 @@ void Strand::select_link_length(double &length, array<double, 3>& r_selected) co
   vector<double>::iterator rate_ell_selec = lower_bound(copy_cum_rates_rindex.begin(), copy_cum_rates_rindex.end(), pick_rate_ell);
   int ell_index(distance(copy_cum_rates_rindex.begin(), rate_ell_selec) + 1);
   length = (double)ell_index;
+  /*cout<<(*r_selected)[0]<<" "<<(*r_selected)[1]<<" "<<(*r_selected)[2]<<endl;
+  cout<<r_selected<<endl;*/
   /*cout<<"np.array([";
   for(auto& it :copy_cum_rates_rindex){cout<<it<<",";}cout<<"])";
   cout<<endl<<ell_index<<endl;*/
 }
 
-double Strand::compute_rate(double li, array<double,3>* rlinker){return 0;} // dummy function that is overwritten in the child class
+void Strand::remove_from_linker(array<double,3>* r_selected)
+{
+  //Check_integrity();
+  IF(true){cout<<"Strand: remove from linker"<<endl;}
+  // too clever wat to efficiently remove the given linker from p_linker
+  p_linkers.erase(remove(p_linkers.begin(),p_linkers.end(),r_selected),p_linkers.end());
+  // now there is one less linker, so we recompute the rates.
+  compute_all_rates();
+}
+//double Strand::compute_rate(double li, array<double,3>* rlinker){return 0;} // dummy function that is overwritten in the child class
 
-array<double,3> Strand::random_in_volume(){return {0,0,0};} // dummy function that is overwritten in the child class
+//array<double,3> Strand::random_in_volume(){return {0,0,0};} // dummy function that is overwritten in the child class
 
-void Strand::get_volume_limit(double& key_0_min,double& key_0_max,
+/*void Strand::get_volume_limit(double& key_0_min,double& key_0_max,
                               double& key_1_min,double& key_1_max,
-                              double& key_2_min,double& key_2_max) const{}
+                              double& key_2_min,double& key_2_max) const{}*/
 
 void Strand::reset_p_linkers(map3d<double,double,double,array<double,3>>& linkers)
 {
@@ -158,6 +178,11 @@ void Strand::reset_p_linkers(map3d<double,double,double,array<double,3>>& linker
   get_volume_limit(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
   linkers.cut_slice(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
   generate_binding_sites(linkers);
+}
+
+void Strand::Check_integrity() const
+{
+  cout<<ell_coordinate_0<<endl;
 }
 
 void Strand::generate_binding_sites(map3d<double,double,double,array<double,3>>& linkers)
@@ -174,6 +199,7 @@ void Strand::generate_binding_sites(map3d<double,double,double,array<double,3>>&
   //---------------------------------------------------------------
   double key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max;
   get_volume_limit(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
+  //cout<<key_0_min<<" "<<key_0_max<<" "<<key_1_min<<" "<<key_1_max<<" "<<key_2_min<<" "<<key_2_max<<endl;
   std::vector<std::array<double, 3>*> in_vicinity(linkers.slice(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max));
   p_linkers.insert(p_linkers.end(),in_vicinity.begin(),in_vicinity.end());
   //---------------------------------------------------------------

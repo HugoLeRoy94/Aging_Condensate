@@ -25,15 +25,15 @@ private:
   void unbind_extremity(std::set<Loop*>::iterator& loop_selec_left);
   void generate_crosslinkers();
   double draw_time(double rate) const;
-  void check_loops_integrity() const;
+  void check_loops_integrity();
   double get_key(std::array<double,3>* p);
   //std::mt19937_64 generator;
   std::uniform_int_distribution<int> distrib;
-  std::set<Loop*> loops;
+  std::set<Loop*,LessLoop> loops;
   double ell,D,rho,kBT;
   bool rho_adjust;
-  Dangling dangling;
+  Dangling* dangling;
   map3d<double,double,double,std::array<double,3>> linkers;
-  std::map<array<double,3>*,vector<Strand*>> linker_to_strand;
+  map_r_strand linker_to_strand;
 };
 #endif

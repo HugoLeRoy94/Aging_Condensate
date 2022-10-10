@@ -30,8 +30,13 @@
 #include <set>
 
 #include "Function.h"
+typedef map3d<double,double,double,std::array<double,3>> map3dR;
 #include "Strand.h"
+typedef std::map<std::array<double,3>*,std::set<Strand*>> map_r_strand;
 #include "Loop.h"
+struct LessLoop{
+  bool operator()(Loop* l1, Loop* l2) const {return l1->get_ell_coordinate_0()<l2->get_ell_coordinate_0();}
+};
 #include "Dangling.h"
 #include "System.h"
 

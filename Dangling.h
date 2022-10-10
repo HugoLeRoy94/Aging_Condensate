@@ -11,7 +11,7 @@ public:
   Dangling();
   Dangling(std::array<double,3> R0,
           map3d<double,double,double,std::array<double,3>>& linkers,
-          std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
+          map_r_strand& linker_to_strand,
           double ell_0,  // ell_0 is the coordinate
           double ell_in, // this is the remaining length
           double rho,
@@ -21,6 +21,7 @@ public:
   void get_volume_limit(double& key_0_min,double& key_0_max,
                         double& key_1_min,double& key_1_max,
                         double& key_2_min,double& key_2_max) const override;
+
 
 private:
   double radius,xg,yg,zg;

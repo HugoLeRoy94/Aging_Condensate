@@ -2,7 +2,7 @@ CC =g++ #compilateur
 VERSION = -std=c++23#derniere version de c++
 OPT = -O3 #optimisation de ouf
 SharedLib = lib.so
-DEBUG=no
+DEBUG=yes
 NAME=Aight
 MEMCHECK= #-g
 

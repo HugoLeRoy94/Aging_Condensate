@@ -29,11 +29,11 @@ Loop::Loop(double ell_loop,double rho){
 Loop::Loop(array<double, 3> R0,
            array<double, 3> R1,
            map3d<double,double,double,array<double,3>>& linkers,
-           std::map<array<double,3>*,vector<Strand*>> linker_to_strand,
+           map_r_strand& linker_to_strand,
            double ell_0,
            double ell_1,
            double rho,
-           bool rho_adjust) : Strand(R0,linkers,linker_to_strand,ell_0,rho,rho_adjust)
+           bool rho_adjust) : Strand(R0,linkers,ell_0,rho,rho_adjust)
 {
   IF(true) { cout << "Loop : creator" << endl; }
   Rright = R1;
@@ -65,12 +65,14 @@ Loop::Loop(array<double, 3> R0,
   unbound_term = 1.5 * get_square_diff(Rleft, Rright) / ell; // intermediate fastener computation
   IF(true) { cout << "Strand : generate the binding sites" << endl; }
   generate_binding_sites(linkers);
+  // add this to every linker key in linker_to_strand:
+  for(auto& it : p_linkers){linker_to_strand[it].insert(this);}
   // compute the array of binding rate to any crosslinker at any length
   IF(true) { cout << "strand : compute the binding rates for every ell" << endl; }
   compute_all_rates();
 }
 
-Loop::Loop(const Loop &loop,map3d<double,double,double,array<double,3>>& linkers) : Strand(loop, linkers)
+Loop::Loop(const Loop &loop,map3dR& linkers,map_r_strand& linker_to_strand) : Strand(loop, linkers)
 {
   Rright = loop.Rright;
   ell_coordinate_1 = loop.ell_coordinate_1;
@@ -180,4 +182,8 @@ void Loop::get_volume_limit(double& key_0_min,double& key_0_max,
 double Loop::compute_rate(double li, array<double,3>* rlinker)
 {
   return exp(1.5 * log(3 * ell / (2 * Pi * li * (ell - li))) - 1.5 * (get_square_diff(Rleft, *rlinker) / li + get_square_diff(*rlinker, Rright) / (ell - li)) + unbound_term);
+}
+void Loop::Check_integrity() const
+{
+  cout<<ell_coordinate_0<<" "<<ell_coordinate_1<<endl;
 }
