@@ -26,6 +26,7 @@ public:
     constexpr T& operator()(T0 x, T1 y, T2 z) { // C++23 required
         return m[x][y][z];
     }
+  
     void print()const{for(auto& it : m){for(auto& it2 : it.second){for(auto& it3 : it2.second){std::cout<<it3.second[0]<<" "<<it3.second[1]<<" "<<it3.second[2]<<std::endl;}}}}
     auto& underlying_array() const { return m; }
     std::vector<T*> slice(T0 key_0_min, T0 key_0_max, 
