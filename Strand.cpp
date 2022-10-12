@@ -2,8 +2,7 @@
 using namespace std;
 
 Strand::Strand(){}
-Strand::Strand(array<double, 3> R0,
-            map3d<double,double,double,array<double,3>>& linkers,
+Strand::Strand(Linker* R0,
             double ell_0,
             double rho,
             bool rho_adjust)
@@ -19,10 +18,17 @@ Strand::Strand(array<double, 3> R0,
 
 Strand::~Strand()
 {
-    //for(auto& p : p_linkers){delete p;} 
+    for(auto& linker : free_linkers)
+    {
+      linker->remove_strand(this);
+    }
+    for(auto& linker : occ_linkers)
+    {
+      linker->remove_strand(this);
+    }
 }
 
-Strand::Strand(const Strand& strand,map3d<double,double,double,array<double,3>>& linkers)
+Strand::Strand(const Strand& strand)
 {
     Rleft = strand.Rleft;
     rho0 = strand.rho0;
@@ -36,20 +42,6 @@ bool Strand::operator<(const Strand &strand_right) const
     return ell_coordinate_0 < strand_right.ell_coordinate_0;
 }
 
-std::array<double, 3> Strand::get_Rleft() const { return Rleft; }
-
-std::vector<array<double, 3>*> Strand::get_r() const { return p_linkers; }
-
-std::vector<std::vector<double>> Strand::get_rates() const { return rates; }
-
-double Strand::get_ell() const { return ell; }
-
-double Strand::get_ell_coordinate_0() const { return ell_coordinate_0; }
-
-double Strand::get_V() const { return V; }
-
-double Strand::get_total_binding_rates() const { return total_rates; }
-
 void Strand::compute_all_rates()
 {
   IF(true){cout<<"Strand : clean the rates"<<endl;}
@@ -57,11 +49,11 @@ void Strand::compute_all_rates()
   cum_rates.clear();
   sum_l_cum_rates.clear();
   IF(true) { cout << "Strand : compute all the binding rates" << endl; }
-  for (auto &rlink : p_linkers)
+  for (auto &rlink : free_linkers)
   {
     vector<double> rates_ell, cum_rates_ell; // rates is just a temporary vector to append the double vector of rates, cum_rates is just the corresponding cumulative array.
     try{rates_ell.reserve((int)ell);}
-    catch(length_error){cout<<(int)ell<<" "<<this<<" "<<Rleft[0]<<" "<<Rleft[1]<<" "<<Rleft[2]<<endl;throw length_error("ell does not have a correct value");}
+    catch(length_error){cout<<(int)ell<<" "<<this<<" "<<Rleft->r()[0]<<" "<<Rleft->r()[1]<<" "<<Rleft->r()[2]<<endl;throw length_error("ell does not have a correct value");}
     // fill the rates vector in which all rates associated to the binding of any crosslinker
     // at any length ell
     double rate_sum_l(0);                                            // initialize the double that just gives the binding rate transition to whatever length
@@ -107,7 +99,7 @@ void Strand::compute_all_rates()
   }
 }
 
-void Strand::select_link_length(double &length, array<double, 3>*& r_selected) const
+void Strand::select_link_length(double &length, Linker*& r_selected) const
 {
   
   ///////////////////////////////////////////////////////////////////////////////
@@ -116,7 +108,7 @@ void Strand::select_link_length(double &length, array<double, 3>*& r_selected) c
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
   // check if there is a neighboring crosslinker, it shouldn't be possible
-  if (p_linkers.size() == 0)
+  if (free_linkers.size() == 0)
   {
     throw out_of_range("No crosslinker in the vicinity");
   }
@@ -131,7 +123,7 @@ void Strand::select_link_length(double &length, array<double, 3>*& r_selected) c
   /*cout<<"np.array([";
   for(auto& it : copy_sum_l_cum_rates){cout<<it<<",";}cout<<"])";
   cout<<endl<<rindex<<endl;*/
-  r_selected = p_linkers[rindex];
+  r_selected = free_linkers[rindex];
   //cout<<"rindex = "<<rindex<<" p_linkers size = "<<p_linkers.size()<<" "<<p_linkers[rindex]<<" "<<r_selected<<endl;
   ///////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
@@ -152,32 +144,17 @@ void Strand::select_link_length(double &length, array<double, 3>*& r_selected) c
   cout<<endl<<ell_index<<endl;*/
 }
 
-void Strand::remove_from_linker(array<double,3>* r_selected)
+void Strand::set_p_linkers(LoopLinkWrap& loop_link)
 {
-  //Check_integrity();
-  IF(true){cout<<"Strand: remove from linker"<<endl;}
-  // too clever wat to efficiently remove the given linker from p_linker
-  p_linkers.erase(remove(p_linkers.begin(),p_linkers.end(),r_selected),p_linkers.end());
-  // now there is one less linker, so we recompute the rates.
-  compute_all_rates();
-}
-//double Strand::compute_rate(double li, array<double,3>* rlinker){return 0;} // dummy function that is overwritten in the child class
-
-//array<double,3> Strand::random_in_volume(){return {0,0,0};} // dummy function that is overwritten in the child class
-
-/*void Strand::get_volume_limit(double& key_0_min,double& key_0_max,
-                              double& key_1_min,double& key_1_max,
-                              double& key_2_min,double& key_2_max) const{}*/
-
-void Strand::reset_p_linkers(map3d<double,double,double,array<double,3>>& linkers)
-{
-  throw bad_function_call();
-  for(auto& p : p_linkers){delete p;}
-  p_linkers.clear();
+  free_linkers.clear();
   double key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max;
   get_volume_limit(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
-  linkers.cut_slice(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
-  generate_binding_sites(linkers);
+  loop_link.slice_free(key_0_min,key_0_max,
+                      key_1_min,key_1_max,
+                      key_2_min,key_2_max,
+                      free_linkers,occ_linkers);
+  for(auto& linker : free_linkers){linker->add_strand(this);}
+  for(auto& linker : occ_linkers){linker->add_strand(this);}
 }
 
 void Strand::Check_integrity() const
@@ -185,53 +162,19 @@ void Strand::Check_integrity() const
   cout<<ell_coordinate_0<<endl;
 }
 
-void Strand::generate_binding_sites(map3d<double,double,double,array<double,3>>& linkers)
-{
-  p_linkers.clear();
-  //---------------------------------------------------------------
-  //-----------------draw a number of crosslinkers ----------------
-  //---------------------------------------------------------------
-  //poisson_distribution<int> distribution(rho0 * V);
-  //int N_crosslinker = distribution(generator);
-  //---------------------------------------------------------------
-  //_________________store the crosslinkers that are already ______
-  //_____________________in the vicinity___________________________
-  //---------------------------------------------------------------
-  double key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max;
-  get_volume_limit(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
-  //cout<<key_0_min<<" "<<key_0_max<<" "<<key_1_min<<" "<<key_1_max<<" "<<key_2_min<<" "<<key_2_max<<endl;
-  std::vector<std::array<double, 3>*> in_vicinity(linkers.slice(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max));
-  p_linkers.insert(p_linkers.end(),in_vicinity.begin(),in_vicinity.end());
-  //---------------------------------------------------------------
-  //_____________if there are less crosslinkers than needed :______
-  //---------------------------------------------------------------
-  /*
-  if(N_crosslinker>p_linkers.size())
-  {
-    // add new ones
-    for(int n=0;n<N_crosslinker-p_linkers.size();n++)
-    {
-      array<double,3> new_linker(random_in_volume());
-      //p_linkers.push_back(&new_linker);
-      //linkers.add(new_linker[0],new_linker[1],new_linker[2],new_linker);
-      p_linkers.push_back(linkers.add_return_address(
-                            new_linker[0],
-                            new_linker[1],
-                            new_linker[2],
-                            new_linker));
-      //cout<<linkers(new_linker[0],new_linker[1],new_linker[2])[0]<<endl;
-    }
-  }
-  else
-  {
-    // remove some
-    for(int n=0;n<p_linkers.size()-N_crosslinker;n++)
-    {
-      uniform_int_distribution<int> rand_int(0, p_linkers.size()-1);
-      vector<array<double,3>*>::iterator linker_select(p_linkers.begin()+rand_int(generator));
-      linkers.remove((*linker_select)->at(0),(*linker_select)->at(1),(*linker_select)->at(2));
-      p_linkers.erase(linker_select);
-    }
-  }
-  */
-}
+// -----------------------------------------------------------------------------
+// -----------------------------accessor----------------------------------------
+// -----------------------------------------------------------------------------
+Linker* Strand::get_Rleft() const { return Rleft; }
+
+std::vector<Linker*> Strand::get_r() const { return free_linkers; }
+
+std::vector<std::vector<double>> Strand::get_rates() const { return rates; }
+
+double Strand::get_ell() const { return ell; }
+
+double Strand::get_ell_coordinate_0() const { return ell_coordinate_0; }
+
+double Strand::get_V() const { return V; }
+
+double Strand::get_total_binding_rates() const { return total_rates; }

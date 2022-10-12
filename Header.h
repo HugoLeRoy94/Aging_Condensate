@@ -30,13 +30,18 @@
 #include <set>
 
 #include "Function.h"
-typedef map3d<double,double,double,std::array<double,3>> map3dR;
+class LoopLinkWrap;
+class Linker;
 #include "Strand.h"
+typedef map3d<double,double,double,std::array<double,3>> map3dR;
 typedef std::map<std::array<double,3>*,std::set<Strand*>> map_r_strand;
-#include "Loop.h"
 struct LessLoop{
-  bool operator()(Loop* l1, Loop* l2) const {return l1->get_ell_coordinate_0()<l2->get_ell_coordinate_0();}
+  bool operator()(Strand* l1, Strand* l2) const {return l1->get_ell_coordinate_0()<l2->get_ell_coordinate_0();}
 };
+#include "Linker.h"
+#include "LoopLinkWrap.h"
+
+#include "Loop.h"
 #include "Dangling.h"
 #include "System.h"
 

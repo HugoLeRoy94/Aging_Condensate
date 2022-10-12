@@ -174,3 +174,16 @@ strands is the parent class of *Loop* and *Dangling* it basically encapsulate mo
 - random_in_volume : generate coordinates to create crosslinkers in the surrounding of the strand.
 
 *warning* the constructor of strands  does not call *generate_binding_sites* and *compute_all_rates* despite these function being exclusively owned by the *Strand* class. This is because other geometrical parameters need to be set before we call them. Because *Strand* constructor is called before *Loop* or *Dangling* one we have to call these function at the end of the constructor.
+
+### LoopLinkWraps and loop_link
+In the file Container.h we create a class of container that manage the interaction between loop and linkers. The goal of this container is to manage the following dependencies :
+
+- Each strand own a list of crosslinker in its vicinity. When a strand bind somewhere, one of the crosslinker is not free anymore. This implies to change the rate of all the strand that has this crosslinker in its vicinity.
+- LoopLinkWrap thus also own a map that make the link between every linkers and the multiple strands that own this linker.
+- To quickly access the list of linkers in a vicinity of a strand, the LoopLinkWrap contain a map3D which is a custom container that can perform fast slicing. The vicinity is thus defined as cube around an area.
+
+The LoopLinkWrap must thus manage all the interaction between the three containers :
+- set<Strand*> loops : list of the strands.
+- map3d free_linkers : container of the free linkers for quick slicing.
+- map<array<double,3>,Strand*> linker_to_strand : link between a linker and a strand.
+

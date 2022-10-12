@@ -3,13 +3,12 @@ using namespace std;
 Dangling::Dangling() : Strand()
 {}
 // dsl : distance sur ell : ratio of the two usefull to know how to adjust the concentration of linkers
-Dangling::Dangling(std::array<double, 3> R0,
-                  map3d<double,double,double,array<double,3>>& linkers,
-                  map_r_strand& linker_to_strand,
+Dangling::Dangling(Linker* R0,
+                  LoopLinkWrap& loop_link,
                   double ell_0,
                   double ell_in,
                   double rho,
-                  bool rho_adjust) : Strand(R0,linkers,ell_0,rho,rho_adjust)
+                  bool rho_adjust) : Strand(R0,ell_0,rho,rho_adjust)
 {
   IF(true) { cout << "Dangling : creator" << endl; }
   ell = ell_in;
@@ -17,24 +16,22 @@ Dangling::Dangling(std::array<double, 3> R0,
   rho0 = rho;
   //V = 4 / 3 * Pi * pow(2 * ell, 1.5);
   V = pow(radius,3); // linkers are generated into a squared box
-  xg = R0[0];
-  yg = R0[1];
-  zg = R0[2];
+  xg = R0->r().at(0);
+  yg = R0->r().at(1);
+  zg = R0->r().at(2);
   IF(true) { cout << "Dangling : generate the binding sites" << endl; }
-  generate_binding_sites(linkers);
-  // add this to every linker key in linker_to_strand:
-  for(auto& it : p_linkers){linker_to_strand[it].insert(this);}
+  set_p_linkers(loop_link);
   IF(true) { cout << "Dangling : compute the binding rates" << endl; }
   compute_all_rates();
   IF(true) { cout << "Dangling : constructor over." << endl; }
 }
 
-Dangling::Dangling(const Dangling &dangling,map3d<double,double,double,array<double,3>>& linkers) : Strand(dangling, linkers)
+Dangling::Dangling(const Dangling &dangling,LoopLinkWrap& loop_link) : Strand(dangling)
 {
   IF(true) { cout << "Dangling : copy constructor" << endl; }
   V = dangling.V;
   radius = dangling.radius;
-  generate_binding_sites(linkers);
+  set_p_linkers(loop_link);
   compute_all_rates();
 }
 
@@ -42,6 +39,7 @@ Dangling::Dangling(const Dangling &dangling,map3d<double,double,double,array<dou
 //-----------------------------------accessor---------------------------------
 // ---------------------------------------------------------------------------
 double Dangling::get_S() const { return ell * log(4 * Pi); }
+Linker* Dangling::get_Rright() const{throw out_of_range("dangling");}
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
 
@@ -100,7 +98,7 @@ void Dangling::get_volume_limit(double& key_0_min,double& key_0_max,
 }
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
-double Dangling::compute_rate(double li, array<double,3>* rlinker)
+double Dangling::compute_rate(double li, Linker* rlinker)
 {
-  return exp(1.5*log(1.5/(Pi*li))-1.5*get_square_diff(Rleft,*rlinker)/li);
+  return exp(1.5*log(1.5/(Pi*li))-1.5*get_square_diff(Rleft->r(),rlinker->r())/li);
 }
