@@ -7,13 +7,23 @@ int main(int argc, char* argv[]){
   double rho0(0.0001);
   double temperature(0.1);
   bool bind(true);
+  double* R;
   System* S = new System(ell_tot,rho0,temperature,19830,false);
-  for(int n = 0;n<100;n++){cout<<n<<endl;S->evolve(&bind);}
-  double R[3 * (S->get_N() + 1)];
-  S->get_R(R,3 * (S->get_N() + 1));
-  int n = 0;
-  for(auto& it :R){cout<<it<<" ";n++;if(n%3==0){cout<<endl;}}cout<<endl;
-//for(auto& it : S->get_r()){for(auto r : it){cout<<r<<" ";}cout<<endl;}
+  for(int n(0);n<1000;n++){
+  S->evolve(&bind);
+  if(n%100==0){cout<<n<<endl;}
+  //cout<<bind<<endl;
+  }
+  R = new double[3*S->get_N_strand()];
+  S->get_R(R,3*S->get_N_strand());
+  cout<<bind<<endl;
+  for(int n =0;n<3*S->get_N_strand();n++)
+  {
+    cout<<R[n]<<" ";
+    if(n%3==2){cout<<endl;}
+  }
+  
+  //for(int n = 0;n<100;n++){cout<<n<<endl;S->evolve(&bind);}
   //cout<<S->evolve(&bind)<<endl;
   //S->print_random_stuff();
 /*for(int n = 0; n<t_tot;n++){

@@ -35,7 +35,7 @@ using namespace std;
 
 }*/
 
-void LoopLinkWrap::reset_loops(set<Strand*,LessLoop> new_loops)
+void LoopLinkWrap::set_loops(set<Strand*,LessLoop> new_loops)
 {
     strands = new_loops;
 }
@@ -47,6 +47,12 @@ void LoopLinkWrap::Insert_Strand(Strand* new_loop)
 
 void LoopLinkWrap::Remove_Strand(Strand* loop_to_remove)
 {
+    IF(true){cout<<"LoopLinkWrapper : start removing a strand"<<endl;}
+    // tell all the concerned linkers that this strand no longer exists
+    //for(auto& linker : loop_to_remove->get_r())
+    //{linker->remove_strand(loop_to_remove);}
+    //for(auto& linker : loop_to_remove->get_occ_r())
+    //{linker->remove_strand(loop_to_remove);}
     // Remove and delete
     strands.erase(loop_to_remove);
     delete loop_to_remove;
@@ -65,7 +71,7 @@ void LoopLinkWrap::set_linker_free(Linker* linker)
 void LoopLinkWrap::create_new_free_linker(double x,double y, double z)
 {
 
-    Linker* new_link = new Linker({x,y,z});
+    linkers.add(x,y,z,new Linker({x,y,z}));
 
 }
 
@@ -96,8 +102,8 @@ set<Strand*,LessLoop> LoopLinkWrap::get_loops() const {return strands;}
 void LoopLinkWrap::slice_free(double key_0_min, double key_0_max, 
                                         double key_1_min,double key_1_max,
                                         double key_2_min, double key_2_max,
-                                        std::vector<Linker*> free_linkers,
-                                        std::vector<Linker*> occ_linkers) const
+                                        std::vector<Linker*>& free_linkers,
+                                        std::vector<Linker*>& occ_linkers) const
 {
     return linkers.slice_free(key_0_min,key_0_max,
                         key_1_min,key_1_max,
@@ -106,10 +112,25 @@ void LoopLinkWrap::slice_free(double key_0_min, double key_0_max,
                         occ_linkers);
 }
 
-void LoopLinkWrap::actualize_vicinity(set<Strand*> to_remake)
+void LoopLinkWrap::actualize_vicinity(set<Strand*,LessLoop> to_remake)
 {
-
+    IF(true){cout<<"LoopLinkWrap : actualize_vicinity"<<endl;}
+    for(auto& strand : to_remake)
+    {
+        try
+        {
+            strand->get_Rright();
+            Insert_Strand(new Loop(*reinterpret_cast<Loop*>(strand),*this));
+        }
+        catch(out_of_range oor)
+        {
+            Insert_Strand(new Dangling(*reinterpret_cast<Dangling*>(strand),*this));
+        }
+    }
+    for(auto& strand : to_remake){Remove_Strand(strand);}
+    IF(true){cout<<"LoopLinkWrap : finished actualizing vicinity"<<endl;}
 }
+
 map<double,map<double,map<double,Linker*>>> LoopLinkWrap::get_linkers() const
 {
     return linkers.underlying_array();

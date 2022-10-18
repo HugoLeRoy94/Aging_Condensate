@@ -1,5 +1,5 @@
 make --dry-run --keep-going --print-directory
 make: Entering directory '/home/hcleroy/PostDoc/Simulation/Aging_Condensate'
-make: Nothing to be done for 'all'.
+g++  -O3  -shared -Wl,-soname,lib.so -o lib.so Dangling.o Function.o Linker.o Loop.o LoopLinkWrap.o Strand.o System.o System_c.o System_get.o main.o  
 make: Leaving directory '/home/hcleroy/PostDoc/Simulation/Aging_Condensate'
  

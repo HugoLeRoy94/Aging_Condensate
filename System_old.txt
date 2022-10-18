@@ -416,7 +416,7 @@ void System::check_loops_integrity()
   cout<<"verify that every loop in linker_to_strand is also in loops"<<endl;
   for(map_r_strand::iterator it = linker_to_strand.begin();it!=linker_to_strand.end();it++)
   {
-    for(set<Strand*>::iterator it2 = (*it).second.begin(); it2!=(*it).second.end();it2++)
+    for(set<Strand*,LessLoop>::iterator it2 = (*it).second.begin(); it2!=(*it).second.end();it2++)
     {
       bool in(false);
       for(auto& loop : loops)

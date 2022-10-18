@@ -183,7 +183,7 @@ In the file Container.h we create a class of container that manage the interacti
 - To quickly access the list of linkers in a vicinity of a strand, the LoopLinkWrap contain a map3D which is a custom container that can perform fast slicing. The vicinity is thus defined as cube around an area.
 
 The LoopLinkWrap must thus manage all the interaction between the three containers :
-- set<Strand*> loops : list of the strands.
+- set<Strand*,LessLoop> loops : list of the strands.
 - map3d free_linkers : container of the free linkers for quick slicing.
 - map<array<double,3>,Strand*> linker_to_strand : link between a linker and a strand.
 

@@ -22,7 +22,15 @@ Dangling::Dangling(Linker* R0,
   IF(true) { cout << "Dangling : generate the binding sites" << endl; }
   set_p_linkers(loop_link);
   IF(true) { cout << "Dangling : compute the binding rates" << endl; }
+  /*
+  cout<<"free linkers"<<endl;
+  for(auto& link : free_linkers){cout<<link<<endl;}
+  cout<<"bounded linkers :"<<endl;
+  for(auto& link : occ_linkers){cout<<link<<endl;}
+  */
   compute_all_rates();
+  IF(true) { cout << "Dangling : add the dangling to loop_link" << endl; }
+  loop_link.Insert_Strand(this);
   IF(true) { cout << "Dangling : constructor over." << endl; }
 }
 
@@ -42,8 +50,6 @@ double Dangling::get_S() const { return ell * log(4 * Pi); }
 Linker* Dangling::get_Rright() const{throw out_of_range("dangling");}
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
-
-
 double Dangling::Omega(double ell) const
 {
   return pow(4 * Pi, ell);

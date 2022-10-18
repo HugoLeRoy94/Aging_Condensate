@@ -18,6 +18,7 @@ Strand::Strand(Linker* R0,
 
 Strand::~Strand()
 {
+  IF(true){cout<<"Strand destructor ;"<<this<<endl;}
     for(auto& linker : free_linkers)
     {
       linker->remove_strand(this);
@@ -30,6 +31,7 @@ Strand::~Strand()
 
 Strand::Strand(const Strand& strand)
 {
+  IF(true){cout<<"Strand : Copy constructor"<<endl;}
     Rleft = strand.Rleft;
     rho0 = strand.rho0;
     ell_coordinate_0 = strand.ell_coordinate_0;
@@ -44,10 +46,11 @@ bool Strand::operator<(const Strand &strand_right) const
 
 void Strand::compute_all_rates()
 {
+  /*Not needed, because strands never changes !
   IF(true){cout<<"Strand : clean the rates"<<endl;}
   rates.clear();
   cum_rates.clear();
-  sum_l_cum_rates.clear();
+  sum_l_cum_rates.clear();*/
   IF(true) { cout << "Strand : compute all the binding rates" << endl; }
   for (auto &rlink : free_linkers)
   {
@@ -146,13 +149,15 @@ void Strand::select_link_length(double &length, Linker*& r_selected) const
 
 void Strand::set_p_linkers(LoopLinkWrap& loop_link)
 {
-  free_linkers.clear();
+  // get the volume limit
   double key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max;
   get_volume_limit(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
+  // select the linkers in the vicinity
   loop_link.slice_free(key_0_min,key_0_max,
                       key_1_min,key_1_max,
                       key_2_min,key_2_max,
                       free_linkers,occ_linkers);
+  // tell the linkers that this strand is around
   for(auto& linker : free_linkers){linker->add_strand(this);}
   for(auto& linker : occ_linkers){linker->add_strand(this);}
 }
@@ -168,6 +173,8 @@ void Strand::Check_integrity() const
 Linker* Strand::get_Rleft() const { return Rleft; }
 
 std::vector<Linker*> Strand::get_r() const { return free_linkers; }
+
+std::vector<Linker*> Strand::get_occ_r() const { return occ_linkers; }
 
 std::vector<std::vector<double>> Strand::get_rates() const { return rates; }
 

@@ -17,9 +17,11 @@ class Strand
         Linker* get_Rleft() const;
         virtual Linker* get_Rright() const =0;
         std::vector<Linker*> get_r() const;
+        std::vector<Linker*> get_occ_r() const;
         double get_ell() const;
         double get_ell_coordinate_0() const;
         std::vector<std::vector<double>> get_rates() const;
+        
         double get_total_binding_rates() const;
         double get_V() const;
         virtual double get_S() const =0;

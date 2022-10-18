@@ -7,7 +7,7 @@ class LoopLinkWrap
         std::set<Strand*,LessLoop> strands;
     public:
 
-        void reset_loops(std::set<Strand*,LessLoop> new_loops);
+        void set_loops(std::set<Strand*,LessLoop> new_loops);
        
         void Insert_Strand(Strand* new_loop);
         
@@ -38,10 +38,10 @@ class LoopLinkWrap
         void slice_free(double key_0_min, double key_0_max, 
                                         double key_1_min,double key_1_max,
                                         double key_2_min, double key_2_max,
-                                        std::vector<Linker*> free_linkers,
-                                        std::vector<Linker*> occ_linkers) const;
+                                        std::vector<Linker*>& free_linkers,
+                                        std::vector<Linker*>& occ_linkers) const;
         
-        void actualize_vicinity(std::set<Strand*> to_remake);
+        void actualize_vicinity(std::set<Strand*,LessLoop> to_remake);
 
 
 };

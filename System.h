@@ -10,7 +10,7 @@ public:
     // -----------------------------------------------------------------------------
     // -----------------------------accessor----------------------------------------
     // -----------------------------------------------------------------------------
-    int get_N() const; // return N the number of loop.
+    int get_N_strand() const; // return N the number of loop.
     void get_R(double* R, int size) const; // return the position of the anchored points
     void get_ell_coordinates(double* ell_coordinate,int size)const; // get the curvilinear coordinates of the links.
     void get_ell(double* ells, int size) const;// return the list of length of the loops.
@@ -28,7 +28,8 @@ public:
 
 private:
     void add_bond(std::vector<double>& cum_rates, std::vector<double>::iterator& rates_selec);
-    void unbind_loop(std::set<Strand*>::iterator& loop_select_left, std::set<Strand*>::iterator& loop_select_right);
+    void unbind_loop(std::set<Strand*,LessLoop>::iterator& loop_select_left, std::set<Strand*,LessLoop>::iterator& loop_select_right);
+    std::set<Strand*,LessLoop> get_vicinity(Linker* modified_linker,std::set<Strand*,LessLoop> strand_created);
 
     void generate_crosslinkers();
     double draw_time(double rate) const;

@@ -25,9 +25,9 @@ extern "C"
     System* system = reinterpret_cast<System*>(ptr);
     return system->get_F();
   }
-  int get_N(void* ptr){
+  int get_N_strand(void* ptr){
     System* system = reinterpret_cast<System*>(ptr);
-    return system->get_N();
+    return system->get_N_strand();
   }
   double evolve(void* ptr, bool* bind)
   {

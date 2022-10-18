@@ -30,8 +30,8 @@ lib.get_r_system_size.argtypes=[POINTER(c_void_p)]
 lib.get_r_system_size.restype=c_int
 lib.get_r.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
 lib.get_r_system.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
-lib.get_N.argtypes=[POINTER(c_void_p)]
-lib.get_N.restype=c_int
+lib.get_N_strand.argtypes=[POINTER(c_void_p)]
+lib.get_N_strand.restype=c_int
 lib.get_R.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
 lib.get_ell_coordinates.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
 lib.get_ell.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
@@ -58,20 +58,20 @@ class System:
         return bind.value, time
     
     def get_N_loop(self):
-        return lib.get_N(self.Address)
+        return lib.get_N_strand(self.Address)
     
     def get_F(self):
         return lib.get_F(self.Address)
     
     def get_R(self):
-        size = (self.get_N_loop()+1)*3
+        size = (self.get_N_loop())*3
         R = np.zeros(size,dtype=np.double)
         lib.get_R(self.Address,R.ctypes.data_as(POINTER(c_double)),size)
         R = np.reshape(R, (-1, 3))
         return R
     
     def get_ell_coordinates(self):
-        size = self.get_N_loop()+1
+        size = self.get_N_loop()
         ell_coordinates = np.zeros(size,dtype=np.double)
         lib.get_ell_coordinates(self.Address,ell_coordinates.ctypes.data_as(POINTER(c_double)),size)
         return ell_coordinates
@@ -82,13 +82,14 @@ class System:
         lib.get_ell(self.Address,ell.ctypes.data_as(POINTER(c_double)),size)
         return ell
 
-    def get_r_system(self):    
+    def get_r(self):    
         size = lib.get_r_system_size(self.Address)
         r = np.zeros(size,dtype=np.double)
+        # r_system access the linkers that are owned by the system
         lib.get_r_system(self.Address,r.ctypes.data_as(POINTER(c_double)),size)
         return np.reshape(r,(-1,3))
     
-    def get_r(self):
+    def get_r_from_loops(self):
         size = lib.get_r_size(self.Address)
         r = np.zeros(size,dtype=np.double)
         lib.get_r(self.Address,r.ctypes.data_as(POINTER(c_double)),size)

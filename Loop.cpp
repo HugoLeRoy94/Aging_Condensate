@@ -37,12 +37,14 @@ Loop::Loop(Linker* R0,
   yg = 0.5 * (Rright->r().at(1) + Rleft->r().at(1));
   zg = 0.5 * (Rright->r().at(2) + Rleft->r().at(2));
   unbound_term = 1.5 * get_square_diff(Rleft->r(), Rright->r()) / ell; // intermediate fastener computation
-  IF(true) { cout << "Strand : generate the binding sites" << endl; }
+  IF(true) { cout << "Loop : generate the binding sites" << endl; }
   set_p_linkers(loop_link);
   // add this to every linker key in linker_to_strand:
   // compute the array of binding rate to any crosslinker at any length
-  IF(true) { cout << "strand : compute the binding rates for every ell" << endl; }
+  IF(true) { cout << "Loop : compute the binding rates for every ell" << endl; }
   compute_all_rates();
+  IF(true) { cout << "Loop : add the loop to loop_link" << endl; }
+  loop_link.Insert_Strand(this);
 }
 
 Loop::Loop(const Loop &loop,LoopLinkWrap& loop_link) : Strand(loop)
@@ -134,6 +136,7 @@ double Loop::compute_rate(double li, Linker* linker)
 {
   return exp(1.5 * log(3 * ell / (2 * Pi * li * (ell - li))) - 1.5 * (get_square_diff(Rleft->r(), linker->r()) / li + get_square_diff(linker->r(), Rright->r()) / (ell - li)) + unbound_term);
 }
+
 void Loop::Check_integrity() const
 {
   cout<<ell_coordinate_0<<" "<<ell_coordinate_1<<endl;
