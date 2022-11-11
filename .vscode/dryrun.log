@@ -1,5 +1,15 @@
-make --dry-run --keep-going --print-directory
+make --dry-run --always-make --keep-going --print-directory
 make: Entering directory '/home/hcleroy/PostDoc/Simulation/Aging_Condensate'
+g++  -std=c++23 -fPIC -O3  -c Dangling.cpp -o Dangling.o  
+g++  -std=c++23 -fPIC -O3  -c Function.cpp -o Function.o  
+g++  -std=c++23 -fPIC -O3  -c Linker.cpp -o Linker.o  
+g++  -std=c++23 -fPIC -O3  -c Loop.cpp -o Loop.o  
+g++  -std=c++23 -fPIC -O3  -c LoopLinkWrap.cpp -o LoopLinkWrap.o  
+g++  -std=c++23 -fPIC -O3  -c Strand.cpp -o Strand.o  
+g++  -std=c++23 -fPIC -O3  -c System.cpp -o System.o  
+g++  -std=c++23 -fPIC -O3  -c System_c.cpp -o System_c.o  
+g++  -std=c++23 -fPIC -O3  -c System_get.cpp -o System_get.o  
+g++  -std=c++23 -fPIC -O3  -c main.cpp -o main.o  
 g++  -O3  -shared -Wl,-soname,lib.so -o lib.so Dangling.o Function.o Linker.o Loop.o LoopLinkWrap.o Strand.o System.o System_c.o System_get.o main.o  
 make: Leaving directory '/home/hcleroy/PostDoc/Simulation/Aging_Condensate'
  
