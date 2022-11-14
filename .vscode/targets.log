@@ -6,20 +6,16 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Fri Nov 11 14:07:16 2022
+# Make data base, printed on Mon Nov 14 14:50:26 2022
 
 # Variables
 
-# makefile (from 'makefile', line 12)
-OBJ = $(SRC:.cpp=.o) 
 # environment
 GDK_BACKEND = x11
 # environment
 AS = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-as
 # environment
 LC_ALL = C
-# makefile (from 'makefile', line 9)
-SRC = $(wildcard *.cpp)
 # environment
 GNOME_SHELL_SESSION_MODE = ubuntu
 # environment
@@ -65,13 +61,11 @@ VSCODE_HANDLES_UNCAUGHT_ERRORS = true
 # environment
 HOST = x86_64-conda-linux-gnu
 # environment
-PWD = /home/hcleroy/PostDoc/Simulation/Aging_Condensate
+PWD = /home/hcleroy/PostDoc/Simulation/Aging_Condensates
 # automatic
 %D = $(patsubst %/,%,$(dir $%))
 # environment
 XDG_DATA_DIRS = /usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/:/var/lib/snapd/desktop
-# makefile (from 'makefile', line 19)
-FLAG = 
 # automatic
 ^D = $(patsubst %/,%,$(dir $^))
 # automatic
@@ -93,15 +87,13 @@ MAKEFLAGS = pqrR
 # environment
 CONDA_TOOLCHAIN_BUILD = x86_64-conda-linux-gnu
 # makefile
-CURDIR := /home/hcleroy/PostDoc/Simulation/Aging_Condensate
+CURDIR := /home/hcleroy/PostDoc/Simulation/Aging_Condensates
 # environment
 APPLICATION_INSIGHTS_NO_DIAGNOSTIC_CHANNEL = 1
 # environment
 LESSOPEN = | /usr/bin/lesspipe %s
 # automatic
 *D = $(patsubst %/,%,$(dir $*))
-# makefile (from 'makefile', line 2)
-VERSION = -std=c++23
 # environment
 MFLAGS = -pqrR
 # environment
@@ -114,8 +106,8 @@ XDG_CONFIG_DIRS = /etc/xdg/xdg-ubuntu:/etc/xdg
 +D = $(patsubst %/,%,$(dir $+))
 # environment
 XDG_SESSION_DESKTOP = ubuntu
-# makefile (from 'makefile', line 1)
-MAKEFILE_LIST := makefile
+# makefile
+MAKEFILE_LIST := 
 # environment
 CONDA_SHLVL = 1
 # environment
@@ -123,7 +115,7 @@ SNAP_REEXEC =
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 12161
+VSCODE_PID = 363782
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -141,7 +133,7 @@ GCC_AR = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-ar
 # environment
 build_alias = x86_64-conda-linux-gnu
 # environment
-SESSION_MANAGER = local/LBSPC1:@/tmp/.ICE-unix/2108,unix/LBSPC1:/tmp/.ICE-unix/2108
+SESSION_MANAGER = local/LBSPC1:@/tmp/.ICE-unix/2097,unix/LBSPC1:/tmp/.ICE-unix/2097
 # automatic
 *F = $(notdir $*)
 # environment
@@ -203,7 +195,7 @@ LC_TIME = de_CH.UTF-8
 # environment
 SNAP = /snap/code/113
 # environment
-INVOCATION_ID = 27470f965b164c1e8f29c1c1d6687ee5
+INVOCATION_ID = 9dd9e46e9f724f59b7217e558629fc8e
 # environment
 CPP = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-cpp
 # environment
@@ -226,8 +218,6 @@ LC_TELEPHONE = de_CH.UTF-8
 LESSCLOSE = /usr/bin/lesspipe %s %s
 # automatic
 ?F = $(notdir $?)
-# makefile (from 'makefile', line 6)
-NAME = Aight
 # environment
 XDG_CURRENT_DESKTOP = Unity
 # environment
@@ -246,8 +236,6 @@ GNUMAKEFLAGS :=
 CONDA_DEFAULT_ENV = base
 # environment
 LOGNAME = hcleroy
-# makefile (from 'makefile', line 3)
-OPT = -O3 
 # environment
 CPPFLAGS = -DNDEBUG -D_FORTIFY_SOURCE=2 -O2 -isystem /home/hcleroy/anaconda3/include
 # environment
@@ -255,9 +243,9 @@ GIO_LAUNCHED_DESKTOP_FILE = /var/lib/snapd/desktop/applications/code_code.deskto
 # environment
 SNAP_ARCH = amd64
 # makefile
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := 
 # environment
-SYSTEMD_EXEC_PID = 2131
+SYSTEMD_EXEC_PID = 2119
 # environment
 DISPLAY = :1
 # environment
@@ -275,17 +263,15 @@ BUILD = x86_64-conda-linux-gnu
 # environment
 LDFLAGS = -Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,--disable-new-dtags -Wl,--gc-sections -Wl,-rpath,/home/hcleroy/anaconda3/lib -Wl,-rpath-link,/home/hcleroy/anaconda3/lib -L/home/hcleroy/anaconda3/lib
 # environment
-MANAGERPID = 1860
+MANAGERPID = 1849
 # environment
 CONDA_BUILD_SYSROOT = /home/hcleroy/anaconda3/x86_64-conda-linux-gnu/sysroot
 # environment
 LC_MEASUREMENT = de_CH.UTF-8
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 12109
+GIO_LAUNCHED_DESKTOP_FILE_PID = 363739
 # environment
 PYTHONPATH = /home/hcleroy/PostDoc/Simulation/KMCLib/python/src:
-# makefile (from 'makefile', line 7)
-MEMCHECK = 
 # environment
 _ = /snap/code/113/usr/share/code/code
 # environment
@@ -293,14 +279,11 @@ LC_PAPER = de_CH.UTF-8
 # environment
 XDG_RUNTIME_DIR = /run/user/1001
 # environment
- 
 CFLAGS = -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /home/hcleroy/anaconda3/include
 # environment
 GCC = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc
 # environment
 GPG_AGENT_INFO = /run/user/1001/gnupg/S.gpg-agent:0:1
-# makefile (from 'makefile', line 14)
-HEAD = $(filter-out main.h System_c.h System_get.h $(wildcard *.c) , $(SRC:.cpp=.h)) 
 # environment
 GDK_PIXBUF_MODULE_FILE = /home/hcleroy/snap/code/common/.cache/gdk-pixbuf-loaders.cache
 # environment
@@ -308,7 +291,7 @@ _CE_M =
 # environment
 DEBUG_CPPFLAGS = -D_DEBUG -D_FORTIFY_SOURCE=2 -Og -isystem /home/hcleroy/anaconda3/include
 # environment
-JOURNAL_STREAM = 8:46521
+JOURNAL_STREAM = 8:40762
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -316,6 +299,9 @@ VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 HOME = /home/hcleroy
 # environment
+ 
+make: *** No rule to make target 'all'.  Stop.
+
 QT_IM_MODULE = ibus
 # environment
 DEBUG_CXXFLAGS = -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-all -fno-plt -Og -g -Wall -Wextra -fvar-tracking-assignments -ffunction-sections -pipe -isystem /home/hcleroy/anaconda3/include
@@ -355,8 +341,6 @@ SNAP_COMMON = /var/snap/code/common
 CXXFLAGS = -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-strong -fno-plt -O2 -ffunction-sections -pipe -isystem /home/hcleroy/anaconda3/include
 # environment
 LD_GOLD = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-ld.gold
-# makefile (from 'makefile', line 5)
-DEBUG = no
 # environment
 STRIP = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-strip
 # default
@@ -365,12 +349,10 @@ STRIP = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-strip
 CXX = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-c++
 # environment
 ADDR2LINE = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-addr2line
-# makefile (from 'makefile', line 1)
-CC = g++ 
+# environment
+CC = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-cc
 # environment
 OBJCOPY = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-objcopy
-# makefile (from 'makefile', line 4)
-SharedLib = lib.so
 # environment
 SNAP_USER_DATA = /home/hcleroy/snap/code/113
 # environment
@@ -386,7 +368,7 @@ LC_IDENTIFICATION = de_CH.UTF-8
 # environment
 SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd/void
 # variable set hash-table stats:
-# Load=187/1024=18%, Rehash=0, Collisions=19/228=8%
+# Load=177/1024=17%, Rehash=0, Collisions=13/204=6%
 
 # Pattern-specific Variable Values
 
@@ -394,9 +376,9 @@ SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd
 
 # Directories
 
-# . (device 66309, inode 13376578): 51 files, no impossibilities.
+# . (device 66309, inode 13376578): 15 files, no impossibilities.
 
-# 51 files, no impossibilities in 1 directories.
+# 15 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -405,111 +387,11 @@ SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd
 # Files
 
 # Not a target:
-Linker.o:
+Makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:02:58.385742753
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-LoopLinkWrap.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:03:00.625770991
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-System_c.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-19 14:21:36.98087925
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Loop.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:02:59.313754451
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Loop.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 14:25:19.894420609
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Dangling.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 14:25:15.326397003
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Strand.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 14:27:04.343044775
-#  File has been updated.
-#  Successfully updated.
-
-EXEC: Dangling.o Function.o Linker.o Loop.o LoopLinkWrap.o Strand.o System.o System_c.o System_get.o main.o
-#  Phony target (prerequisite of .PHONY).
-#  Implicit rule search has not been done.
 #  File does not exist.
-#  File has not been updated.
-#  recipe to execute (from 'makefile', line 37):
-	$(CC) $(OPT) $(OBJ)  -o $(NAME) $(FLAG) $(MEMCHECK)
-
-# Not a target:
-System_get.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-20 12:38:05.023461274
 #  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-System_c.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:03:03.417806197
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Dangling.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:02:56.641720773
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-System.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-19 12:35:13.937639384
-#  File has been updated.
-#  Successfully updated.
-
-clean:
-#  Phony target (prerequisite of .PHONY).
-#  Implicit rule search has not been done.
-#  File does not exist.
-#  File has not been updated.
-#  recipe to execute (from 'makefile', line 33):
-	rm -rf *.o *~ $(SharedLib)
-
-.cpp.o:
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-#  recipe to execute (from 'makefile', line 28):
-	$(CC) $(VERSION) -fPIC $(OPT) -c $< -o $@ $(FLAG) $(MEMCHECK)
-
-# Not a target:
-Function.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:02:57.477731309
-#  File has been updated.
-#  Successfully updated.
+#  Failed to be updated.
 
 # Not a target:
 .DEFAULT:
@@ -518,151 +400,40 @@ Function.o:
 #  File has not been updated.
 
 # Not a target:
-Dangling.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-19 12:44:29.117725696
-#  File has been updated.
-#  Successfully updated.
-
-all: lib.so
+all:
 #  Command line target.
 #  Implicit rule search has been done.
 #  File does not exist.
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Linker.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-13 15:47:23.957661688
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-main.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-20 12:08:43.862752025
-#  File has been updated.
-#  Successfully updated.
-
-lib.so: Dangling.o Function.o Linker.o Loop.o LoopLinkWrap.o Strand.o System.o System_c.o System_get.o main.o
-#  Implicit rule search has not been done.
-#  Last modified 2022-10-21 15:03:06.233841717
-#  File has been updated.
-#  Successfully updated.
-#  recipe to execute (from 'makefile', line 24):
-	     $(CC) $(OPT) -shared -Wl,-soname,$(SharedLib) -o $(SharedLib) $(OBJ) $(FLAG)
-
-# Not a target:
-Strand.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:03:02.513794797
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Linker.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-13 15:47:23.957661688
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-LoopLinkWrap.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-19 11:23:49.189620544
-#  File has been updated.
-#  Successfully updated.
-
-main.o: Dangling.cpp Function.cpp Linker.cpp Loop.cpp LoopLinkWrap.cpp Strand.cpp System.cpp System_c.cpp System_get.cpp main.cpp Dangling.h Function.h Linker.h Loop.h LoopLinkWrap.h Strand.h System.h
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:03:01.465781582
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-LoopLinkWrap.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-19 11:23:50.237632469
-#  File has been updated.
- 
-#  Successfully updated.
-
-# Not a target:
-Function.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-12 12:46:38.696129208
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Loop.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:02:24.821320438
-#  File has been updated.
-#  Successfully updated.
+#  File has not been updated.
 
 # Not a target:
 makefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:02:52.02966266
+#  File does not exist.
 #  File has been updated.
-#  Successfully updated.
+#  Failed to be updated.
 
 # Not a target:
-System.o:
+GNUmakefile:
 #  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:03:05.061826932
+#  File does not exist.
 #  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-System_get.o:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:03:06.189841162
-#  File has been updated.
-#  Successfully updated.
-
-.PHONY: clean EXEC
-#  Implicit rule search has not been done.
-#  Modification time never checked.
-#  File has not been updated.
-
-# Not a target:
-Strand.h:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 14:25:33.23849145
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-System.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-10-21 15:02:10.041134974
-#  File has been updated.
-#  Successfully updated.
-
-# Not a target:
-Function.cpp:
-#  Implicit rule search has been done.
-#  Last modified 2022-08-29 16:05:24.485898617
-#  File has been updated.
-#  Successfully updated.
+#  Failed to be updated.
 
 # files hash-table stats:
-# Load=36/1024=4%, Rehash=0, Collisions=0/92=0%
+# Load=6/1024=1%, Rehash=0, Collisions=0/15=0%
 # VPATH Search Paths
 
 # No 'vpath' search paths.
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 60 / storage = 705 B / avg = 11 B
-# current buf: size = 8162 B / used = 705 B / count = 60 / avg = 11 B
+# strcache buffers: 1 (0) / strings = 23 / storage = 309 B / avg = 13 B
+# current buf: size = 8162 B / used = 309 B / count = 23 / avg = 13 B
 
-# strcache performance: lookups = 116 / hit rate = 48%
+# strcache performance: lookups = 26 / hit rate = 11%
 # hash-table stats:
-# Load=60/8192=1%, Rehash=0, Collisions=1/116=1%
-# Finished Make data base on Fri Nov 11 14:07:16 2022
+# Load=23/8192=0%, Rehash=0, Collisions=1/26=4%
+# Finished Make data base on Mon Nov 14 14:50:26 2022
 
  

@@ -11,7 +11,7 @@ from ctypes import c_void_p
 from ctypes import c_char_p
 from ctypes import c_bool
 from ctypes import byref
-lib = cdll.LoadLibrary(str(pathlib.Path(__file__).parent.absolute())+'/lib.so')
+lib = cdll.LoadLibrary(str(pathlib.Path(__file__).parent.absolute())+'/../System_cpp/lib.so')
 
 lib.create_system.argtypes=[c_double,c_double,c_double,c_int,c_bool]
 lib.create_system.restype=POINTER(c_void_p)
@@ -20,6 +20,7 @@ lib.CopySystem.restype = POINTER(c_void_p)
 
 lib.evolve.argtypes=[POINTER(c_void_p),POINTER(c_bool)]
 lib.evolve.restype=c_double
+lib.delete_System.argtypes = [POINTER(c_void_p)]
 lib.reset_crosslinkers.argypes = POINTER(c_void_p)
 
 
@@ -52,7 +53,8 @@ class System:
         self.rho0 = old_system.rho0
         self.T = old_system.T
         self.Address = lib.CopySystem(old_system.Address)
-    
+    def __del__(self):
+        lib.delete_System(self.Address) # deleting pointers is important in c++
     def evolve(self):
         bind = c_bool(False)
         time = lib.evolve(self.Address,byref(bind))

@@ -40,7 +40,11 @@ extern "C"
     System* system = reinterpret_cast<System*>(ptr);
     return system->evolve(bind);
   }
-  
+  void delete_System(void* ptr)
+  {
+    System* system = reinterpret_cast<System*>(ptr);
+    delete system;
+  }
   int get_r_size(void* ptr){
     System* system = reinterpret_cast<System*>(ptr);
     return system->get_r_size();
