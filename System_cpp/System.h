@@ -37,7 +37,7 @@ private:
     void check_loops_integrity();
     //std::mt19937_64 generator;
     std::uniform_int_distribution<int> distrib;
-    double ell,D,rho,kBT;
+    double ell,D,rho,binding_energy;
     bool rho_adjust;
 
     LoopLinkWrap loop_link;

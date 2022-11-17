@@ -82,10 +82,10 @@ int System::get_r_size() const
 
 double System::get_F() const
 {
-  double F(-get_N_strand());
+  double F(get_N_strand()*binding_energy);
   for (auto &it : loop_link.get_loops())
   {
-    F += -kBT * it->get_S();
+    F += - it->get_S();
   }
   return F;
 }

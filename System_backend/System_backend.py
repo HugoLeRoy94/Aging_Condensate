@@ -42,16 +42,16 @@ lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
 lib.print_random_stuff.argtypes=[POINTER(c_void_p)]
 
 class System:
-    def __init__(self,ell_tot=100,rho0=0.1,temperature=0.005,seed=19874,rho_adjust=False,old_system=None):
+    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,seed=19874,rho_adjust=False,old_system=None):
         if old_system is None:
-            self.ell_tot,self.rho0,self.T = ell_tot,rho0,temperature
-            self.Address = lib.create_system(self.ell_tot,self.rho0,self.T,seed,rho_adjust)
+            self.ell_tot,self.rho0,self.binding_energy = ell_tot,rho0,BindingEnergy
+            self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,seed,rho_adjust)
         else:
             self.copy(old_system)
     def copy(self,old_system):
         self.ell_tot = old_system.ell_tot
         self.rho0 = old_system.rho0
-        self.T = old_system.T
+        self.binding_energy = old_system.binding_energy
         self.Address = lib.CopySystem(old_system.Address)
     def __del__(self):
         lib.delete_System(self.Address) # deleting pointers is important in c++

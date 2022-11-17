@@ -4,9 +4,9 @@ extern "C"
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
-  void* create_system(double ell_tot,double rho0,double temperature,int seed,bool adjust)
+  void* create_system(double ell_tot,double rho0,double BindingEnergy,int seed,bool adjust)
   {
-    return new System(ell_tot, rho0, temperature,seed,adjust);
+    return new System(ell_tot, rho0, BindingEnergy,seed,adjust);
   }
   
   void* CopySystem(void* ptr)

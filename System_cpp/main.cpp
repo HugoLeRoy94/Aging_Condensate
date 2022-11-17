@@ -1,20 +1,21 @@
 #include "Header.h"
 using namespace std;
 int main(int argc, char* argv[]){
-  int t_tot(2000);
-  double ell_tot(2000.);
+  int t_tot(100);
+  double ell_tot(200.);
   //double distance_anchor(1000.);
-  double rho0(0.0001);
-  double temperature(0.1);
+  double rho0(0.1/ell_tot);
+  double BindingEnergy(-10);
   bool bind(true);
   double* R;
-  System* S = new System(ell_tot,rho0,temperature,19874,false);
-  for(int n(0);n<1000;n++){
-  S->evolve(&bind);}
-  S->reset_crosslinkers();
-  S->reset_crosslinkers();
-  S->reset_crosslinkers();
+  System* S = new System(ell_tot,rho0,BindingEnergy,19874,false);
+  for(int n(0);n<t_tot;n++){
+  S->evolve(&bind);
+  cout<<S->get_F()<<endl;
+  }
   //cout<<bind<<endl;
+
+  /*
   R = new double[3*S->get_N_strand()];
   S->get_R(R,3*S->get_N_strand());
   cout<<bind<<endl;
@@ -32,6 +33,7 @@ int main(int argc, char* argv[]){
     cout<<r[n]<<" ";
     if(n%3==2){cout<<endl;}
   }
+  */
    
   //for(int n = 0;n<100;n++){cout<<n<<endl;S->evolve(&bind);}
   //cout<<S->evolve(&bind)<<endl;

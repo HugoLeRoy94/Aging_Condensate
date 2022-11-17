@@ -6,7 +6,7 @@ make all --print-data-base --no-builtin-variables --no-builtin-rules --question
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Mon Nov 14 14:50:26 2022
+# Make data base, printed on Thu Nov 17 14:46:19 2022
 
 # Variables
 
@@ -115,7 +115,7 @@ SNAP_REEXEC =
 # automatic
 @F = $(notdir $@)
 # environment
-VSCODE_PID = 363782
+VSCODE_PID = 220577
 # environment
 XDG_SESSION_TYPE = x11
 # automatic
@@ -133,7 +133,7 @@ GCC_AR = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-gcc-ar
 # environment
 build_alias = x86_64-conda-linux-gnu
 # environment
-SESSION_MANAGER = local/LBSPC1:@/tmp/.ICE-unix/2097,unix/LBSPC1:/tmp/.ICE-unix/2097
+SESSION_MANAGER = local/LBSPC1:@/tmp/.ICE-unix/2090,unix/LBSPC1:/tmp/.ICE-unix/2090
 # automatic
 *F = $(notdir $*)
 # environment
@@ -195,7 +195,7 @@ LC_TIME = de_CH.UTF-8
 # environment
 SNAP = /snap/code/113
 # environment
-INVOCATION_ID = 9dd9e46e9f724f59b7217e558629fc8e
+INVOCATION_ID = 5dd7719beb73439eb8a1d40515f5f52f
 # environment
 CPP = /home/hcleroy/anaconda3/bin/x86_64-conda-linux-gnu-cpp
 # environment
@@ -245,7 +245,7 @@ SNAP_ARCH = amd64
 # makefile
 .DEFAULT_GOAL := 
 # environment
-SYSTEMD_EXEC_PID = 2119
+SYSTEMD_EXEC_PID = 2113
 # environment
 DISPLAY = :1
 # environment
@@ -263,19 +263,22 @@ BUILD = x86_64-conda-linux-gnu
 # environment
 LDFLAGS = -Wl,-O2 -Wl,--sort-common -Wl,--as-needed -Wl,-z,relro -Wl,-z,now -Wl,--disable-new-dtags -Wl,--gc-sections -Wl,-rpath,/home/hcleroy/anaconda3/lib -Wl,-rpath-link,/home/hcleroy/anaconda3/lib -L/home/hcleroy/anaconda3/lib
 # environment
-MANAGERPID = 1849
+MANAGERPID = 1843
 # environment
 CONDA_BUILD_SYSROOT = /home/hcleroy/anaconda3/x86_64-conda-linux-gnu/sysroot
 # environment
 LC_MEASUREMENT = de_CH.UTF-8
 # environment
-GIO_LAUNCHED_DESKTOP_FILE_PID = 363739
+GIO_LAUNCHED_DESKTOP_FILE_PID = 220538
 # environment
 PYTHONPATH = /home/hcleroy/PostDoc/Simulation/KMCLib/python/src:
 # environment
 _ = /snap/code/113/usr/share/code/code
 # environment
 LC_PAPER = de_CH.UTF-8
+ 
+make: *** No rule to make target 'all'.  Stop.
+
 # environment
 XDG_RUNTIME_DIR = /run/user/1001
 # environment
@@ -291,7 +294,7 @@ _CE_M =
 # environment
 DEBUG_CPPFLAGS = -D_DEBUG -D_FORTIFY_SOURCE=2 -Og -isystem /home/hcleroy/anaconda3/include
 # environment
-JOURNAL_STREAM = 8:40762
+JOURNAL_STREAM = 8:44595
 # environment
 XDG_SESSION_CLASS = user
 # environment
@@ -299,9 +302,6 @@ VSCODE_AMD_ENTRYPOINT = vs/workbench/api/node/extensionHostProcess
 # environment
 HOME = /home/hcleroy
 # environment
- 
-make: *** No rule to make target 'all'.  Stop.
-
 QT_IM_MODULE = ibus
 # environment
 DEBUG_CXXFLAGS = -fvisibility-inlines-hidden -fmessage-length=0 -march=nocona -mtune=haswell -ftree-vectorize -fPIC -fstack-protector-all -fno-plt -Og -g -Wall -Wextra -fvar-tracking-assignments -ffunction-sections -pipe -isystem /home/hcleroy/anaconda3/include
@@ -376,9 +376,9 @@ SNAP_LIBRARY_PATH = /var/lib/snapd/lib/gl:/var/lib/snapd/lib/gl32:/var/lib/snapd
 
 # Directories
 
-# . (device 66309, inode 13376578): 15 files, no impossibilities.
+# . (device 66309, inode 13376578): 16 files, no impossibilities.
 
-# 15 files, no impossibilities in 1 directories.
+# 16 files, no impossibilities in 1 directories.
 
 # Implicit Rules
 
@@ -428,12 +428,12 @@ GNUmakefile:
 
 # No general ('VPATH' variable) search path.
 
-# strcache buffers: 1 (0) / strings = 23 / storage = 309 B / avg = 13 B
-# current buf: size = 8162 B / used = 309 B / count = 23 / avg = 13 B
+# strcache buffers: 1 (0) / strings = 24 / storage = 326 B / avg = 13 B
+# current buf: size = 8162 B / used = 326 B / count = 24 / avg = 13 B
 
-# strcache performance: lookups = 26 / hit rate = 11%
+# strcache performance: lookups = 27 / hit rate = 11%
 # hash-table stats:
-# Load=23/8192=0%, Rehash=0, Collisions=1/26=4%
-# Finished Make data base on Mon Nov 14 14:50:26 2022
+# Load=24/8192=0%, Rehash=0, Collisions=1/27=4%
+# Finished Make data base on Thu Nov 17 14:46:19 2022
 
  

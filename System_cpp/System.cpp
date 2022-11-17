@@ -2,7 +2,7 @@
 
 using namespace std;
 
-System::System(double ell_tot, double rho0, double temperature, int seed, bool adjust) : distrib(1, 10000000)
+System::System(double ell_tot, double rho0, double BindingEnergy, int seed, bool adjust) : distrib(1, 10000000)
 {
     IF(true) { cout << "System : creator" << endl; }
     // srand(seed);
@@ -12,7 +12,7 @@ System::System(double ell_tot, double rho0, double temperature, int seed, bool a
     ell = ell_tot;
     rho = rho0;
     rho_adjust = adjust;
-    kBT = temperature;
+    binding_energy = BindingEnergy;
     Linker* R0 = new Linker({0, 0, 0});
     Strand* dummy_dangling = new Dangling(R0,loop_link, 0., ell, rho, rho_adjust); // dummy dangling that helps generate crosslinkers but has none initially
     loop_link.Insert_Strand(dummy_dangling);
@@ -48,7 +48,9 @@ double System::evolve(bool *bind)
   // compute the cumulative transition rates for each loop
   vector<double> cum_rates(loop_link.get_strand_size() + 1); // the +1 is for removing a bond and +2 for binding the dangling end
   IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
-  cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(-1 / kBT) / (1 - exp(-1 / kBT)); // -1 because we do not remove dangling
+  //cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(-binding_energy) / (1 - exp(-binding_energy)); // -1 because we do not remove dangling
+  cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
+  //cout<<cum_rates[0]<<endl;
   int n(1);
   for (auto &it : loop_link.get_loops())
   {
