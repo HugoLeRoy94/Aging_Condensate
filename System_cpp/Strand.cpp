@@ -80,7 +80,8 @@ void Strand::compute_all_rates()
     catch(length_error){cout<<(int)ell<<" "<<this<<" "<<Rleft->r()[0]<<" "<<Rleft->r()[1]<<" "<<Rleft->r()[2]<<endl;throw length_error("ell does not have a correct value");}
     // fill the rates vector in which all rates associated to the binding of any crosslinker
     // at any length ell
-    double rate_sum_l(0);                                            // initialize the double that just gives the binding rate transition to whatever length
+    double rate_sum_l(0);// initialize the double that just gives the binding rate transition to whatever length
+    // but isn't it equal to cum_rates_ell.back() ?
     //IF(true){cout<<"Compute rate for each Ell"<<endl;}
     for (int ELL = 1; ELL < (int)ell; ELL++)
     {

@@ -266,14 +266,6 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
   double ymin(*(yminl.begin())),ymax(*(ymaxl.rbegin()));
   double zmin(*(zminl.begin())),zmax(*(zmaxl.rbegin()));
   // compute the volume and draw a number of linkers
-  /*for(auto& it : xminl){cout<<it<<" ";}cout<<endl;
-  for(auto& it : xmaxl){cout<<it<<" ";}cout<<endl;
-  for(auto& it : yminl){cout<<it<<" ";}cout<<endl;
-  for(auto& it : ymaxl){cout<<it<<" ";}cout<<endl;
-  for(auto& it : zminl){cout<<it<<" ";}cout<<endl;
-  for(auto& it : zmaxl){cout<<it<<" ";}cout<<endl;
-  cout<<xmin<<" "<<xmax<<" "<<ymin<<" "<<ymax<<" "<<zmin<<" "<<zmax<<endl;
-  IF(true){cout<<"xmax-xmin="<<xmax-xmin<<" ymax-ymin="<<ymax-ymin<<" zmax-zmin="<<zmax-zmin<<endl;}*/
   double V((xmax-xmin)*(ymax-ymin)*(zmax-zmin));
   poisson_distribution<int> distribution(rho * V);
   int N_crosslinker = max(0,distribution(generator)-N_linker_already);
@@ -290,6 +282,16 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
   }
   return res;
 }
+/*
+set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
+  set<array<double,3>> res; // the result is a set of coordinates
+  for(int n =1; n<rho*2*sqrt(ell);n++){
+    double x(n/rho),y(0),z(0);
+    res.insert({n/rho,0,0});
+  }
+  return res;
+}
+*/
 
 void System::reset_loops(LoopLinkWrap& new_loop_link)
 {

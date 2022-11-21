@@ -2,16 +2,18 @@
 using namespace std;
 int main(int argc, char* argv[]){
   int t_tot(100);
-  double ell_tot(200.);
+  double ell_tot(1000.);
   //double distance_anchor(1000.);
-  double rho0(0.1/ell_tot);
+  double rho0(5*pow(10,-4));
   double BindingEnergy(-10);
   bool bind(true);
   double* R;
   System* S = new System(ell_tot,rho0,BindingEnergy,19874,false);
+  cout<<S->get_r_size()<<endl;
   for(int n(0);n<t_tot;n++){
+  if(n%10==0){cout<<n<<endl;}
   S->evolve(&bind);
-  cout<<S->get_F()<<endl;
+  //cout<<S->get_F()<<endl;
   }
   //cout<<bind<<endl;
 

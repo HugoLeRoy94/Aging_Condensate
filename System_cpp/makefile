@@ -4,7 +4,7 @@ OPT = -O3 #optimisation de ouf
 SharedLib = lib.so
 DEBUG=no
 NAME=Aight
-MEMCHECK= #-g
+MEMCHECK= -g
 
 SRC=$(wildcard *.cpp)# $(wildcard *.c)
 
