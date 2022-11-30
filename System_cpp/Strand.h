@@ -38,7 +38,7 @@ class Strand
         std::vector<Linker*> free_linkers,occ_linkers;     // position of all crosslinkers
         std::vector<std::vector<double>> rates, cum_rates; // rate of binding at any linkers for every length
         std::vector<double> sum_l_cum_rates;               // rate of binding at any linkers
-        double ell, V,xg,yg,zg;                                     // size of the polymer and volume it can occupy
+        double ell,V,xg,yg,zg;                             // size of the polymer and volume it can occupy
         double ell_coordinate_0;         // curvilinear coordinate of the linkers along the polymer
         double rho0;                                       // volume fraction (initial of crosslinkers)
         double total_rates;                                // total binding rates to crosslinkers

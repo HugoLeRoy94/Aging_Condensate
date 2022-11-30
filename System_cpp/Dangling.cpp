@@ -38,7 +38,6 @@ Dangling::Dangling(const Dangling &dangling,
                   LoopLinkWrap& loop_link) : Strand(dangling,new_left_linker)
 {
   IF(true) { cout << "Dangling : copy constructor" << endl; }
-  V = dangling.V;
   radius = dangling.radius;
   set_p_linkers(loop_link);
   compute_all_rates();
@@ -46,7 +45,6 @@ Dangling::Dangling(const Dangling &dangling,
 Dangling::Dangling(const Dangling &dangling,LoopLinkWrap& loop_link) : Strand(dangling)
 {
   IF(true) { cout << "Dangling : copy constructor" << endl; }
-  V = dangling.V;
   radius = dangling.radius;
   set_p_linkers(loop_link);
   compute_all_rates();

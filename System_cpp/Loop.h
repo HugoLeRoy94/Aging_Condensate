@@ -34,7 +34,7 @@ private:
   Linker* Rright;
   double unbound_term;
   double ell_coordinate_1;         // curvilinear coordinate of the linkers along the polymer
-  double a,b,c;                                       // small and large axis
+  double a,b;                                       // small and large axis
   // returns a random position in an ellipse
   std::array<double, 3> random_in_volume() override;
   // number of configuration of a polymer bound in r1 and r2 and length ell

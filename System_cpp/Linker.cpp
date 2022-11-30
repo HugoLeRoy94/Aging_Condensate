@@ -20,3 +20,7 @@ set<Strand*,LessLoop> Linker::get_strands() const
 {
     return strands;
 }
+void Linker::print_position(string end)const
+{
+    cout<<R[0]<<" "<<R[1]<<" "<<R[2]<<end;
+}

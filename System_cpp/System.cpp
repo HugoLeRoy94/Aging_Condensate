@@ -46,7 +46,7 @@ double System::evolve(bool *bind)
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
   // compute the cumulative transition rates for each loop
-  vector<double> cum_rates(loop_link.get_strand_size() + 1); // the +1 is for removing a bond and +2 for binding the dangling end
+  vector<double> cum_rates(loop_link.get_strand_size() + 1,0); // the +1 is for removing a bond and +2 for binding the dangling end
   IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
   //cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(-binding_energy) / (1 - exp(-binding_energy)); // -1 because we do not remove dangling
   cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
@@ -55,6 +55,11 @@ double System::evolve(bool *bind)
   for (auto &it : loop_link.get_loops())
   {
     cum_rates[n] = cum_rates[n - 1] + it->get_total_binding_rates();
+    /*if(isnan(it->get_total_binding_rates())){for(auto& linker : it->get_r()){
+      linker->print_position("\n");}
+      cout<<"bounded linkers : "<<endl;
+      it->get_Rleft()->print_position("\n");
+      it->get_Rright()->print_position("\n");}*/
     n++;
   }
   if (cum_rates.back() == 0)
@@ -96,6 +101,7 @@ double System::evolve(bool *bind)
     *bind = false;
   }
   IF(true){check_loops_integrity();}
+  //if(isnan(cum_rates.back())){cout<<cum_rates.back()<<endl;}
   return draw_time(cum_rates.back());
 }
 

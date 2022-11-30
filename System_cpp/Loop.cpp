@@ -15,6 +15,9 @@ Loop::Loop(Linker* R0,
   ell = ell_coordinate_1 - ell_coordinate_0;
     // Compute the volume covered by the polymer
   IF(true) { cout << "Loop : compute the volume covered by the polymer" << endl; }
+  a=0;
+  b=0;
+  V=0;
   if (ell < 2.)
   {
     V = 0.;
@@ -37,6 +40,7 @@ Loop::Loop(Linker* R0,
   yg = 0.5 * (Rright->r().at(1) + Rleft->r().at(1));
   zg = 0.5 * (Rright->r().at(2) + Rleft->r().at(2));
   unbound_term = 1.5 * get_square_diff(Rleft->r(), Rright->r()) / ell; // intermediate fastener computation
+  //if(isnan(unbound_term)){cout<<"rlinkers : "<<endl;Rleft->print_position("\n");Rright->print_position("\n");cout<<ell<<endl;}
   IF(true) { cout << "Loop : generate the binding sites" << endl; }
   set_p_linkers(loop_link);
   // add this to every linker key in linker_to_strand:
@@ -57,6 +61,7 @@ Loop::Loop(const Loop &loop,
   ell_coordinate_1 = loop.ell_coordinate_1;
   a = loop.a;
   b = loop.b;
+  unbound_term = loop.unbound_term;
   set_p_linkers(loop_link);
   compute_all_rates();
 }
@@ -67,6 +72,7 @@ Loop::Loop(const Loop &loop,LoopLinkWrap& loop_link) : Strand(loop)
   ell_coordinate_1 = loop.ell_coordinate_1;
   a = loop.a;
   b = loop.b;
+  unbound_term = loop.unbound_term;
   set_p_linkers(loop_link);
   compute_all_rates();
 }
@@ -150,6 +156,7 @@ void Loop::get_volume_limit(double& key_0_min,double& key_0_max,
 
 double Loop::compute_rate(double li, Linker* linker)
 {
+  //cout<<ell<<" "<<li<<" "<<Pi<<" "<<unbound_term<<"|";
   return exp(1.5 * log(3 * ell / (2 * Pi * li * (ell - li))) - 1.5 * (get_square_diff(Rleft->r(), linker->r()) / li + get_square_diff(linker->r(), Rright->r()) / (ell - li)) + unbound_term);
 }
 

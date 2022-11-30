@@ -5,7 +5,7 @@ int main(int argc, char* argv[]){
   double ell_tot(1000.);
   //double distance_anchor(1000.);
   double rho0(5*pow(10,-4));
-  double BindingEnergy(-10);
+  double BindingEnergy(0);
   bool bind(true);
   double* R;
   System* S = new System(ell_tot,rho0,BindingEnergy,19874,false);
@@ -15,6 +15,7 @@ int main(int argc, char* argv[]){
   S->evolve(&bind);
   //cout<<S->get_F()<<endl;
   }
+  delete S;
   //cout<<bind<<endl;
 
   /*
