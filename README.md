@@ -79,6 +79,10 @@ $$\tau_0 r(\mathbf{R}_0,\ell,\mathbf{r},\ell_i) = \left( \frac{3}{2\pi \ell_i}\r
 Every anchoring point can unbind according to the following rate :
 $$r_{ub} = \frac{e^{-\beta E_b}}{\tau_0}$$
 
+### Slide linkers
+
+Each linker can slide along the polymer by a length a (=1). Thus cum_rates has a length : loop.size()+bounded_linker.size()
+
 ## Linkers management
 
 A linker is a proper object, its main parameter is its position : three double x,y,z. It also owns a reference to every strand that have this linker in its vicinity. Every time a loop is modified a single linker changes its state from bound to unbound. This implies a change in the rate of the processes that concern this linker. To find all the strand that are in the vicinity of the concerned linker, we ask this linker to provide a reference to every strand in its vicinity. Based on the new status of the concerned linker, these strands are thus remade, and the rate of their associated processes are recomputed.
