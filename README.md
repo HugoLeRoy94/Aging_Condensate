@@ -79,14 +79,10 @@ $$\tau_0 r(\mathbf{R}_0,\ell,\mathbf{r},\ell_i) = \left( \frac{3}{2\pi \ell_i}\r
 Every anchoring point can unbind according to the following rate :
 $$r_{ub} = \frac{e^{-\beta E_b}}{\tau_0}$$
 
-<!-- We choose a bond to unbind according to its unbinding rate :  
-$$r_\text{unbind} = 1/\tau_0 e^{-\beta E_\text{bind}+\Delta S}$$
-where $\Delta S$ is the difference of polymer entropy between the bound and unbound state, $E_\text{bind}$ is the binding energy, and $\beta$ the temperature.
+## Linkers management
 
-#### Rebinding
+A linker is a proper object, its main parameter is its position : three double x,y,z. It also owns a reference to every strand that have this linker in its vicinity. Every time a loop is modified a single linker changes its state from bound to unbound. This implies a change in the rate of the processes that concern this linker. To find all the strand that are in the vicinity of the concerned linker, we ask this linker to provide a reference to every strand in its vicinity. Based on the new status of the concerned linker, these strands are thus remade, and the rate of their associated processes are recomputed.
 
-We then re-do a similar re-binding chain of events similarly to the initialization step, but only with the bond affected by the unbinding event. Each rebinding event consist in drawing a random binding point coordinates : $\overrightarrow{r}$ and a random $\ell$ that corresponds of the length of the polymer after binding on the left-hand side.
--->
 # Python and C++ objects
 :warning:Not updated !:warning:
 ## System

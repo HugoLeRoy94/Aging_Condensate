@@ -38,6 +38,36 @@ System::~System()
   loop_link.delete_pointers();
 }
 
+void System::compute_cum_rates(vector<double>& cum_rates) const
+{
+  IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
+  cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
+  int n(1);
+  for (auto &it : loop_link.get_loops())
+  {
+    cum_rates[n] = cum_rates[n - 1] + it->get_total_binding_rates();
+    n++;
+  }
+  if (cum_rates.back() == 0)
+  {
+    IF(true){
+    cout<<"cumulative rate are 0, let's output the number of linkers in the loops :" <<endl; 
+    for(auto& loop : loop_link.get_loops())
+    {cout<<loop->get_r().size()<<endl;}}
+    throw invalid_argument("cum_rates.back()=0 no available process"); 
+  }
+}
+
+int System::pick_random_process(vector<double>& cum_rates) const
+{
+   IF(true) { cout << "System : draw a random process" << endl; }
+  uniform_real_distribution<double> distribution(0, cum_rates.back());
+  double pick_rate = distribution(generator);
+  // becareful : if the rate_selec number is higher than cum_rates.back()  lower_bound returns cum_rates.back()
+  vector<double>::iterator rate_selec = lower_bound(cum_rates.begin(), cum_rates.end(), pick_rate);
+  return distance(cum_rates.begin(),rate_selec);
+}
+
 double System::evolve(bool *bind)
 {
   
@@ -46,70 +76,49 @@ double System::evolve(bool *bind)
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
   // compute the cumulative transition rates for each loop
-  vector<double> cum_rates(loop_link.get_strand_size() + 1,0); // the +1 is for removing a bond and +2 for binding the dangling end
-  IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
-  //cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(-binding_energy) / (1 - exp(-binding_energy)); // -1 because we do not remove dangling
-  cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
-  //cout<<cum_rates[0]<<endl;
-  int n(1);
-  for (auto &it : loop_link.get_loops())
-  {
-    cum_rates[n] = cum_rates[n - 1] + it->get_total_binding_rates();
-    /*if(isnan(it->get_total_binding_rates())){for(auto& linker : it->get_r()){
-      linker->print_position("\n");}
-      cout<<"bounded linkers : "<<endl;
-      it->get_Rleft()->print_position("\n");
-      it->get_Rright()->print_position("\n");}*/
-    n++;
-  }
-  if (cum_rates.back() == 0)
-  {
-    IF(true){
-    cout<<"cumulative rate are 0, let's output the number of linkers in the loops :" <<endl; 
-    for(auto& loop : loop_link.get_loops())
-    {
-      cout<<loop->get_r().size()<<endl;
-    }}
-    // if the system is blocked, we remake a loop with the possibility of having a crosslinker this time
-    reset_crosslinkers();
-    return 0;
-  }
+  vector<double> cum_rates(loop_link.get_strand_size() + 1,0); // the +1 is for removing a bond
+  try{compute_cum_rates(cum_rates);}
+  catch(invalid_argument& e){return 0.;}
+  // -----------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------
   // pick a random process
-  IF(true) { cout << "System : draw a random process" << endl; }
-  uniform_real_distribution<double> distribution(0, cum_rates.back());
-  double pick_rate = distribution(generator);
-  // becareful : if the rate_selec number is higher than cum_rates.back()  lower_bound returns cum_rates.back()
-  vector<double>::iterator rate_selec = lower_bound(cum_rates.begin(), cum_rates.end(), pick_rate);
-  if (rate_selec - cum_rates.begin() != 0)
+  int rate_select(pick_random_process(cum_rates));
+  // Exectute the process
+  set<Strand*,LessLoop> strands_affected;
+  if (rate_select != 0)
   {
+    // ad a linker to a strand
     IF(true) { cout << "System : add a bond" << endl; }
-    add_bond(cum_rates, rate_selec);
+    int loop_selected(rate_select-1); // rate_select = 1 => first bond
+    add_bond(loop_selected, strands_affected);
     *bind = true;
   }
   else
   {
-    // select a random loop:
+    // Unbind a loop
     IF(true) { cout << "System : remove a bond" << endl; }
     // select the index of the left bond to remove
+    // last index is loop.size-1
     // the left bond index maximum is loop.size -2
     uniform_int_distribution<int> distribution(0, loop_link.get_strand_size() - 2);
     int index(distribution(generator));
     set<Strand*,LessLoop>::iterator loop_selec_left(loop_link.get_loop(index));
     set<Strand*,LessLoop>::iterator loop_selec_right(loop_link.get_loop(index+1));
     // unbind
-    unbind_loop(loop_selec_left, loop_selec_right);
+    unbind_loop(loop_selec_left, loop_selec_right,strands_affected);
     *bind = false;
   }
+  // remake the strands whose rates have been modified by the event.
+  loop_link.actualize_vicinity(strands_affected);
   IF(true){check_loops_integrity();}
-  //if(isnan(cum_rates.back())){cout<<cum_rates.back()<<endl;}
   return draw_time(cum_rates.back());
 }
 
-void System::add_bond(vector<double> &cum_rates, vector<double>::iterator &rate_selec)
+void System::add_bond(int loop_selected,set<Strand*,LessLoop>& strands_affected)
 {
-    IF(true) { cout << "System : select the associated loop" << endl; }
+    IF(true) { cout << "System : select the associated loop" << endl;}
     // cum_rates.begin() is unbinding
-    set<Strand*,LessLoop>::iterator loop_selec(loop_link.get_loop(distance(cum_rates.begin()+1, rate_selec))); 
+    set<Strand*,LessLoop>::iterator loop_selec(loop_link.get_loop(loop_selected)); 
     IF(true){cout<<"the affected loop id is : "<<*loop_selec<<endl;}
     // ask the loop for a random linker, and a random length
     double length;
@@ -168,11 +177,16 @@ void System::add_bond(vector<double> &cum_rates, vector<double>::iterator &rate_
     IF(true) { cout << "System : add_bond : delete the old loop" << endl; }
     loop_link.Remove_Strand((*loop_selec));
     // delete the loop
-    IF(true){cout<< "System : add_bond : actualize vicinity"<<endl;}
-    loop_link.actualize_vicinity(get_vicinity(r_selected,{loop_right,loop_left}));
+    IF(true){cout<< "System : add_bond : build the list of strands that are affected"<<endl;}
+    strands_affected = r_selected->get_strands();
+    strands_affected.erase(loop_right);
+    strands_affected.erase(loop_left);
+    //loop_link.actualize_vicinity(get_vicinity(r_selected,{loop_right,loop_left}));
 }
 
-void System::unbind_loop(set<Strand*,LessLoop>::iterator &loop_selec_left, set<Strand*,LessLoop>::iterator &loop_selec_right)
+void System::unbind_loop(set<Strand*,LessLoop>::iterator &loop_selec_left, 
+                         set<Strand*,LessLoop>::iterator &loop_selec_right,
+                         set<Strand*,LessLoop>& strands_affected)
 {
   IF(true) { cout << "System : unbind loop from the loop_left : "<<*loop_selec_left<<" and the right : "<<*loop_selec_right << endl; }
 
@@ -213,9 +227,11 @@ void System::unbind_loop(set<Strand*,LessLoop>::iterator &loop_selec_left, set<S
   Linker* freed((*loop_selec_right)->get_Rleft()); // save the reference of the linker to actualize
   loop_link.Remove_Strand(*loop_selec_right);
   IF(true){cout<<"System : unbind_loop actualize vicinity"<<endl;}
-  set<Strand*,LessLoop> to_remake(get_vicinity(freed,{loop}));
+  strands_affected = freed->get_strands();
+  strands_affected.erase(loop);
+  //set<Strand*,LessLoop> to_remake(get_vicinity(freed,{loop}));
   //for(auto& it : to_remake){cout<<it<<endl;}
-  loop_link.actualize_vicinity(to_remake);
+  //loop_link.actualize_vicinity(to_remake);
 }
 
 double System::draw_time(double rate) const
@@ -343,28 +359,18 @@ void System::reset_loops(LoopLinkWrap& new_loop_link)
   IF(true){cout<<"System : copy finished : delete old strands"<<endl;}
   loop_link.delete_loops();
 }
-
+/*
 set<Strand*,LessLoop> System::get_vicinity(Linker* modified_linker,set<Strand*,LessLoop> strand_created)
 {
   set<Strand*,LessLoop>  modified(modified_linker->get_strands());//.begin(),modified_linker->get_strands().end());
   for(auto& it : modified_linker->get_strands()){modified.insert(it);}
   set<Strand*,LessLoop> not_to_modify(strand_created.begin(),strand_created.end());
   set<Strand*,LessLoop>result0;
-  /*
-  for(auto& strand : modified_linker->get_strands()){cout<<strand<<endl;}
-  for(auto& strand : strand_created){cout<<strand<<endl;}
-  set_difference( modified_linker->get_strands().begin(), 
-                  modified_linker->get_strands().end(), 
-                  strand_created.begin()  , 
-                  strand_created.end(),
-                  inserter(result,result.end()));
-  */
-  //for(auto& strand: modified){cout<<strand<<endl;}
-  //for(auto& strand : not_to_modify){cout<<strand<<endl;}
+
   set_difference(modified.begin(),modified.end(),
                 not_to_modify.begin(),not_to_modify.end(),
                 inserter(result0,result0.end()));
   IF(true){cout<<"strands that are reset : "<<endl;for(auto& strand : result0){cout<<strand<<endl;}}
-  //set<Strand*,LessLoop> result(result0.begin(),result0.end());
   return result0;
 }
+*/

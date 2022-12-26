@@ -26,9 +26,14 @@ public:
     // -----------------------------------------------------------------------------
 
 private:
-    void add_bond(std::vector<double>& cum_rates, std::vector<double>::iterator& rates_selec);
-    void unbind_loop(std::set<Strand*,LessLoop>::iterator& loop_select_left, std::set<Strand*,LessLoop>::iterator& loop_select_right);
-    std::set<Strand*,LessLoop> get_vicinity(Linker* modified_linker,std::set<Strand*,LessLoop> strand_created);
+    void compute_cum_rates(std::vector<double>& cum_rates) const;
+    int pick_random_process(std::vector<double>& cum_rates) const;
+
+    void add_bond(int loop_selected,std::set<Strand*,LessLoop>& strands_affected);
+    void unbind_loop(std::set<Strand*,LessLoop>::iterator& loop_select_left, 
+                     std::set<Strand*,LessLoop>::iterator& loop_select_right,
+                     std::set<Strand*,LessLoop>& strand_affected);
+    //std::set<Strand*,LessLoop> get_vicinity(Linker* modified_linker,std::set<Strand*,LessLoop> strand_created);
 
     std::set<std::array<double,3>>  generate_crosslinkers(int N_linker_already);
     void reset_loops(LoopLinkWrap& new_loop_link);
