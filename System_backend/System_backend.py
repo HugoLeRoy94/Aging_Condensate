@@ -48,17 +48,31 @@ class System:
             self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,seed,rho_adjust)
         else:
             self.copy(old_system)
+    
     def copy(self,old_system):
         self.ell_tot = old_system.ell_tot
         self.rho0 = old_system.rho0
         self.binding_energy = old_system.binding_energy
         self.Address = lib.CopySystem(old_system.Address)
+    
     def __del__(self):
         lib.delete_System(self.Address) # deleting pointers is important in c++
-    def evolve(self):
-        bind = c_bool(False)
-        time = lib.evolve(self.Address,byref(bind))
-        return bind.value, time
+    
+    def evolve(self,steps=1):
+        """
+        Make the system evolves 
+        """
+        if steps>1:
+            binds,time = np.zeros(steps,dtype=bool),np.zeros(steps,dtype=float)
+            for dt in range(steps):
+                bind = c_bool(False)
+                time[dt] = lib.evolve(self.Address,byref(bind))
+                binds[dt] = bind.value
+            return binds,time
+        else:
+            bind = c_bool(False)
+            time = lib.evolve(self.Address,byref(bind))
+            return bind.value, time
     
     def get_N_loop(self):
         return lib.get_N_strand(self.Address)
@@ -153,3 +167,43 @@ class System:
 
     def reset_crosslinkers(self):
         lib.reset_crosslinkers(self.Address)
+    def compute_correlation_function(self,Array,distmax=None,bins=10):
+        """
+        This function return the radial distribution function in any dimension
+
+        Parameter: Array : 
+                SystemSize:
+                bins:
+                distmax:
+        return:
+                P:
+                R:
+        """
+        #--------------------------------------------------
+        # construct a list of all the neighboring distances
+        #--------------------------------------------------
+        distances = list()
+        for r in Array:
+                for R in Array:
+                    if distmax:
+                        if np.linalg.norm(r-R)<distmax:
+                            distances.append(np.linalg.norm(r-R))
+                    else:        
+                        distances.append(np.linalg.norm(r-R))
+        distances = np.array(distances)
+        #--------------------------------------------------
+        # Compute the histogram of distances
+        #--------------------------------------------------
+        H,R  = np.histogram(distances,bins=bins,density=True)
+        R = np.array([(R[i]+R[i+1])/2 for i in range(R.__len__()-1)]) # re-center the values of the bins
+        #--------------------------------------------------
+        try:
+            iter(Array[0])
+        except TypeError:
+            Norm=np.array([self.rho0 for _ in range(R.__len__())])
+        else:
+            if Array[0].__len__()==2:
+                Norm = np.array([2*np.arccos(-1)*r*self.rho0 for r in R])
+            if Array[0].__len__()==3:
+                Norm = np.array([4*np.arccos(-1)*r**2*self.rho0 for r in R])
+        return H/Norm,R
