@@ -18,7 +18,7 @@ void System::get_R(double *R, int size) const
   // for( auto& it : R_to_sort){for(auto& it2 : it){cout<<it2<<" ";}cout<<endl;}
   // fill the R array
   int n(0);
-  for (auto &it : loop_link.get_loops())
+  for (auto &it : loop_link.get_strands())
   {
     R[n] = it->get_Rleft()->r()[0];
     R[n + 1] = it->get_Rleft()->r()[1];
@@ -31,7 +31,7 @@ void System::get_ell_coordinates(double* ell_coordinate,int size)const
 {
   if(size != loop_link.get_strand_size()){throw invalid_argument("invalid size in System::get_R");}
 int n(0);
-  for(auto& loop : loop_link.get_loops()){
+  for(auto& loop : loop_link.get_strands()){
     ell_coordinate[n] = loop->get_ell_coordinate_0();
     n++;
   }
@@ -44,7 +44,7 @@ void System::get_ell(double *ells, int size) const
     throw invalid_argument("invalid size in System::get_ell");
   }
   int n(0);
-  for (auto &it : loop_link.get_loops())
+  for (auto &it : loop_link.get_strands())
   {
     ells[n] = it->get_ell();
     n++;
@@ -58,7 +58,7 @@ void System::get_r(double *r, int size) const
     throw invalid_argument("invalid size in System::get_r");
   }
   int n(0);
-  for (auto &loop : loop_link.get_loops())
+  for (auto &loop : loop_link.get_strands())
   {
     for (auto &link : loop->get_r())
     {
@@ -73,7 +73,7 @@ void System::get_r(double *r, int size) const
 int System::get_r_size() const
 {
   int size(0);
-  for (auto &it : loop_link.get_loops())
+  for (auto &it : loop_link.get_strands())
   {
     size += it->get_r().size();
   }
@@ -83,7 +83,7 @@ int System::get_r_size() const
 double System::get_F() const
 {
   double F(get_N_strand()*binding_energy);
-  for (auto &it : loop_link.get_loops())
+  for (auto &it : loop_link.get_strands())
   {
     F += - it->get_S();
   }
@@ -92,7 +92,7 @@ double System::get_F() const
 
 void System::Print_Loop_positions() const
 {
-  for (auto &loop : loop_link.get_loops())
+  for (auto &loop : loop_link.get_strands())
   {
     //cout << "theta Phi " << loop->get_theta() << " " << loop->get_phi() << endl;
     //cout << "xg,yg,zg " << loop->get_Rg()[0] << " " << loop->get_Rg()[1] << " " << loop->get_Rg()[2] << endl;
@@ -108,7 +108,7 @@ void System::check_loops_integrity()
 {
   IF(true){cout<<"System : Start checking loops integrity"<<endl;}
   // check that the occupied linkers are in strand occupied container
-  for(auto& loop: loop_link.get_loops())
+  for(auto& loop: loop_link.get_strands())
   {
     for(auto& linker : loop->get_r())
     {
@@ -132,7 +132,7 @@ void System::check_loops_integrity()
   }
   // check that the linker of every strand own the given strand
   cout<<"adresses of the loops :"<<endl;
-  for(auto& loop:loop_link.get_loops())
+  for(auto& loop:loop_link.get_strands())
   {
     cout<<loop<<endl;
     for(auto& linker : loop->get_r())
@@ -211,7 +211,7 @@ int System::get_r_system_size() const
 void System::print_random_stuff() const{
   //linkers.print();
   cout<<"loops linkers : "<<endl;
-  for(auto& it : loop_link.get_loops()){for(auto& link : it->get_r()){
+  for(auto& it : loop_link.get_strands()){for(auto& link : it->get_r()){
     cout<<link->r()[0]<< " " << link->r()[1] << " "<<link->r()[2]<<endl;
   }}
 }

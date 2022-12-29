@@ -1,52 +1,70 @@
 #ifndef LoopLinkWrap_h
 #define LoopLinkWrap_h
+//class LoopLinkWrap;
+class Accessor
+{
+    private:
+        static void compute_rates(Strand* strand_to_compute_rates);
+        static Strand* clone(const Strand& strand_to_clone);
+    friend class LoopLinkWrap;
+};
 class LoopLinkWrap
 {
     private:
         map3dLink linkers;
         std::set<Strand*,LessLoop> strands;
-    public:
 
-        void set_loops(std::set<Strand*,LessLoop> new_loops);
-       
-        void Insert_Strand(Strand* new_loop);
+        void set_p_linkers(Strand* newly_created_strand);
+    public:
+        /*
+            (~_|_ _ _  _  _| _
+            _) | | (_|| |(_|_\                                                              
+        */
+        void reset_strands(std::set<Strand*,LessLoop> new_strands);
+
+        Strand* Create_Strand(const Strand& new_strand);
+
+        void Remove_Strand(Strand* strand_to_remove);
         
-        void Remove_Strand(Strand* loop_to_remove);
+        void delete_strands();
+
+        std::set<Strand*,LessLoop>::iterator get_strand(int distance);
+
+        std::set<Strand*,LessLoop> get_strands() const;
+
+        int get_strand_size() const;
         
-        void set_linker_bounded(Linker* linker);
-        
-        void set_linker_free(Linker* linker_to_add);
+       /*
+            | . _ |  _  _ _
+            |_|| ||<(/_| _\                    
+       */
+                
         
         void create_new_free_linker(double x,double y, double z);
         
-        void create_new_occupied_linker(double x, double y, double z);
-        
-        std::set<Strand*,LessLoop>::iterator get_loop(int distance);
-        
-        void delete_pointers();
-        
-        void delete_loops();
-        
+        void create_new_occupied_linker(double x,double y,double z);
+                
         void delete_linkers();
         
-        int get_strand_size() const;
-
         int get_linker_size() const;
-
-        std::set<Strand*,LessLoop> get_loops() const;
         
         std::map<double,std::map<double,std::map<double,Linker*>>>  get_linkers() const;
         
         map3dLink get_linkers3d() const;
+        
+        /*
+        |\/|. _ _ _ || _  _  _  _     _
+        |  ||_\(_(/_||(_|| |(/_(_)|_|_\
+        */
 
         void slice_free(double key_0_min, double key_0_max, 
                                         double key_1_min,double key_1_max,
                                         double key_2_min, double key_2_max,
                                         std::vector<Linker*>& free_linkers,
                                         std::vector<Linker*>& occ_linkers) const;
-        
-        void actualize_vicinity(std::set<Strand*,LessLoop> to_remake);
 
+        void remake_strands(std::set<Strand*,LessLoop> to_remake);
 
+        void delete_pointers();
 };
 #endif

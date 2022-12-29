@@ -1,19 +1,25 @@
 #ifndef Strand_h
 #define Strand_h
+class Accessor;
 class Strand
 {
+    //friend Strand* LoopLinkWrap::Create_Strand(const Strand& new_strand);
+    friend class Accessor;
     public:
         Strand();
         Strand(Linker* R0,
                 double ell_coordinate_0,
-                double rho,
-                bool rho_adjust);
+                double rho);
         virtual ~Strand();
         Strand(const Strand& strand, Linker* new_left_linker);
         Strand(const Strand& strand);
+        void set_linkers(std::vector<Linker*> new_free_linkers,std::vector<Linker*> occupied_linkers);
         bool operator<(const Strand &otherstrand) const;
         // main function for the evolution
+
         void select_link_length(double &length, Linker*& r_selected) const;
+        virtual std::unique_ptr<Strand> unbind_from(Strand* left_strand) const=0;
+        virtual  std::pair<std::unique_ptr<Strand>,std::unique_ptr<Strand>> bind() const = 0;
         // Accessors :
         Linker* get_Rleft() const;
         virtual Linker* get_Rright() const =0;
@@ -23,16 +29,17 @@ class Strand
         double get_ell_coordinate_0() const;
         std::vector<std::vector<double>> get_rates() const;
         
-        double get_total_binding_rates() const;
+        virtual double get_total_binding_rates() const;
         double get_V() const;
         virtual double get_S() const =0;
-        void set_p_linkers(LoopLinkWrap& loop_link);
+        //void set_p_linkers(LoopLinkWrap& loop_link);
         virtual void get_volume_limit(double& key_0_min,double& key_0_max,
                                       double& key_1_min,double& key_1_max,
                                       double& key_2_min,double& key_2_max) const =0;
         virtual void Check_integrity() const;
         void remove_from_linkers();
     protected:
+        virtual Strand* clone() const = 0;
         virtual std::array<double,3> random_in_volume() = 0;
         Linker* Rleft;               // Position of the right and left anchor
         std::vector<Linker*> free_linkers,occ_linkers;     // position of all crosslinkers
@@ -45,8 +52,10 @@ class Strand
 
         void generate_binding_sites(LoopLinkWrap& loop_link);
         // inner function to compute all rates of the loop
-        void compute_all_rates();
+        virtual void compute_all_rates();
         // use random_in_ellipse to generate  a number of linkers
         virtual double compute_rate(double li, Linker* rlinker)=0;
+
+    //friend class LoopLinkWrap;
 };
 #endif

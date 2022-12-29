@@ -1,57 +1,94 @@
 #include "Header.h"
 
 using namespace std;
-void LoopLinkWrap::set_loops(set<Strand*,LessLoop> new_loops)
+
+void Accessor::compute_rates(Strand* strand_to_compute_rates)
 {
-    strands = new_loops;
+    strand_to_compute_rates->compute_all_rates();
+}
+Strand* Accessor::clone(const Strand& strand_to_clone)
+{
+    return strand_to_clone.clone();
 }
 
-void LoopLinkWrap::Insert_Strand(Strand* new_loop)
+
+void LoopLinkWrap::set_p_linkers(Strand* newly_created_strand)
 {
-    strands.insert(new_loop);
+  IF(true){cout<<"set_p_linkers"<<endl;}
+  // get the volume limit
+  double key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max;
+  newly_created_strand->get_volume_limit(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
+  // select the linkers in the vicinity
+  vector<Linker*> free_linkers,occ_linkers;
+  IF(true){cout<<"Strand : slice"<<endl;}
+  slice_free(key_0_min,key_0_max,
+             key_1_min,key_1_max,
+             key_2_min,key_2_max,
+             free_linkers,occ_linkers);
+  // tell the linkers that this strand is around
+  for(auto& linker : free_linkers){linker->add_strand(newly_created_strand);}
+  for(auto& linker : occ_linkers){linker->add_strand(newly_created_strand);}
+  newly_created_strand->set_linkers(free_linkers,occ_linkers);
 }
 
-void LoopLinkWrap::Remove_Strand(Strand* loop_to_remove)
+/*
+    (~_|_ _ _  _  _| _
+    _) | | (_|| |(_|_\                                                              
+*/
+
+void LoopLinkWrap::reset_strands(set<Strand*,LessLoop> new_strands)
+{
+    strands = new_strands;
+}
+
+Strand* LoopLinkWrap::Create_Strand(const Strand& new_strand)
+{
+    //Strand* new_created_strand = new_strand.clone();
+    Strand* new_created_strand = Accessor::clone(new_strand);
+    strands.insert(new_created_strand);
+    set_p_linkers(new_created_strand);
+    //new_created_strand->compute_all_rates();
+    Accessor::compute_rates(new_created_strand);
+    return new_created_strand;
+}
+
+void LoopLinkWrap::Remove_Strand(Strand* strand_to_remove)
 {
     IF(true){cout<<"LoopLinkWrapper : start removing a strand"<<endl;}
-    strands.erase(loop_to_remove);
-    loop_to_remove->remove_from_linkers();
-    delete loop_to_remove;
+    strands.erase(strand_to_remove);
+    strand_to_remove->remove_from_linkers();
+    delete strand_to_remove;
 }
 
-void LoopLinkWrap::set_linker_bounded(Linker* linker)
-{
-    linker->set_bounded();
-}
+set<Strand*,LessLoop>::iterator LoopLinkWrap::get_strand(int distance)
+{return next(strands.begin(),distance);}
 
-void LoopLinkWrap::set_linker_free(Linker* linker)
-{
-    linker->set_free();
-}
+void LoopLinkWrap::delete_strands()
+{for(auto& strand : strands){delete strand;}strands.clear();}
+
+int LoopLinkWrap::get_strand_size() const {return strands.size();}
+
+set<Strand*,LessLoop> LoopLinkWrap::get_strands() const {return strands;}
+
+
+/*
+    | . _ |  _  _ _
+    |_|| ||<(/_| _\                    
+*/
+
+
 
 void LoopLinkWrap::create_new_free_linker(double x,double y, double z)
 {
     linkers.add(x,y,z,new Linker({x,y,z}));
 }
+
 void LoopLinkWrap::create_new_occupied_linker(double x, double y, double z)
 {
     Linker* link = new Linker({x,y,z});
     link->set_bounded();
     linkers.add(x,y,z,link);
 }
-
-set<Strand*,LessLoop>::iterator LoopLinkWrap::get_loop(int distance)
-{return next(strands.begin(),distance);}
-
-void LoopLinkWrap::delete_pointers()
-{
-    IF(true){cout<<"delete_pointers"<<endl;}
-    delete_loops();
-    delete_linkers();
-}
-
-void LoopLinkWrap::delete_loops()
-{for(auto& strand : strands){delete strand;}strands.clear();}
 
 void LoopLinkWrap::delete_linkers()
 {
@@ -63,9 +100,27 @@ void LoopLinkWrap::delete_linkers()
     linkers = newlinkers;
 }
 
-int LoopLinkWrap::get_strand_size() const {return strands.size();}
+map<double,map<double,map<double,Linker*>>> LoopLinkWrap::get_linkers() const
+{
+    return linkers.underlying_array();
+}
 
-set<Strand*,LessLoop> LoopLinkWrap::get_loops() const {return strands;}
+map3dLink LoopLinkWrap::get_linkers3d() const{ return linkers;}
+
+int LoopLinkWrap::get_linker_size() const{
+    return linkers.get_number_of_elements();
+}
+
+/*
+    |\/|. _ _ _ || _  _  _  _     _
+    |  ||_\(_(/_||(_|| |(/_(_)|_|_\
+*/
+void LoopLinkWrap::delete_pointers()
+{
+    IF(true){cout<<"delete_pointers"<<endl;}
+    delete_strands();
+    delete_linkers();
+}
 
 void LoopLinkWrap::slice_free(double key_0_min, double key_0_max, 
                                         double key_1_min,double key_1_max,
@@ -80,30 +135,15 @@ void LoopLinkWrap::slice_free(double key_0_min, double key_0_max,
                         occ_linkers);
 }
 
-void LoopLinkWrap::actualize_vicinity(set<Strand*,LessLoop> to_remake)
+void LoopLinkWrap::remake_strands(set<Strand*,LessLoop> to_remake)
 {
+    // this function just remake the list of strands given.
+    // Recreating has only one function : recomputing the rates.
     IF(true){cout<<"LoopLinkWrap : actualize_vicinity"<<endl;}
     for(auto& strand : to_remake)
     {
-        try
-        {
-            strand->get_Rright();
-            Insert_Strand(new Loop(*reinterpret_cast<Loop*>(strand),*this));
-        }
-        catch(out_of_range oor)
-        {
-            Insert_Strand(new Dangling(*reinterpret_cast<Dangling*>(strand),*this));
-        }
+        Create_Strand(*strand);
     }
     for(auto& strand : to_remake){Remove_Strand(strand);}
     IF(true){cout<<"LoopLinkWrap : finished actualizing vicinity"<<endl;}
-}
-
-map<double,map<double,map<double,Linker*>>> LoopLinkWrap::get_linkers() const
-{
-    return linkers.underlying_array();
-}
-map3dLink LoopLinkWrap::get_linkers3d() const{ return linkers;}
-int LoopLinkWrap::get_linker_size() const{
-    return linkers.get_number_of_elements();
 }

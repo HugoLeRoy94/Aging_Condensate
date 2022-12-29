@@ -3,11 +3,9 @@ using namespace std;
 
 Loop::Loop(Linker* R0,
            Linker* R1,
-           LoopLinkWrap& loop_link,
            double ell_0,
            double ell_1,
-           double rho,
-           bool rho_adjust) : Strand(R0,ell_0,rho,rho_adjust)
+           double rho) : Strand(R0,ell_0,rho)
 {
   IF(true) { cout << "Loop : creator" << endl; }
   Rright = R1;
@@ -40,21 +38,12 @@ Loop::Loop(Linker* R0,
   yg = 0.5 * (Rright->r().at(1) + Rleft->r().at(1));
   zg = 0.5 * (Rright->r().at(2) + Rleft->r().at(2));
   unbound_term = 1.5 * get_square_diff(Rleft->r(), Rright->r()) / ell; // intermediate fastener computation
-  //if(isnan(unbound_term)){cout<<"rlinkers : "<<endl;Rleft->print_position("\n");Rright->print_position("\n");cout<<ell<<endl;}
-  IF(true) { cout << "Loop : generate the binding sites" << endl; }
-  set_p_linkers(loop_link);
-  // add this to every linker key in linker_to_strand:
-  // compute the array of binding rate to any crosslinker at any length
-  IF(true) { cout << "Loop : compute the binding rates for every ell" << endl; }
-  compute_all_rates();
-  IF(true) { cout << "Loop : add the loop to loop_link" << endl; }
-  loop_link.Insert_Strand(this);
+  IF(true){cout<<"Loop::Constructor : OVER"<<endl;}
 }
 
 Loop::Loop(const Loop &loop,
             Linker* new_left_linker,
-            Linker* new_right_linker,
-            LoopLinkWrap& loop_link) : Strand(loop,new_left_linker)
+            Linker* new_right_linker) : Strand(loop,new_left_linker)
 {
   IF(true){cout<<"Loop constructor with new link"<<endl;}
   Rright = new_right_linker;
@@ -62,20 +51,20 @@ Loop::Loop(const Loop &loop,
   a = loop.a;
   b = loop.b;
   unbound_term = loop.unbound_term;
-  set_p_linkers(loop_link);
-  compute_all_rates();
+  //compute_all_rates();
 }
 
-Loop::Loop(const Loop &loop,LoopLinkWrap& loop_link) : Strand(loop)
+Loop::Loop(const Loop &loop) : Strand(loop)
 {
   Rright = loop.Rright;
   ell_coordinate_1 = loop.ell_coordinate_1;
   a = loop.a;
   b = loop.b;
   unbound_term = loop.unbound_term;
-  set_p_linkers(loop_link);
-  compute_all_rates();
+  //compute_all_rates();
 }
+
+Strand* Loop::clone() const{return new Loop(*this);}
 
 double Loop::Omega(Linker* r1, Linker* r2, double ell) const
 {
@@ -85,42 +74,6 @@ double Loop::Omega(Linker* r1, Linker* r2, double ell) const
 
 array<double, 3> Loop::random_in_volume()
 {
-  
-  //  draw three random number that  must lie within an ellipse of
-  //  revolution of big axe a and two small axes b.
-  
-  // draw a x,y,z x in [-a,a] and y,z in [-b,b]
-  /*
-  bool OUT(true);
-  double x(0), y(0), z(0);
-  int counter(0);
-  while (OUT)
-  {
-    counter++;
-    if (counter > 100000)
-    {
-      throw runtime_error("cannot find a place to put a crosslinker");
-    }
-    uniform_real_distribution<double> distribution(-1, 1); // doubles from -1 to 1
-
-    x = distribution(generator) * a;
-    y = distribution(generator) * b;
-    z = distribution(generator) * b;
-
-    if (pow(x / a, 2) + pow(y / b, 2) + pow(z / c, 2) <= 1)
-    {
-      OUT = false;
-    }
-  }
-  double theta(atan2(yg, xg)), phi(atan2(xg, zg) - Pi / 2.);
-  // cout<<"xg yg zg ="<<xg<<" "<<yg<<" "<<zg<<endl;
-  // cout<< "theta phi ="<<theta<<" "<<phi<<endl;
-  // cout<<x<<" "<<y<<" "<<z<<endl;
-  // cout<<x<<" "<<y<<" "<<z<<endl;
-  array<double, 3> res{cos(phi) * (cos(theta) * x - sin(theta) * y + sin(phi) * z),
-                       sin(theta) * x + cos(theta) * y,
-                       -sin(phi) * (cos(theta) * x - sin(theta) * y) + cos(phi) * z};
-  */
  double theta(atan2(yg, xg)), phi(atan2(xg, zg) - Pi / 2.);
   uniform_real_distribution<double> distribution(-1, 1); // doubles from -1 to 1
   double x(distribution(generator) * a);
@@ -154,6 +107,41 @@ void Loop::get_volume_limit(double& key_0_min,double& key_0_max,
   key_2_max = zg + 2*sqrt(ell)+abs(Rleft->r().at(2)-Rright->r().at(2));
 }
 
+void Loop::compute_all_rates()
+{
+  Strand::compute_all_rates();
+  // Now compute the sliding rates
+}
+
+double Loop::get_total_binding_rates() const
+{
+  return Strand::get_total_binding_rates();
+}                            
+
+pair<unique_ptr<Strand>,unique_ptr<Strand>> Loop::bind() const
+{
+  // return a reference to a the two loop that must be created
+  // when binding the current loop to a linker randomly choosen
+  // in the vicinity of the current loop. The choice is made
+  // in accordance with the binding rate of each specific linker
+  Linker* linker_selected;
+  double length;
+  select_link_length(length,linker_selected);
+  unique_ptr<Loop> left_loop =make_unique<Loop>(Rleft,linker_selected,ell_coordinate_0,ell_coordinate_0+length,rho0);
+  unique_ptr<Loop> right_loop = make_unique<Loop>(linker_selected,Rright,ell_coordinate_0+length,ell_coordinate_1,rho0);
+  return  {move(left_loop),move(right_loop)};
+}
+unique_ptr<Strand> Loop::unbind_from(Strand* left_strand) const
+{
+  // return a reference to the loop that must be created when
+  // unbinding a linker between the current loop (at its right)
+  // and "left_loop" that is at its left.
+  return make_unique<Loop>(left_strand->get_Rleft(),
+                          Rright,
+                          left_strand->get_ell_coordinate_0(),
+                          ell_coordinate_1,
+                          rho0);
+}
 double Loop::compute_rate(double li, Linker* linker)
 {
   //cout<<ell<<" "<<li<<" "<<Pi<<" "<<unbound_term<<"|";

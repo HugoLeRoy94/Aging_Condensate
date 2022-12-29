@@ -81,7 +81,7 @@ $$r_{ub} = \frac{e^{-\beta E_b}}{\tau_0}$$
 
 ### Slide linkers
 
-Each linker can slide along the polymer by a length a (=1). Thus cum_rates has a length : loop.size()+bounded_linker.size()
+Each linker can slide along the polymer by a length a (=1). Thus cum_rates has a length : loop.size()+(bounded_linker.size()-1) (1 is the (0,0,0) linker). The sliding rate is computed by each loop, that propose to slide its right linker by a step $\pm 1$. 
 
 ## Linkers management
 

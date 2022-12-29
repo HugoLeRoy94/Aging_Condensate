@@ -14,8 +14,8 @@ System::System(double ell_tot, double rho0, double BindingEnergy, int seed, bool
     rho_adjust = adjust;
     binding_energy = BindingEnergy;
     Linker* R0 = new Linker({0, 0, 0});
-    Strand* dummy_dangling = new Dangling(R0,loop_link, 0., ell, rho, rho_adjust); // dummy dangling that helps generate crosslinkers but has none initially
-    loop_link.Insert_Strand(dummy_dangling);
+    Dangling dummy_dangling(R0, 0., ell, rho); // dummy dangling that helps generate crosslinkers but has none initially
+    Strand* dummy_strand(loop_link.Create_Strand(dummy_dangling));
     // ---------------------------------------------------------------------------
     //-----------------------------initialize crosslinkers------------------------
     set<array<double,3>> linkers(generate_crosslinkers(0));
@@ -23,11 +23,11 @@ System::System(double ell_tot, double rho0, double BindingEnergy, int seed, bool
     {
       loop_link.create_new_free_linker(linker.at(0),linker.at(1),linker.at(2));// the linker is free by default
     }
-    loop_link.Remove_Strand(dummy_dangling);
+    loop_link.Remove_Strand(dummy_strand);
     // ---------------------------------------------------------------------------
     //-----------------------------initialize dangling----------------------------
     IF(true){cout<< "System : create dangling" << endl;}
-    loop_link.Insert_Strand(new Dangling(R0,loop_link, 0., ell, rho, rho_adjust));
+    loop_link.Create_Strand(Dangling(R0, 0., ell, rho));
     //print_random_stuff();
     //for(auto& it : linker_to_strand){for(auto& it2 : it.second){cout<<it2->get_Rleft()[0]<<" "<<it2->get_Rleft()[1]<<" "<<it2->get_Rleft()[2]<<endl;}}
     IF(true) { cout << "System : created" << endl; }
@@ -43,7 +43,7 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
   IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
   cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
   int n(1);
-  for (auto &it : loop_link.get_loops())
+  for (auto &it : loop_link.get_strands())
   {
     cum_rates[n] = cum_rates[n - 1] + it->get_total_binding_rates();
     n++;
@@ -52,7 +52,7 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
   {
     IF(true){
     cout<<"cumulative rate are 0, let's output the number of linkers in the loops :" <<endl; 
-    for(auto& loop : loop_link.get_loops())
+    for(auto& loop : loop_link.get_strands())
     {cout<<loop->get_r().size()<<endl;}}
     throw invalid_argument("cum_rates.back()=0 no available process"); 
   }
@@ -84,154 +84,84 @@ double System::evolve(bool *bind)
   // pick a random process
   int rate_select(pick_random_process(cum_rates));
   // Exectute the process
-  set<Strand*,LessLoop> strands_affected;
   if (rate_select != 0)
   {
-    // ad a linker to a strand
+    // add a linker to a strand
     IF(true) { cout << "System : add a bond" << endl; }
     int loop_selected(rate_select-1); // rate_select = 1 => first bond
-    add_bond(loop_selected, strands_affected);
+    add_bond(loop_selected);
     *bind = true;
   }
   else
   {
     // Unbind a loop
     IF(true) { cout << "System : remove a bond" << endl; }
-    // select the index of the left bond to remove
-    // last index is loop.size-1
-    // the left bond index maximum is loop.size -2
-    uniform_int_distribution<int> distribution(0, loop_link.get_strand_size() - 2);
-    int index(distribution(generator));
-    set<Strand*,LessLoop>::iterator loop_selec_left(loop_link.get_loop(index));
-    set<Strand*,LessLoop>::iterator loop_selec_right(loop_link.get_loop(index+1));
     // unbind
-    unbind_loop(loop_selec_left, loop_selec_right,strands_affected);
+    unbind_random_loop();
     *bind = false;
   }
   // remake the strands whose rates have been modified by the event.
-  loop_link.actualize_vicinity(strands_affected);
   IF(true){check_loops_integrity();}
   return draw_time(cum_rates.back());
 }
 
-void System::add_bond(int loop_selected,set<Strand*,LessLoop>& strands_affected)
+void System::add_bond(int loop_selected)
 {
     IF(true) { cout << "System : select the associated loop" << endl;}
     // cum_rates.begin() is unbinding
-    set<Strand*,LessLoop>::iterator loop_selec(loop_link.get_loop(loop_selected)); 
+    set<Strand*,LessLoop>::iterator loop_selec(loop_link.get_strand(loop_selected)); 
     IF(true){cout<<"the affected loop id is : "<<*loop_selec<<endl;}
     // ask the loop for a random linker, and a random length
-    double length;
-    Linker* r_selected;
     IF(true) { cout << "System : select a length and a r" << endl; }
-    // select a link to bind to
-    (*loop_selec)->select_link_length(length, r_selected);
-    //cout<<r_selected->r()[0]<<" "<<r_selected->r()[1]<<" "<<r_selected->r()[2]<<endl;
-    //  set the linker selected to bounded
-    IF(true){cout<<"linker selected "<<r_selected<<endl;}
-    //cout<<"list of the strand that will be affected : "<<endl;
-    //for(auto& strand : r_selected->get_strands()){cout<<strand<<endl;}
-    r_selected->set_bounded();
-    //  create the two new loops
-    IF(true) { cout << "System : create two new loops" << endl; }
-    Loop* loop_left = new Loop((*loop_selec)->get_Rleft(),
-                    r_selected,
-                    loop_link,
-                    (*loop_selec)->get_ell_coordinate_0(),
-                    (*loop_selec)->get_ell_coordinate_0() + length,
-                    rho,
-                    rho_adjust);
-    Strand* loop_right;
-    try
-    {// if loop_selec isn't dangling :
-        (*loop_selec)->get_Rright();
-        IF(true){cout<<"------------------------------------------------------"<<endl;}
-        IF(true){cout<<"System : add_bond : create a loop on the right"<<endl;}
-        IF(true){cout<<"------------------------------------------------------"<<endl;}
-        // then the right side is a loop
-        loop_right = new Loop(r_selected,
-                            (*loop_selec)->get_Rright(),
-                            loop_link,
-                            (*loop_selec)->get_ell_coordinate_0() + length,
-                            (reinterpret_cast<Loop*>(*loop_selec))->get_ell_coordinate_1(),
-                            rho,
-                            rho_adjust);
-    }
-    catch(out_of_range oor)
-    {
-      IF(true){cout<<"------------------------------------------------------"<<endl;}
-      IF(true){cout<<"System : add_bond : create a dangling bond on the right"<<endl;}
-      IF(true){cout<<"------------------------------------------------------"<<endl;}
-      // then the right side is a Dangling
-      loop_right = new Dangling(r_selected,
-                              loop_link,
-                              (*loop_selec)->get_ell_coordinate_0() + length,
-                              reinterpret_cast<Dangling*>(*loop_selec)->get_ell() - length,
-                              rho,
-                              rho_adjust);
-    }
-    // add the loop to loop_link :
-    IF(true){cout<<"loop left created : "<<loop_left<<endl<<"loop right created : "<<loop_right<<endl;}
-    //---------------------------------------------------------------------------------
-    //------------------------------Actualize the linkers------------------------------
-    IF(true) { cout << "System : add_bond : delete the old loop" << endl; }
-    loop_link.Remove_Strand((*loop_selec));
-    // delete the loop
+    // select a link to bind to and ask the selected loop to return two new loops.
+    pair<unique_ptr<Strand>,unique_ptr<Strand>> new_strands((*loop_selec)->bind());
+    new_strands.first->get_Rright()->set_bounded(); // set the linker to bounded
+    // Create the pointers in the wrapper
     IF(true){cout<< "System : add_bond : build the list of strands that are affected"<<endl;}
-    strands_affected = r_selected->get_strands();
-    strands_affected.erase(loop_right);
-    strands_affected.erase(loop_left);
-    //loop_link.actualize_vicinity(get_vicinity(r_selected,{loop_right,loop_left}));
+    Strand* strand_left = loop_link.Create_Strand(*new_strands.first);
+    Strand* strand_right = loop_link.Create_Strand(*new_strands.second);
+    IF(true) { cout << "System : add_bond : delete the old loop" << endl; }
+    // delete the loop
+    loop_link.Remove_Strand((*loop_selec));
+    // actualize the rates of the vicinity of the move
+    // 1) store the affected strands
+    set<Strand*,LessLoop> strands_affected = strand_left->get_Rright()->get_strands();
+    // 2) remove those that have just been created
+    strands_affected.erase(strand_right);//do not remake the strand that has just been made
+    strands_affected.erase(strand_left);
+    // 3) actualize the remaining strands
+    loop_link.remake_strands(strands_affected);
 }
 
-void System::unbind_loop(set<Strand*,LessLoop>::iterator &loop_selec_left, 
-                         set<Strand*,LessLoop>::iterator &loop_selec_right,
-                         set<Strand*,LessLoop>& strands_affected)
+void System::unbind_random_loop()
 {
-  IF(true) { cout << "System : unbind loop from the loop_left : "<<*loop_selec_left<<" and the right : "<<*loop_selec_right << endl; }
+  // select the index of the left bond to remove
+  // last index is loop.size-1
+  // the left bond index maximum is loop.size -2
+  uniform_int_distribution<int> distribution(0, loop_link.get_strand_size() - 2);
+  int index(distribution(generator));
+  Strand* loop_selec_left(*loop_link.get_strand(index));
+  Strand* loop_selec_right(*loop_link.get_strand(index+1));
+  IF(true) { cout << "System : unbind loop from the loop_left : "<<loop_selec_left<<" and the right : "<<loop_selec_right << endl; }
 
   // set the linker that was bound to unbound
-  (*loop_selec_left)->get_Rright()->set_free();
+  loop_selec_left->get_Rright()->set_free();
   // create a new loop that is the combination of both inputs
-  Strand* loop;
-  try
-  {   
-      (*loop_selec_right)->get_Rright();
-      IF(true){cout<<"------------------------------------------------------"<<endl;}
-      IF(true){cout<<"System : unbind_loop : unbind between two loops"<<endl;}
-      IF(true){cout<<"------------------------------------------------------"<<endl;}
-      loop = new Loop((*loop_selec_left)->get_Rleft(),
-                      (*loop_selec_right)->get_Rright(),
-                      loop_link,
-                      (*loop_selec_left)->get_ell_coordinate_0(),
-                      reinterpret_cast<Loop*>(*loop_selec_right)->get_ell_coordinate_1(),
-                      rho,
-                      rho_adjust);
-  }
-  catch(out_of_range oor)
-  {
-    IF(true){cout<<"------------------------------------------------------"<<endl;}
-    IF(true){cout<<"System : unbind_loop : unbind the a bond and the dangling"<<endl;}
-    IF(true){cout<<"------------------------------------------------------"<<endl;}
-    loop = new Dangling((*loop_selec_left)->get_Rleft(),
-                    loop_link,
-                    (*loop_selec_left)->get_ell_coordinate_0(),
-                    (*loop_selec_right)->get_ell()+(*loop_selec_left)->get_ell(),
-                    rho,
-                    rho_adjust);
-  }
+
+  Strand* loop(loop_link.Create_Strand(*loop_selec_right->unbind_from(loop_selec_left)));
   IF(true){cout<<"System : remove the old strand from loop_link"<<endl;}
+  // save the reference of the linker to actualize the linker's state
+  Linker* freed((loop_selec_right)->get_Rleft());
   // delete the loop before actualize vicinity.
-  // otherwise these strands will be remade and the reference to delete lost.
-  loop_link.Remove_Strand(*loop_selec_left);
-  Linker* freed((*loop_selec_right)->get_Rleft()); // save the reference of the linker to actualize
-  loop_link.Remove_Strand(*loop_selec_right);
+  loop_link.Remove_Strand(loop_selec_left);
+  loop_link.Remove_Strand(loop_selec_right);
   IF(true){cout<<"System : unbind_loop actualize vicinity"<<endl;}
-  strands_affected = freed->get_strands();
+  // 1) access all the affected strands in the neighboring
+  set<Strand*,LessLoop> strands_affected = freed->get_strands();
+  // 2) remove those that have just been created
   strands_affected.erase(loop);
-  //set<Strand*,LessLoop> to_remake(get_vicinity(freed,{loop}));
-  //for(auto& it : to_remake){cout<<it<<endl;}
-  //loop_link.actualize_vicinity(to_remake);
+  // 3) recompute the rates
+  loop_link.remake_strands(strands_affected);
 }
 
 double System::draw_time(double rate) const
@@ -250,20 +180,21 @@ void System::reset_crosslinkers()
   LoopLinkWrap new_loop_link;
   // create a new set of occupied crosslinkers
   set<array<double,3>> occ_linkers_to_remake;
-  for(auto& strand : loop_link.get_loops()){
+  // save the occupied linkers that stay
+  for(auto& strand : loop_link.get_strands()){
     occ_linkers_to_remake.insert(strand->get_Rleft()->r());
     }
-    for(auto& linker : occ_linkers_to_remake){
+  // remake them
+  for(auto& linker : occ_linkers_to_remake){
     new_loop_link.create_new_occupied_linker(linker.at(0),linker.at(1),linker.at(2));
   }
+  // generate a bunch of free linkers
   set<array<double,3>> free_linkers_to_remake(generate_crosslinkers(occ_linkers_to_remake.size()));
   IF(true){cout<<"Number of free linkers to remake : "<<free_linkers_to_remake.size()<<endl;}
   // new create the associated linkers. carefull, they are free !
   for(auto& linker : free_linkers_to_remake){
     new_loop_link.create_new_free_linker(linker.at(0),linker.at(1),linker.at(2));
   }
-  /*for(auto& linker : occupied_linkers)
-    {loop_link.create_new_occupied_linker(linker.at(0),linker.at(1),linker.at(2));}*/
   // set all the crosslinker into the linker_to_strand
   // which also add the bound extremities
   reset_loops(new_loop_link);
@@ -276,7 +207,7 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
   IF(true){cout<<"System : generate crosslinkers"<<endl;}
   // create a set with all the limits
   set<double> xminl,xmaxl,yminl,ymaxl,zminl,zmaxl;
-  for(auto& loop : loop_link.get_loops()){
+  for(auto& loop : loop_link.get_strands()){
     double ximin,ximax,yimin,yimax,zimin,zimax;
     //try{cout<<loop->get_Rright()->r().at(0)<<" "<<loop->get_Rright()->r().at(1)<<" "<<loop->get_Rright()->r().at(2)<<endl;}
     //catch(out_of_range oor){cout<<endl;}
@@ -319,45 +250,40 @@ void System::reset_loops(LoopLinkWrap& new_loop_link)
 {
   // recreate all the loops while changing the extremities to bounded
   IF(true){cout<<"System : reset loops"<<endl;}
-  for(auto& loop : loop_link.get_loops())
+  for(auto& strand : loop_link.get_strands())
   {
       try
       {
-          loop->get_Rright(); // check to know if it's dangling
+          strand->get_Rright(); // check to know if it's dangling
           // access the new linker via the coordinate of the old one : should always be valid
           Linker* new_linker_right;
           Linker* new_linker_left;
-          try{new_linker_right = new_loop_link.get_linkers3d()(loop->get_Rright()->r().at(0),
-                                                                loop->get_Rright()->r().at(1),
-                                                                loop->get_Rright()->r().at(2));}
+          try{new_linker_right = new_loop_link.get_linkers3d()(strand->get_Rright()->r().at(0),
+                                                               strand->get_Rright()->r().at(1),
+                                                               strand->get_Rright()->r().at(2));}
           catch(out_of_range oor){cout<<"try to access a right new loop with an invalide old coordinate"<<endl; throw invalid_argument("invalid coordinate");}
-          try{new_linker_left = new_loop_link.get_linkers3d()(loop->get_Rleft()->r().at(0),
-                                                              loop->get_Rleft()->r().at(1),
-                                                              loop->get_Rleft()->r().at(2));}
+          try{new_linker_left = new_loop_link.get_linkers3d()(strand->get_Rleft()->r().at(0),
+                                                              strand->get_Rleft()->r().at(1),
+                                                              strand->get_Rleft()->r().at(2));}
           catch(out_of_range oor){cout<<"try to access a left new loop with an invalide old coordinate"<<endl; throw invalid_argument("invalid coordinate");}                                                                      
-          // seems that the new_linkers are invalid ? 
-          Loop* newloop = new Loop(*reinterpret_cast<Loop*>(loop),
-                                      new_linker_left,
-                                      new_linker_right,
-                                      new_loop_link);
-
-          new_loop_link.Insert_Strand(newloop);
+          // seems that the new_linkers are invalid ?
+          Strand* newloop(new_loop_link.Create_Strand(Loop(*reinterpret_cast<Loop*>(strand),
+                                                            new_linker_left,new_linker_right)));
       }
       catch(out_of_range oor)
       {
         // access the new linker via the coordinate of the old one : should always be valid
           Linker* new_linker_left;
-          try{new_linker_left = new_loop_link.get_linkers3d()(loop->get_Rleft()->r().at(0),
-                                                                      loop->get_Rleft()->r().at(1),
-                                                                      loop->get_Rleft()->r().at(2));}
-          catch(out_of_range oor){cout<<"try to access a left new loop with an invalide old coordinate"<<endl; throw oor;}                                                                      
-          new_loop_link.Insert_Strand(new Dangling(*reinterpret_cast<Dangling*>(loop),
-                                              new_linker_left,
-                                              new_loop_link));
+          try{new_linker_left = new_loop_link.get_linkers3d()(strand->get_Rleft()->r().at(0),
+                                                              strand->get_Rleft()->r().at(1),
+                                                              strand->get_Rleft()->r().at(2));}
+          catch(out_of_range oor){cout<<"try to access a left new loop with an invalide old coordinate"<<endl; throw oor;}
+          Strand* newloop(new_loop_link.Create_Strand(Dangling(*reinterpret_cast<Dangling*>(strand),
+                                                            new_linker_left)));
       }
   }
   IF(true){cout<<"System : copy finished : delete old strands"<<endl;}
-  loop_link.delete_loops();
+  loop_link.delete_strands();
 }
 /*
 set<Strand*,LessLoop> System::get_vicinity(Linker* modified_linker,set<Strand*,LessLoop> strand_created)

@@ -4,8 +4,7 @@ using namespace std;
 Strand::Strand(){}
 Strand::Strand(Linker* R0,
             double ell_0,
-            double rho,
-            bool rho_adjust)
+            double rho)
 {
   IF(true) { cout << "Strand : creator" << endl; }
   // generator.seed(seed);
@@ -46,6 +45,12 @@ Strand::Strand(const Strand& strand)
   ell_coordinate_0 = strand.ell_coordinate_0;
   ell = strand.ell;
   V = strand.V;
+}
+
+void Strand::set_linkers(vector<Linker*> new_free_linkers,vector<Linker*> occupied_linkers)
+{
+  free_linkers = new_free_linkers;
+  occ_linkers=occupied_linkers;
 }
 
 bool Strand::operator<(const Strand &strand_right) const
@@ -162,28 +167,6 @@ void Strand::select_link_length(double &length, Linker*& r_selected) const
   vector<double>::iterator rate_ell_selec = lower_bound(copy_cum_rates_rindex.begin(), copy_cum_rates_rindex.end(), pick_rate_ell);
   int ell_index(distance(copy_cum_rates_rindex.begin(), rate_ell_selec) + 1);
   length = (double)ell_index;
-  /*cout<<(*r_selected)[0]<<" "<<(*r_selected)[1]<<" "<<(*r_selected)[2]<<endl;
-  cout<<r_selected<<endl;*/
-  /*cout<<"np.array([";
-  for(auto& it :copy_cum_rates_rindex){cout<<it<<",";}cout<<"])";
-  cout<<endl<<ell_index<<endl;*/
-}
-
-void Strand::set_p_linkers(LoopLinkWrap& loop_link)
-{
-  IF(true){cout<<"set_p_linkers"<<endl;}
-  // get the volume limit
-  double key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max;
-  get_volume_limit(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
-  // select the linkers in the vicinity
-  IF(true){cout<<"Strand : slice"<<endl;}
-  loop_link.slice_free(key_0_min,key_0_max,
-                      key_1_min,key_1_max,
-                      key_2_min,key_2_max,
-                      free_linkers,occ_linkers);
-  // tell the linkers that this strand is around
-  for(auto& linker : free_linkers){linker->add_strand(this);}
-  for(auto& linker : occ_linkers){linker->add_strand(this);}
 }
 
 void Strand::Check_integrity() const
@@ -192,7 +175,10 @@ void Strand::Check_integrity() const
 }
 
 // -----------------------------------------------------------------------------
-// -----------------------------accessor----------------------------------------
+/*
+ /\  _ _ _  _ _ _  _
+/~~\(_(_(/__\_\(_)|                     
+*/
 // -----------------------------------------------------------------------------
 Linker* Strand::get_Rleft() const { return Rleft; }
 
