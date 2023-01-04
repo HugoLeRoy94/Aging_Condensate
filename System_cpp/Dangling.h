@@ -12,18 +12,21 @@ public:
   Dangling(Linker* R0,
           double ell_0,  // ell_0 is the coordinate
           double ell_in, // this is the remaining length
-          double rho);
+          double rho,
+          bool sliding);
   Dangling(const Dangling& dangling);
   Dangling(const Dangling& dangling,
             Linker* new_left_linker);
-  double get_S()const override; // entropy of the polymer.
+  double get_S(double dl=0)const override; // entropy of the polymer.
+
   void get_volume_limit(double& key_0_min,double& key_0_max,
                         double& key_1_min,double& key_1_max,
                         double& key_2_min,double& key_2_max) const override;
   Linker* get_Rright() const;
   std::unique_ptr<Strand> unbind_from(Strand* left_strand) const override;
   std::pair<std::unique_ptr<Strand>,std::unique_ptr<Strand>> bind() const override;
-
+  std::unique_ptr<Strand> do_slide(double dl,bool right) const override;
+  double get_ell_coordinate_1() const override;
 private:
   Strand* clone() const override;
   double radius;
@@ -33,7 +36,7 @@ private:
   double Omega(double ell) const;
   // use random_in_sphere to generate  a number of linkers
    // build le vector p_linkers from the overall map of the system:
-  double compute_rate(double li, Linker* rlinker) override;
+  double compute_binding_rate(double li, Linker* rlinker) override;
   
 };
 #endif

@@ -24,7 +24,7 @@ public:
     map3d() = default;
     map3d(map3d const&) = default;
     //void set_sizes(T0 x,T1 y,T2 z){size_x = x;size_y=y;size_z=z;}
-    constexpr T& operator()(T0 x, T1 y, T2 z) { // C++23 required
+    T operator() (T0 x, T1 y, T2 z) { // C++23 required
         return m[x][y][z];
     }
     void print()const{for(auto& it : m){for(auto& it2 : it.second){for(auto& it3 : it2.second){std::cout<<it3.second[0]<<" "<<it3.second[1]<<" "<<it3.second[2]<<std::endl;}}}}

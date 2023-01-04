@@ -2,21 +2,22 @@
 using namespace std;
 int main(int argc, char* argv[]){
   int t_tot(100);
-  double ell_tot(1000.);
+  double ell_tot(100.);
   //double distance_anchor(1000.);
-  double rho0(5*pow(10,-4));
-  double BindingEnergy(0);
+  double rho0(pow(10,-2));
+  double BindingEnergy(-10);
   bool bind(true);
   double* R;
-  System* S = new System(ell_tot,rho0,BindingEnergy,19874,false);
-  cout<<S->get_r_size()<<endl;
+  System* S = new System(ell_tot,rho0,BindingEnergy,19880,true);
   for(int n(0);n<t_tot;n++){
-  if(n%10==0){cout<<n<<endl;}
-  S->evolve(&bind);
+  double time(S->evolve(&bind));
+  //cout<<bind<<endl;
+  //cout<<time<<endl;
+  if(isnan(time)){break;}
   //cout<<S->get_F()<<endl;
   }
+  S->reset_crosslinkers();
   delete S;
-  //cout<<bind<<endl;
 
   /*
   R = new double[3*S->get_N_strand()];

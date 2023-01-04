@@ -2,7 +2,7 @@
 
 using namespace std;
 
-System::System(double ell_tot, double rho0, double BindingEnergy, int seed, bool adjust) : distrib(1, 10000000)
+System::System(double ell_tot, double rho0, double BindingEnergy, int seed,bool sliding) : distrib(1, 10000000)
 {
     IF(true) { cout << "System : creator" << endl; }
     // srand(seed);
@@ -11,10 +11,10 @@ System::System(double ell_tot, double rho0, double BindingEnergy, int seed, bool
     // -----------------------constant of the simulation--------------------------
     ell = ell_tot;
     rho = rho0;
-    rho_adjust = adjust;
+    slide=sliding;
     binding_energy = BindingEnergy;
     Linker* R0 = new Linker({0, 0, 0});
-    Dangling dummy_dangling(R0, 0., ell, rho); // dummy dangling that helps generate crosslinkers but has none initially
+    Dangling dummy_dangling(R0, 0., ell, rho,slide); // dummy dangling that helps generate crosslinkers but has none initially
     Strand* dummy_strand(loop_link.Create_Strand(dummy_dangling));
     // ---------------------------------------------------------------------------
     //-----------------------------initialize crosslinkers------------------------
@@ -27,7 +27,7 @@ System::System(double ell_tot, double rho0, double BindingEnergy, int seed, bool
     // ---------------------------------------------------------------------------
     //-----------------------------initialize dangling----------------------------
     IF(true){cout<< "System : create dangling" << endl;}
-    loop_link.Create_Strand(Dangling(R0, 0., ell, rho));
+    loop_link.Create_Strand(Dangling(R0, 0., ell, rho,slide));
     //print_random_stuff();
     //for(auto& it : linker_to_strand){for(auto& it2 : it.second){cout<<it2->get_Rleft()[0]<<" "<<it2->get_Rleft()[1]<<" "<<it2->get_Rleft()[2]<<endl;}}
     IF(true) { cout << "System : created" << endl; }
@@ -48,6 +48,44 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
     cum_rates[n] = cum_rates[n - 1] + it->get_total_binding_rates();
     n++;
   }
+  double previous(0);
+  //--------------- check if the ell_cordinate of the linkers are consistent
+  /*
+  for(auto& strand : loop_link.get_strands()){
+    try{
+      strand->get_Rright();
+      cout<<strand->get_ell_coordinate_0()<<" "<<reinterpret_cast<Loop*>(strand)->get_ell_coordinate_1()<<endl;
+      if(previous!=strand->get_ell_coordinate_0()){exit(0);}
+      previous = reinterpret_cast<Loop*>(strand)->get_ell_coordinate_1();
+      }
+    catch(out_of_range oor){
+      cout<<strand->get_ell_coordinate_0()<<endl;
+      if(previous!=strand->get_ell_coordinate_0()){exit(0);}
+    }
+  }
+  */
+  //-----------------------------------------------------------
+  if(slide)
+  {
+  // iterate over each loop and the next one (skip the last)
+  //-------------------------------------------------------------------
+  for(set<Strand*>::iterator it = loop_link.get_strands().begin();
+      it!=prev(loop_link.get_strands().end());
+      it++)
+  {    
+
+    auto next_strand = next(it);
+    cum_rates[n] = cum_rates[n - 1] + get_slide_rate(*it,*next_strand,1)+//slide right
+                                      get_slide_rate(*it,*next_strand,-1);//slide left
+    /*try{cout<<get_slide_rate(*it,*next_strand,1)<<" ";}
+    catch(invalid_argument ia){}
+    try{cout<<get_slide_rate(*it,*next_strand,-1);}
+    catch(invalid_argument ia){}
+    cout<<endl;*/
+    n++;
+  }
+  }
+  //-------------------------------------------------------------------
   if (cum_rates.back() == 0)
   {
     IF(true){
@@ -76,7 +114,13 @@ double System::evolve(bool *bind)
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
   // compute the cumulative transition rates for each loop
-  vector<double> cum_rates(loop_link.get_strand_size() + 1,0); // the +1 is for removing a bond
+  vector<double> cum_rates;
+  if(slide)
+  // the +1 is for removing a bond
+  // the -1 is for the (0,0,0) linker that cannot be slide
+    cum_rates.resize(loop_link.get_strand_size()*2 + 1-1,0); 
+  else
+    cum_rates.resize(loop_link.get_strand_size() + 1,0); // the +1 is for removing a bond
   try{compute_cum_rates(cum_rates);}
   catch(invalid_argument& e){return 0.;}
   // -----------------------------------------------------------------------------
@@ -84,32 +128,42 @@ double System::evolve(bool *bind)
   // pick a random process
   int rate_select(pick_random_process(cum_rates));
   // Exectute the process
-  if (rate_select != 0)
+  if (rate_select == 0)
   {
-    // add a linker to a strand
-    IF(true) { cout << "System : add a bond" << endl; }
-    int loop_selected(rate_select-1); // rate_select = 1 => first bond
-    add_bond(loop_selected);
-    *bind = true;
-  }
-  else
-  {
-    // Unbind a loop
+        // Unbind a loop
     IF(true) { cout << "System : remove a bond" << endl; }
     // unbind
     unbind_random_loop();
     *bind = false;
   }
+  else if(rate_select>=loop_link.get_strand_size()+1)
+  {
+    // slide
+    IF(true){cout<<"System : slide a bond"<<endl;}
+    int loop_index_left(rate_select-loop_link.get_strand_size()-1);
+    slide_bond(loop_index_left);
+    *bind=false;
+  }
+  else
+  {
+    // add a linker to a strand or slide it
+    IF(true) { cout << "System : add a bond" << endl; }
+    int loop_index(rate_select-1); // rate_select = 1 => first bond
+
+    add_bond(loop_index);
+    *bind = true;
+  }
   // remake the strands whose rates have been modified by the event.
   IF(true){check_loops_integrity();}
+  IF(true){for(auto& rates : cum_rates){cout<<rates<<endl;}}
   return draw_time(cum_rates.back());
 }
 
-void System::add_bond(int loop_selected)
+void System::add_bond(int loop_index)
 {
     IF(true) { cout << "System : select the associated loop" << endl;}
     // cum_rates.begin() is unbinding
-    set<Strand*,LessLoop>::iterator loop_selec(loop_link.get_strand(loop_selected)); 
+    set<Strand*,LessLoop>::iterator loop_selec(loop_link.get_strand(loop_index));
     IF(true){cout<<"the affected loop id is : "<<*loop_selec<<endl;}
     // ask the loop for a random linker, and a random length
     IF(true) { cout << "System : select a length and a r" << endl; }
@@ -162,6 +216,35 @@ void System::unbind_random_loop()
   strands_affected.erase(loop);
   // 3) recompute the rates
   loop_link.remake_strands(strands_affected);
+}
+
+void System::slide_bond(int left_loop_index)
+{ 
+  double dl(choose_dl(left_loop_index));
+  IF(true){cout<<"slide a bond by a dl = "<<dl<<endl;}
+  Strand* left_strand((*loop_link.get_strand(left_loop_index)));
+  Strand* right_strand((*loop_link.get_strand(left_loop_index+1)));
+  IF(true){
+    cout<<"slide the linker between the index : "<<left_loop_index<<"and the index : "<<left_loop_index+1<<endl;
+    cout<<"with the coordinates : "<<left_strand->get_ell_coordinate_0()<<" "<<right_strand->get_ell_coordinate_0()<<endl;
+  }
+  Strand* new_left_strand = loop_link.Create_Strand(*left_strand->do_slide(dl,true));
+  Strand* new_right_strand = loop_link.Create_Strand(*right_strand->do_slide(dl,false));
+  loop_link.Remove_Strand(left_strand);
+  loop_link.Remove_Strand(right_strand);
+}
+
+double System::choose_dl(int left_loop_index)
+{
+  set<Strand*,LessLoop>::iterator left_loop(loop_link.get_strand(left_loop_index));
+  set<Strand*,LessLoop>::iterator right_loop(loop_link.get_strand(left_loop_index+1));
+  uniform_real_distribution<double> distribution(0,get_slide_rate(*left_loop,*right_loop,1)+
+                                                   get_slide_rate(*left_loop,*right_loop,-1));
+  double pick_rate = distribution(generator);
+  if(pick_rate<=get_slide_rate(*left_loop,*right_loop,+1)){
+    return +1;
+  }
+  else{ return -1;}
 }
 
 double System::draw_time(double rate) const
@@ -246,6 +329,32 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
 }
 */
 
+double System::compute_slide_S(Strand* left_strand, Strand* right_strand,double dl) const
+{
+  // left strand is always a loop
+  if(left_strand->get_ell_coordinate_0()-(left_strand->get_ell_coordinate_1()+dl)<=1)
+  {
+    throw invalid_argument("the two left linkers overlap");
+  }
+  if((right_strand->get_ell_coordinate_0()+dl)-right_strand->get_ell_coordinate_1()<=1)
+  {
+    throw invalid_argument("the two right linkers overlap");
+  }
+  return left_strand->get_S(-dl)+right_strand->get_S(dl)-//slide right
+         (left_strand->get_S(0)+right_strand->get_S(0));
+
+}
+
+double System::get_slide_rate(Strand* left_strand, Strand* right_strand,double dl) const
+{
+  // This function simply returns the rate of sliding
+  // if it is a forbiden move it returns 0;
+  try{
+    return exp(0.5*compute_slide_S(left_strand,right_strand,+1));
+  }
+  catch(invalid_argument ia){return 0.;}
+}
+
 void System::reset_loops(LoopLinkWrap& new_loop_link)
 {
   // recreate all the loops while changing the extremities to bounded
@@ -256,28 +365,24 @@ void System::reset_loops(LoopLinkWrap& new_loop_link)
       {
           strand->get_Rright(); // check to know if it's dangling
           // access the new linker via the coordinate of the old one : should always be valid
-          Linker* new_linker_right;
-          Linker* new_linker_left;
-          try{new_linker_right = new_loop_link.get_linkers3d()(strand->get_Rright()->r().at(0),
-                                                               strand->get_Rright()->r().at(1),
-                                                               strand->get_Rright()->r().at(2));}
-          catch(out_of_range oor){cout<<"try to access a right new loop with an invalide old coordinate"<<endl; throw invalid_argument("invalid coordinate");}
-          try{new_linker_left = new_loop_link.get_linkers3d()(strand->get_Rleft()->r().at(0),
-                                                              strand->get_Rleft()->r().at(1),
-                                                              strand->get_Rleft()->r().at(2));}
-          catch(out_of_range oor){cout<<"try to access a left new loop with an invalide old coordinate"<<endl; throw invalid_argument("invalid coordinate");}                                                                      
+          Linker* const new_linker_right = new_loop_link.get_linkers3d()(strand->get_Rright()->r().at(0),
+                                                                         strand->get_Rright()->r().at(1),
+                                                                         strand->get_Rright()->r().at(2));
+          Linker* const new_linker_left = new_loop_link.get_linkers3d()(strand->get_Rleft()->r().at(0),
+                                                                        strand->get_Rleft()->r().at(1),
+                                                                        strand->get_Rleft()->r().at(2));
+          
           // seems that the new_linkers are invalid ?
           Strand* newloop(new_loop_link.Create_Strand(Loop(*reinterpret_cast<Loop*>(strand),
                                                             new_linker_left,new_linker_right)));
       }
       catch(out_of_range oor)
       {
-        // access the new linker via the coordinate of the old one : should always be valid
-          Linker* new_linker_left;
-          try{new_linker_left = new_loop_link.get_linkers3d()(strand->get_Rleft()->r().at(0),
-                                                              strand->get_Rleft()->r().at(1),
-                                                              strand->get_Rleft()->r().at(2));}
-          catch(out_of_range oor){cout<<"try to access a left new loop with an invalide old coordinate"<<endl; throw oor;}
+        // access the new linker via the coordinate of the old one : should always be valid          
+          Linker* const new_linker_left = new_loop_link.get_linkers3d()(strand->get_Rleft()->r().at(0),
+                                                          strand->get_Rleft()->r().at(1),
+                                                          strand->get_Rleft()->r().at(2));
+          
           Strand* newloop(new_loop_link.Create_Strand(Dangling(*reinterpret_cast<Dangling*>(strand),
                                                             new_linker_left)));
       }

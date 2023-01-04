@@ -6,7 +6,8 @@ Dangling::Dangling() : Strand()
 Dangling::Dangling(Linker* R0,
                   double ell_0,
                   double ell_in,
-                  double rho) : Strand(R0,ell_0,rho)
+                  double rho,
+                  bool sliding) : Strand(R0,ell_0,rho,sliding)
 {
   IF(true) { cout << "Dangling : creator" << endl; }
   ell = ell_in;
@@ -31,12 +32,11 @@ Dangling::Dangling(const Dangling &dangling) : Strand(dangling)
   IF(true) { cout << "Dangling : copy constructor" << endl; }
   radius = dangling.radius;
 }
-
 Strand* Dangling::clone() const{return new Dangling(*this);}
 // ---------------------------------------------------------------------------
 //-----------------------------------accessor---------------------------------
 // ---------------------------------------------------------------------------
-double Dangling::get_S() const { return ell * log(4 * Pi); }
+double Dangling::get_S(double dl) const { return (ell+dl) * log(4 * Pi); }
 Linker* Dangling::get_Rright() const{throw out_of_range("dangling");}
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -72,7 +72,7 @@ void Dangling::get_volume_limit(double& key_0_min,double& key_0_max,
 }
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
-double Dangling::compute_rate(double li, Linker* rlinker)
+double Dangling::compute_binding_rate(double li, Linker* rlinker)
 {
   return exp(1.5*log(1.5/(Pi*li))-1.5*get_square_diff(Rleft->r(),rlinker->r())/li);
 }
@@ -87,8 +87,8 @@ pair<unique_ptr<Strand>,unique_ptr<Strand>> Dangling::bind() const
   double length;
   select_link_length(length,linker_selected);
   linker_selected->set_bounded();
-  unique_ptr<Loop> left_loop = make_unique<Loop>(Rleft,linker_selected,ell_coordinate_0,ell_coordinate_0+length,rho0);
-  unique_ptr<Dangling> dangling = make_unique<Dangling>(linker_selected,ell_coordinate_0+length,ell-length,rho0);
+  unique_ptr<Loop> left_loop = make_unique<Loop>(Rleft,linker_selected,ell_coordinate_0,ell_coordinate_0+length,rho0,slide);
+  unique_ptr<Dangling> dangling = make_unique<Dangling>(linker_selected,ell_coordinate_0+length,ell-length,rho0,slide);
   return  {move(left_loop),move(dangling)};
 }
 unique_ptr<Strand> Dangling::unbind_from(Strand* left_strand) const
@@ -99,5 +99,11 @@ unique_ptr<Strand> Dangling::unbind_from(Strand* left_strand) const
   return make_unique<Dangling>(left_strand->get_Rleft(),
                                left_strand->get_ell_coordinate_0(),
                                ell + left_strand->get_ell(),
-                               rho0);
+                               rho0,
+                               slide);
 }
+unique_ptr<Strand> Dangling::do_slide(double dl,bool right) const
+{
+  return make_unique<Dangling>(Rleft,ell_coordinate_0+dl,ell-dl,rho0,slide);
+}
+double Dangling::get_ell_coordinate_1() const{return ell_coordinate_0+ell;}

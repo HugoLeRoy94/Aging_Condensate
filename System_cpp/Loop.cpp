@@ -5,7 +5,8 @@ Loop::Loop(Linker* R0,
            Linker* R1,
            double ell_0,
            double ell_1,
-           double rho) : Strand(R0,ell_0,rho)
+           double rho,
+           bool sliding) : Strand(R0,ell_0,rho,sliding)
 {
   IF(true) { cout << "Loop : creator" << endl; }
   Rright = R1;
@@ -106,17 +107,7 @@ void Loop::get_volume_limit(double& key_0_min,double& key_0_max,
   key_2_min = zg - 2*sqrt(ell)-abs(Rleft->r().at(2)-Rright->r().at(2));
   key_2_max = zg + 2*sqrt(ell)+abs(Rleft->r().at(2)-Rright->r().at(2));
 }
-
-void Loop::compute_all_rates()
-{
-  Strand::compute_all_rates();
-  // Now compute the sliding rates
-}
-
-double Loop::get_total_binding_rates() const
-{
-  return Strand::get_total_binding_rates();
-}                            
+                       
 
 pair<unique_ptr<Strand>,unique_ptr<Strand>> Loop::bind() const
 {
@@ -127,8 +118,8 @@ pair<unique_ptr<Strand>,unique_ptr<Strand>> Loop::bind() const
   Linker* linker_selected;
   double length;
   select_link_length(length,linker_selected);
-  unique_ptr<Loop> left_loop =make_unique<Loop>(Rleft,linker_selected,ell_coordinate_0,ell_coordinate_0+length,rho0);
-  unique_ptr<Loop> right_loop = make_unique<Loop>(linker_selected,Rright,ell_coordinate_0+length,ell_coordinate_1,rho0);
+  unique_ptr<Loop> left_loop =make_unique<Loop>(Rleft,linker_selected,ell_coordinate_0,ell_coordinate_0+length,rho0,slide);
+  unique_ptr<Loop> right_loop = make_unique<Loop>(linker_selected,Rright,ell_coordinate_0+length,ell_coordinate_1,rho0,slide);
   return  {move(left_loop),move(right_loop)};
 }
 unique_ptr<Strand> Loop::unbind_from(Strand* left_strand) const
@@ -140,14 +131,26 @@ unique_ptr<Strand> Loop::unbind_from(Strand* left_strand) const
                           Rright,
                           left_strand->get_ell_coordinate_0(),
                           ell_coordinate_1,
-                          rho0);
+                          rho0,
+                          slide);
 }
-double Loop::compute_rate(double li, Linker* linker)
+unique_ptr<Strand> Loop::do_slide(double dl,bool right) const
 {
-  //cout<<ell<<" "<<li<<" "<<Pi<<" "<<unbound_term<<"|";
+  // simply add dl to the right linker if right otherwise add dl to the left one
+  if(right){
+    return make_unique<Loop>(Rleft,Rright,ell_coordinate_0,ell_coordinate_1+dl,rho0,slide);
+    }
+  else{
+    return make_unique<Loop>(Rleft,Rright,ell_coordinate_0+dl,ell_coordinate_1,rho0,slide);
+  }
+}
+double Loop::compute_binding_rate(double li, Linker* linker)
+{
+  // if the distance between linkers larger than the length : return 0.
+  if(sqrt(get_square_diff(Rleft->r(), linker->r()))>li){return 0.;} 
+  else if(sqrt(get_square_diff(linker->r(), Rright->r())) > (ell - li)){return 0.;}
   return exp(1.5 * log(3 * ell / (2 * Pi * li * (ell - li))) - 1.5 * (get_square_diff(Rleft->r(), linker->r()) / li + get_square_diff(linker->r(), Rright->r()) / (ell - li)) + unbound_term);
 }
-
 void Loop::Check_integrity() const
 {
   cout<<ell_coordinate_0<<" "<<ell_coordinate_1<<endl;
@@ -166,9 +169,9 @@ array<double, 3> Loop::get_Rg() const { return {0.5 * (Rright->r().at(0) + Rleft
 
 double Loop::get_ell_coordinate_1() const { return ell_coordinate_1; }
 
-double Loop::get_S() const
+double Loop::get_S(double dl) const
 {
-  return log(pow(3 / (2 * Pi * ell), 1.5)) - 3 / 2 * get_square_diff(Rleft->r(), Rright->r()) / ell;
+  return log(pow(3 / (2 * Pi * (ell+dl)), 1.5)) - 3 / 2 * get_square_diff(Rleft->r(), Rright->r()) / (ell+dl);
 }
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------

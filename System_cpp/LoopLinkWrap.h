@@ -1,13 +1,6 @@
 #ifndef LoopLinkWrap_h
 #define LoopLinkWrap_h
 //class LoopLinkWrap;
-class Accessor
-{
-    private:
-        static void compute_rates(Strand* strand_to_compute_rates);
-        static Strand* clone(const Strand& strand_to_clone);
-    friend class LoopLinkWrap;
-};
 class LoopLinkWrap
 {
     private:
@@ -30,7 +23,7 @@ class LoopLinkWrap
 
         std::set<Strand*,LessLoop>::iterator get_strand(int distance);
 
-        std::set<Strand*,LessLoop> get_strands() const;
+        std::set<Strand*,LessLoop> const& get_strands() const;
 
         int get_strand_size() const;
         
@@ -48,7 +41,7 @@ class LoopLinkWrap
         
         int get_linker_size() const;
         
-        std::map<double,std::map<double,std::map<double,Linker*>>>  get_linkers() const;
+        std::map<double,std::map<double,std::map<double,Linker*>>>const &  get_linkers() const;
         
         map3dLink get_linkers3d() const;
         
@@ -66,5 +59,12 @@ class LoopLinkWrap
         void remake_strands(std::set<Strand*,LessLoop> to_remake);
 
         void delete_pointers();
+};
+class Accessor
+{
+    private:
+        static void compute_rates(Strand* strand_to_compute_rates);
+        static Strand* clone(const Strand& strand_to_clone);
+    friend Strand* LoopLinkWrap::Create_Strand(const Strand& new_strand);
 };
 #endif

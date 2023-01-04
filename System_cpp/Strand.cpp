@@ -4,7 +4,8 @@ using namespace std;
 Strand::Strand(){}
 Strand::Strand(Linker* R0,
             double ell_0,
-            double rho)
+            double rho,
+            bool sliding)
 {
   IF(true) { cout << "Strand : creator" << endl; }
   // generator.seed(seed);
@@ -13,6 +14,7 @@ Strand::Strand(Linker* R0,
   ell_coordinate_0 = ell_0;
   //if (rho_adjust){rho0 = rho + (0.1 - rho) * (diff(Rright, Rleft) / ell - dsl);}
   rho0 = rho;
+  slide= sliding;
 }
 
 Strand::~Strand()
@@ -32,6 +34,7 @@ Strand::Strand(const Strand& strand, Linker* new_left_linker)
   ell_coordinate_0 = strand.ell_coordinate_0;
   ell = strand.ell;
   V = strand.V;
+  slide = strand.slide;
 }
 
 Strand::Strand(const Strand& strand)
@@ -45,6 +48,7 @@ Strand::Strand(const Strand& strand)
   ell_coordinate_0 = strand.ell_coordinate_0;
   ell = strand.ell;
   V = strand.V;
+  slide = strand.slide;
 }
 
 void Strand::set_linkers(vector<Linker*> new_free_linkers,vector<Linker*> occupied_linkers)
@@ -93,7 +97,7 @@ void Strand::compute_all_rates()
 
       double li(ELL);
       // rates_ell.push_back(exp(1.5*log(3*ell/(2*Pi*li*(ell-li)))-log(4*Pi)-1.5*(get_square_diff(Rleft,rlink)/li+get_square_diff(rlink,Rright)/(ell-li))+unbound_term)); // push back the rate
-      rates_ell.push_back(compute_rate(li,rlink)); // push back the rate
+      rates_ell.push_back(compute_binding_rate(li,rlink)); // push back the rate
       // ad it to the cumulative vector
       if (cum_rates_ell.size() == 0)
       {

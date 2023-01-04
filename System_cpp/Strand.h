@@ -9,17 +9,18 @@ class Strand
         Strand();
         Strand(Linker* R0,
                 double ell_coordinate_0,
-                double rho);
+                double rho,
+                bool sliding);
         virtual ~Strand();
         Strand(const Strand& strand, Linker* new_left_linker);
         Strand(const Strand& strand);
         void set_linkers(std::vector<Linker*> new_free_linkers,std::vector<Linker*> occupied_linkers);
         bool operator<(const Strand &otherstrand) const;
         // main function for the evolution
-
         void select_link_length(double &length, Linker*& r_selected) const;
         virtual std::unique_ptr<Strand> unbind_from(Strand* left_strand) const=0;
-        virtual  std::pair<std::unique_ptr<Strand>,std::unique_ptr<Strand>> bind() const = 0;
+        virtual std::pair<std::unique_ptr<Strand>,std::unique_ptr<Strand>> bind() const = 0;
+        virtual std::unique_ptr<Strand> do_slide(double dl,bool right) const = 0;
         // Accessors :
         Linker* get_Rleft() const;
         virtual Linker* get_Rright() const =0;
@@ -27,11 +28,12 @@ class Strand
         std::vector<Linker*> get_occ_r() const;
         double get_ell() const;
         double get_ell_coordinate_0() const;
+        virtual double get_ell_coordinate_1() const = 0;
         std::vector<std::vector<double>> get_rates() const;
         
-        virtual double get_total_binding_rates() const;
+        double get_total_binding_rates() const;
         double get_V() const;
-        virtual double get_S() const =0;
+        virtual double get_S(double dl=0) const =0;
         //void set_p_linkers(LoopLinkWrap& loop_link);
         virtual void get_volume_limit(double& key_0_min,double& key_0_max,
                                       double& key_1_min,double& key_1_max,
@@ -49,12 +51,14 @@ class Strand
         double ell_coordinate_0;         // curvilinear coordinate of the linkers along the polymer
         double rho0;                                       // volume fraction (initial of crosslinkers)
         double total_rates;                                // total binding rates to crosslinkers
+        bool slide;
+        double slide_left,slide_right;
 
         void generate_binding_sites(LoopLinkWrap& loop_link);
         // inner function to compute all rates of the loop
-        virtual void compute_all_rates();
+        void compute_all_rates();
         // use random_in_ellipse to generate  a number of linkers
-        virtual double compute_rate(double li, Linker* rlinker)=0;
+        virtual double compute_binding_rate(double li, Linker* rlinker)=0;
 
     //friend class LoopLinkWrap;
 };

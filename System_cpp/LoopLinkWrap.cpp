@@ -68,7 +68,7 @@ void LoopLinkWrap::delete_strands()
 
 int LoopLinkWrap::get_strand_size() const {return strands.size();}
 
-set<Strand*,LessLoop> LoopLinkWrap::get_strands() const {return strands;}
+set<Strand*,LessLoop> const & LoopLinkWrap::get_strands() const {return strands;}
 
 
 /*
@@ -100,12 +100,12 @@ void LoopLinkWrap::delete_linkers()
     linkers = newlinkers;
 }
 
-map<double,map<double,map<double,Linker*>>> LoopLinkWrap::get_linkers() const
+map<double,map<double,map<double,Linker*>>> const &LoopLinkWrap::get_linkers() const
 {
     return linkers.underlying_array();
 }
 
-map3dLink LoopLinkWrap::get_linkers3d() const{ return linkers;}
+map3dLink LoopLinkWrap::get_linkers3d() const { return linkers;}
 
 int LoopLinkWrap::get_linker_size() const{
     return linkers.get_number_of_elements();
