@@ -74,63 +74,56 @@ void Strand::remove_from_linkers()
     }
 }
 
-void Strand::compute_all_rates()
+void Strand::compute_total_rates()
 {
-  /*Not needed, because strands never changes !
-  IF(true){cout<<"Strand : clean the rates"<<endl;}
-  rates.clear();
-  cum_rates.clear();
-  sum_l_cum_rates.clear();*/
-  IF(true) { cout << "Strand : compute all the binding rates" << endl; }
-  for (auto &rlink : free_linkers)
+  total_rates = 0.;
+  for (auto &rlink : free_linkers) // iterate through every linkers
   {
-    vector<double> rates_ell, cum_rates_ell; // rates is just a temporary vector to append the double vector of rates, cum_rates is just the corresponding cumulative array.
-    try{rates_ell.reserve((int)ell);}
-    catch(length_error){cout<<(int)ell<<" "<<this<<" "<<Rleft->r()[0]<<" "<<Rleft->r()[1]<<" "<<Rleft->r()[2]<<endl;throw length_error("ell does not have a correct value");}
-    // fill the rates vector in which all rates associated to the binding of any crosslinker
-    // at any length ell
-    double rate_sum_l(0);// initialize the double that just gives the binding rate transition to whatever length
-    // but isn't it equal to cum_rates_ell.back() ?
-    //IF(true){cout<<"Compute rate for each Ell"<<endl;}
     for (int ELL = 1; ELL < (int)ell; ELL++)
     {
+      total_rates+=compute_binding_rate((double)ELL,rlink);
+    }
+  }
+}
 
-      double li(ELL);
-      // rates_ell.push_back(exp(1.5*log(3*ell/(2*Pi*li*(ell-li)))-log(4*Pi)-1.5*(get_square_diff(Rleft,rlink)/li+get_square_diff(rlink,Rright)/(ell-li))+unbound_term)); // push back the rate
-      rates_ell.push_back(compute_binding_rate(li,rlink)); // push back the rate
+void Strand::compute_cum_rates(vector<double>& sum_l_cum_rates,
+                               vector<vector<double>>& cum_rates) const
+{
+//reserve the correct amount of memory
+sum_l_cum_rates.resize(free_linkers.size());
+cum_rates.resize(free_linkers.size());
+for(auto& cum_rate : cum_rates){cum_rate.resize((int)ell-1);}
+// the entry vectors must be empty
+int rindex(0);
+for (auto &rlink : free_linkers)
+  {
+    // iterate through each linker
+    // and compute a cumulative binding rate vector for each
+    // length and.
+    int ellindex(0);
+    for (int ELL = 1; ELL < (int)ell; ELL++)
+    {
       // ad it to the cumulative vector
-      if (cum_rates_ell.size() == 0)
+      if (ellindex == 0)
       {
-        cum_rates_ell.push_back(rates_ell.back());
+        cum_rates[rindex][ellindex] = compute_binding_rate((double)ELL,rlink);
       }
       else
       {
-        cum_rates_ell.push_back(cum_rates_ell.back() + rates_ell.back());
+        cum_rates[rindex][ellindex] = cum_rates[rindex][ellindex-1]+compute_binding_rate((double)ELL,rlink);
       }
-      rate_sum_l += rates_ell.back();
+      ellindex++;
     }
-    //IF(true){cout<<"compute the comulative array"<<endl;}
-    rates.push_back(rates_ell);
-    cum_rates.push_back(cum_rates_ell);
-    if (sum_l_cum_rates.size() == 0)
-    {
-      sum_l_cum_rates.push_back(rate_sum_l);
-    }
-    else
-    {
-      sum_l_cum_rates.push_back(sum_l_cum_rates.back() + rate_sum_l);
-    }
+    // Add the end of this vector, which is the total probability
+    // to bind to this specific linker to sum_l_cum_rates.
+    if(rindex==0){sum_l_cum_rates[0] = cum_rates[rindex].back();}
+    else{sum_l_cum_rates[rindex] = sum_l_cum_rates[rindex-1]+cum_rates[rindex].back();}
+    // add the whole vector to to cum_rates:
+    rindex++;
   }
-  // compute the total binding rate, which is the sum of the rates vector:
-  IF(true) { cout << "Strand : compute the total unbinding rate" << endl; }
-  total_rates = 0; // make sure it's 0 if there is no bond
-  for (auto &ell_r : rates)
-  {
-    for (auto &rate : ell_r)
-    {
-      total_rates += rate;
-    }
-  }
+  //cout<<"cum_rate"<<endl;
+  //for(auto& rate : cum_rates){for(auto& r : rate){cout<<r<<endl;}}
+
 }
 
 void Strand::select_link_length(double &length, Linker*& r_selected) const
@@ -147,13 +140,15 @@ void Strand::select_link_length(double &length, Linker*& r_selected) const
     throw out_of_range("No crosslinker in the vicinity");
   }
   IF(true) { cout << "Strand : start selecting a link and a length" << endl; }
+  vector<double> sum_l_cum_rates;
+  vector<vector<double>> cum_rates;
+  compute_cum_rates(sum_l_cum_rates,cum_rates);
   //Check_integrity();
   IF(true) { cout << "Strand : select a r" << endl; }
   uniform_real_distribution<double> distribution(0, sum_l_cum_rates.back());
   double pick_rate = distribution(generator);
-  vector<double> copy_sum_l_cum_rates(sum_l_cum_rates);
-  vector<double>::iterator rate_selec = lower_bound(copy_sum_l_cum_rates.begin(), copy_sum_l_cum_rates.end(), pick_rate);
-  int rindex(distance(copy_sum_l_cum_rates.begin(), rate_selec));
+  vector<double>::iterator rate_selec = lower_bound(sum_l_cum_rates.begin(), sum_l_cum_rates.end(), pick_rate);
+  int rindex(distance(sum_l_cum_rates.begin(), rate_selec));
   /*cout<<"np.array([";
   for(auto& it : copy_sum_l_cum_rates){cout<<it<<",";}cout<<"])";
   cout<<endl<<rindex<<endl;*/
@@ -171,6 +166,8 @@ void Strand::select_link_length(double &length, Linker*& r_selected) const
   vector<double>::iterator rate_ell_selec = lower_bound(copy_cum_rates_rindex.begin(), copy_cum_rates_rindex.end(), pick_rate_ell);
   int ell_index(distance(copy_cum_rates_rindex.begin(), rate_ell_selec) + 1);
   length = (double)ell_index;
+  IF(true){cout<<"ell selected : "<<length<<endl;}
+  IF(true){cout<<"r selected : "<<r_selected->r()[0]<<" "<<r_selected->r()[1]<<" "<<r_selected->r()[2]<<endl;}
 }
 
 void Strand::Check_integrity() const
@@ -189,8 +186,6 @@ Linker* Strand::get_Rleft() const { return Rleft; }
 std::vector<Linker*> Strand::get_r() const { return free_linkers; }
 
 std::vector<Linker*> Strand::get_occ_r() const { return occ_linkers; }
-
-std::vector<std::vector<double>> Strand::get_rates() const { return rates; }
 
 double Strand::get_ell() const { return ell; }
 

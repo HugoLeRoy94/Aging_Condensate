@@ -144,7 +144,7 @@ unique_ptr<Strand> Loop::do_slide(double dl,bool right) const
     return make_unique<Loop>(Rleft,Rright,ell_coordinate_0+dl,ell_coordinate_1,rho0,slide);
   }
 }
-double Loop::compute_binding_rate(double li, Linker* linker)
+double Loop::compute_binding_rate(double li, Linker* linker) const
 {
   // if the distance between linkers larger than the length : return 0.
   if(sqrt(get_square_diff(Rleft->r(), linker->r()))>li){return 0.;} 

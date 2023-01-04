@@ -72,7 +72,7 @@ void Dangling::get_volume_limit(double& key_0_min,double& key_0_max,
 }
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
-double Dangling::compute_binding_rate(double li, Linker* rlinker)
+double Dangling::compute_binding_rate(double li, Linker* rlinker)const
 {
   return exp(1.5*log(1.5/(Pi*li))-1.5*get_square_diff(Rleft->r(),rlinker->r())/li);
 }

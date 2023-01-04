@@ -13,10 +13,8 @@ int main(int argc, char* argv[]){
   double time(S->evolve(&bind));
   //cout<<bind<<endl;
   //cout<<time<<endl;
-  if(isnan(time)){break;}
   //cout<<S->get_F()<<endl;
   }
-  S->reset_crosslinkers();
   delete S;
 
   /*

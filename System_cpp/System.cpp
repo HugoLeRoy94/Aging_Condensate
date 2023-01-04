@@ -50,20 +50,6 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
   }
   double previous(0);
   //--------------- check if the ell_cordinate of the linkers are consistent
-  /*
-  for(auto& strand : loop_link.get_strands()){
-    try{
-      strand->get_Rright();
-      cout<<strand->get_ell_coordinate_0()<<" "<<reinterpret_cast<Loop*>(strand)->get_ell_coordinate_1()<<endl;
-      if(previous!=strand->get_ell_coordinate_0()){exit(0);}
-      previous = reinterpret_cast<Loop*>(strand)->get_ell_coordinate_1();
-      }
-    catch(out_of_range oor){
-      cout<<strand->get_ell_coordinate_0()<<endl;
-      if(previous!=strand->get_ell_coordinate_0()){exit(0);}
-    }
-  }
-  */
   //-----------------------------------------------------------
   if(slide)
   {
@@ -77,11 +63,6 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
     auto next_strand = next(it);
     cum_rates[n] = cum_rates[n - 1] + get_slide_rate(*it,*next_strand,1)+//slide right
                                       get_slide_rate(*it,*next_strand,-1);//slide left
-    /*try{cout<<get_slide_rate(*it,*next_strand,1)<<" ";}
-    catch(invalid_argument ia){}
-    try{cout<<get_slide_rate(*it,*next_strand,-1);}
-    catch(invalid_argument ia){}
-    cout<<endl;*/
     n++;
   }
   }
@@ -103,13 +84,20 @@ int System::pick_random_process(vector<double>& cum_rates) const
   double pick_rate = distribution(generator);
   // becareful : if the rate_selec number is higher than cum_rates.back()  lower_bound returns cum_rates.back()
   vector<double>::iterator rate_selec = lower_bound(cum_rates.begin(), cum_rates.end(), pick_rate);
+  //cout<<"size of the cumulative rate array, and the distance from the beginning  of the rate selected "<<cum_rates.size()<<" "<<distance(cum_rates.begin(),rate_selec)<<endl;
+  if(rate_selec==cum_rates.end()){
+    cout<<"pick_rate is too high"<<pick_rate<<endl;
+    for(auto& rate : cum_rates){cout<<rate<<endl;}
+    exit(0);
+    }
   return distance(cum_rates.begin(),rate_selec);
 }
 
 double System::evolve(bool *bind)
 {
-  
+  IF(true){cout<<"-------------------------------------------------"<<endl;}
   IF(true) { cout << "System : start evolve" << endl; }
+  IF(true){cout<<"-------------------------------------------------"<<endl;}
   IF(true){check_loops_integrity();}
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
@@ -127,6 +115,7 @@ double System::evolve(bool *bind)
   // -----------------------------------------------------------------------------
   // pick a random process
   int rate_select(pick_random_process(cum_rates));
+  //cout<<"index of the rate selected = "<<rate_select<<endl;
   // Exectute the process
   if (rate_select == 0)
   {
@@ -225,7 +214,9 @@ void System::slide_bond(int left_loop_index)
   Strand* left_strand((*loop_link.get_strand(left_loop_index)));
   Strand* right_strand((*loop_link.get_strand(left_loop_index+1)));
   IF(true){
-    cout<<"slide the linker between the index : "<<left_loop_index<<"and the index : "<<left_loop_index+1<<endl;
+    cout<<"number of strands = "<<loop_link.get_strands().size()<<endl;
+    cout<<"slide the linker between the index : "<<left_loop_index<<" and the index : "<<left_loop_index+1<<endl;
+    cout<<"address of the strands selected "<<left_strand<<" "<<right_strand<<endl;
     cout<<"with the coordinates : "<<left_strand->get_ell_coordinate_0()<<" "<<right_strand->get_ell_coordinate_0()<<endl;
   }
   Strand* new_left_strand = loop_link.Create_Strand(*left_strand->do_slide(dl,true));
