@@ -146,9 +146,6 @@ unique_ptr<Strand> Loop::do_slide(double dl,bool right) const
 }
 double Loop::compute_binding_rate(double li, Linker* linker) const
 {
-  // if the distance between linkers larger than the length : return 0.
-  if(sqrt(get_square_diff(Rleft->r(), linker->r()))>li){return 0.;} 
-  else if(sqrt(get_square_diff(linker->r(), Rright->r())) > (ell - li)){return 0.;}
   return exp(1.5 * log(3 * ell / (2 * Pi * li * (ell - li))) - 1.5 * (get_square_diff(Rleft->r(), linker->r()) / li + get_square_diff(linker->r(), Rright->r()) / (ell - li)) + unbound_term);
 }
 void Loop::Check_integrity() const
