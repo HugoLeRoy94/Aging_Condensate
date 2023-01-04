@@ -42,10 +42,10 @@ lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
 lib.print_random_stuff.argtypes=[POINTER(c_void_p)]
 
 class System:
-    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,seed=19874,rho_adjust=False,old_system=None):
+    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,seed=19874,sliding=False,old_system=None):
         if old_system is None:
             self.ell_tot,self.rho0,self.binding_energy = ell_tot,rho0,BindingEnergy
-            self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,seed,rho_adjust)
+            self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,seed,sliding)
         else:
             self.copy(old_system)
     
