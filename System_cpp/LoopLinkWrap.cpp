@@ -11,6 +11,10 @@ Strand* Accessor::clone(const Strand& strand_to_clone)
     return strand_to_clone.clone();
 }
 
+LoopLinkWrap::~LoopLinkWrap()
+{
+    //delete_pointers();
+}
 
 void LoopLinkWrap::set_p_linkers(Strand* newly_created_strand)
 {
@@ -111,6 +115,35 @@ int LoopLinkWrap::get_linker_size() const{
     return linkers.get_number_of_elements();
 }
 
+//void LoopLinkWrap::add_linker(Linker* to_add){
+//    linkers.add(to_add->r()[0],
+//                to_add->r()[1],
+//                to_add->r()[2],
+//                to_add);
+//}
+
+void LoopLinkWrap::diffuse_linkers(){
+    // make a new map3d
+    map3dLink new_map3d;
+for(auto& slice1 : linkers.underlying_array()){
+    for(auto& slice2 : slice1.second){
+        for(auto& linker: slice2.second){
+            if(linker.second->is_free()){
+            linker.second->diffuse();
+            new_map3d.add(linker.second->r()[0],
+                          linker.second->r()[1],
+                          linker.second->r()[2],
+                          linker.second);}
+            else{
+            new_map3d.add(linker.second->r()[0],
+                          linker.second->r()[1],
+                          linker.second->r()[2],
+                          linker.second);}
+            }
+        }
+    }
+    linkers = new_map3d;
+}
 /*
     |\/|. _ _ _ || _  _  _  _     _
     |  ||_\(_(/_||(_|| |(/_(_)|_|_\

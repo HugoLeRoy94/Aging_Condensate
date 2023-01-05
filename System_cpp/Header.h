@@ -41,8 +41,6 @@ struct LessLoop{
     {return l1<l2;}
     }
 };
-typedef map3d<double,double,double,std::array<double,3>> map3dR;
-typedef std::map<std::array<double,3>*,std::set<Strand*,LessLoop>> map_r_strand;
 #include "Linker.h"
 #include "LoopLinkWrap.h"
 

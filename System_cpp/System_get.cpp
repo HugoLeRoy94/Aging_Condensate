@@ -154,8 +154,10 @@ void System::check_loops_integrity()
       }
     }
   }
+  IF(true){cout<<"Strands and linkers are consistent"<<endl;}
   // ccheck that the strand of every linkers contain the given linker
   //cout<<"linkers address :"<<endl;
+  /*
   ofstream out_linker;
   out_linker.open("linkers.txt",ios::out);
   for(auto& slice1:loop_link.get_linkers())
@@ -179,6 +181,7 @@ void System::check_loops_integrity()
     }
   }
   out_linker.close();
+  */
 }
 
 void System::get_r_system(double *r, int size)const

@@ -24,3 +24,16 @@ void Linker::print_position(string end)const
 {
     cout<<R[0]<<" "<<R[1]<<" "<<R[2]<<end;
 }
+void Linker::diffuse()
+{
+    // chose a direction to make the move.
+    normal_distribution<double> distribution(0.,1.);
+    double dx(distribution(generator));
+    double dy(distribution(generator));
+    double dz(distribution(generator));
+    double norm = sqrt(dx*dx+dy*dy+dz*dz);
+    R[0]+=dx/norm;
+    R[1]+=dy/norm;
+    R[2]+=dz/norm;
+
+}

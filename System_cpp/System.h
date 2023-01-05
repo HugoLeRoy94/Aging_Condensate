@@ -2,7 +2,7 @@
 #define System_h
 class System{
 public:
-    System(double ell_tot,double rho0,double temperature,int seed,bool sliding=0); // constructor with the Parameters
+    System(double ell_tot,double rho0,double BindingEnergy,double k_diff,int seed,bool sliding=0); // constructor with the Parameters
     ~System(); // destructor that have to delete all the loops
     double evolve(bool* bind); // make the system evolve and return the time increment.
     void reset_crosslinkers();
@@ -32,6 +32,7 @@ private:
     void add_bond(int loop_selected);
     void unbind_random_loop();
     void slide_bond(int left_loop);
+    void move_linkers();
 
     double choose_dl(int left_loop_index);
     double compute_slide_S(Strand* left_strand, Strand* right_strand,double dl) const;
@@ -44,7 +45,7 @@ private:
     void check_loops_integrity();
     //std::mt19937_64 generator;
     std::uniform_int_distribution<int> distrib;
-    double ell,D,rho,binding_energy;
+    double ell,D,rho,binding_energy,kdiff;
     bool slide;
 
     LoopLinkWrap loop_link;

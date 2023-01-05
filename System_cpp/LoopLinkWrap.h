@@ -9,6 +9,7 @@ class LoopLinkWrap
 
         void set_p_linkers(Strand* newly_created_strand);
     public:
+        ~LoopLinkWrap();
         /*
             (~_|_ _ _  _  _| _
             _) | | (_|| |(_|_\                                                              
@@ -32,7 +33,8 @@ class LoopLinkWrap
             |_|| ||<(/_| _\                    
        */
                 
-        
+        //void add_linker(Linker* to_add);
+
         void create_new_free_linker(double x,double y, double z);
         
         void create_new_occupied_linker(double x,double y,double z);
@@ -44,6 +46,8 @@ class LoopLinkWrap
         std::map<double,std::map<double,std::map<double,Linker*>>>const &  get_linkers() const;
         
         map3dLink get_linkers3d() const;
+
+        void diffuse_linkers();
         
         /*
         |\/|. _ _ _ || _  _  _  _     _

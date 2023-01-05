@@ -138,11 +138,11 @@ double System::evolve(bool *bind)
     move_linkers();
     *bind = false;
   }
-  else if(rate_select>=loop_link.get_strand_size()+1)
+  else if(rate_select>=loop_link.get_strand_size()+2)
   {
     // slide
     IF(true){cout<<"System : slide a bond"<<endl;}
-    int loop_index_left(rate_select-loop_link.get_strand_size()-1);
+    int loop_index_left(rate_select-loop_link.get_strand_size()-2);
     slide_bond(loop_index_left);
     *bind=false;
   }
@@ -150,13 +150,14 @@ double System::evolve(bool *bind)
   {
     // add a linker to a strand or slide it
     IF(true) { cout << "System : add a bond" << endl; }
-    int loop_index(rate_select-1); // rate_select = 1 => first bond
+    int loop_index(rate_select-2); // rate_select = 1 => first bond
 
     add_bond(loop_index);
     *bind = true;
   }
   // remake the strands whose rates have been modified by the event.
   IF(true){check_loops_integrity();}
+  IF(true){cout<<"output the value of the rates"<<endl;}
   IF(true){for(auto& rates : cum_rates){cout<<rates<<endl;}}
   return draw_time(cum_rates.back());
 }
@@ -232,18 +233,23 @@ void System::slide_bond(int left_loop_index)
     cout<<"address of the strands selected "<<left_strand<<" "<<right_strand<<endl;
     cout<<"with the coordinates : "<<left_strand->get_ell_coordinate_0()<<" "<<right_strand->get_ell_coordinate_0()<<endl;
   }
+  
   Strand* new_left_strand = loop_link.Create_Strand(*left_strand->do_slide(dl,true));
   Strand* new_right_strand = loop_link.Create_Strand(*right_strand->do_slide(dl,false));
   loop_link.Remove_Strand(left_strand);
   loop_link.Remove_Strand(right_strand);
 }
+
 void System::move_linkers()
 {
+  //LoopLinkWrap new_loop_link;
   // move the linkers
-
+  IF(true){cout<<"System : Move_linkers : diffuse linkers"<<endl;}
+  loop_link.diffuse_linkers();
   // remake all the strands
-
-
+  set<Strand*,LessLoop> newstrands;
+  IF(true){cout<<"System : move_linkers :recreate the links"<<endl;}
+  loop_link.remake_strands(loop_link.get_strands());
 }
 
 double System::choose_dl(int left_loop_index)
@@ -293,7 +299,7 @@ void System::reset_crosslinkers()
   // set all the crosslinker into the linker_to_strand
   // which also add the bound extremities
   reset_loops(new_loop_link);
-  loop_link.delete_linkers();
+  loop_link.delete_linkers(); 
   loop_link = new_loop_link;
   IF(true){check_loops_integrity();}
 }
