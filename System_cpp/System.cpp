@@ -2,7 +2,7 @@
 
 using namespace std;
 
-System::System(double ell_tot, double rho0, double BindingEnergy, int seed,bool sliding) : distrib(1, 10000000)
+System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, int seed,bool sliding) : distrib(1, 10000000)
 {
     IF(true) { cout << "System : creator" << endl; }
     // srand(seed);
@@ -13,6 +13,7 @@ System::System(double ell_tot, double rho0, double BindingEnergy, int seed,bool 
     rho = rho0;
     slide=sliding;
     binding_energy = BindingEnergy;
+    kdiff = k_diff;
     Linker* R0 = new Linker({0, 0, 0});
     Dangling dummy_dangling(R0, 0., ell, rho,slide); // dummy dangling that helps generate crosslinkers but has none initially
     Strand* dummy_strand(loop_link.Create_Strand(dummy_dangling));
@@ -42,7 +43,8 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
 {
   IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
   cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
-  int n(1);
+  cum_rates[1] = kdiff;
+  int n(2);
   for (auto &it : loop_link.get_strands())
   {
     cum_rates[n] = cum_rates[n - 1] + it->get_total_binding_rates();
@@ -106,9 +108,14 @@ double System::evolve(bool *bind)
   if(slide)
   // the +1 is for removing a bond
   // the -1 is for the (0,0,0) linker that cannot be slide
-    cum_rates.resize(loop_link.get_strand_size()*2 + 1-1,0); 
+  // +1 is for diffusion of free linkers
+    cum_rates.resize(loop_link.get_strand_size()*2 + 1-1+1,0); 
   else
-    cum_rates.resize(loop_link.get_strand_size() + 1,0); // the +1 is for removing a bond
+    // the +1 is for removing a bond
+    // the +1 is for diffusion
+    cum_rates.resize(loop_link.get_strand_size() + 1 +1 ,0); 
+  // -----------------------------------------------------------------------------
+  // -----------------------------------------------------------------------------
   try{compute_cum_rates(cum_rates);}
   catch(invalid_argument& e){return 0.;}
   // -----------------------------------------------------------------------------
@@ -123,6 +130,12 @@ double System::evolve(bool *bind)
     IF(true) { cout << "System : remove a bond" << endl; }
     // unbind
     unbind_random_loop();
+    *bind = false;
+  }
+  else if(rate_select == 1)
+  {
+    IF(true){cout<<"System : move the linkers"<<endl;}
+    move_linkers();
     *bind = false;
   }
   else if(rate_select>=loop_link.get_strand_size()+1)
@@ -224,6 +237,14 @@ void System::slide_bond(int left_loop_index)
   loop_link.Remove_Strand(left_strand);
   loop_link.Remove_Strand(right_strand);
 }
+void System::move_linkers()
+{
+  // move the linkers
+
+  // remake all the strands
+
+
+}
 
 double System::choose_dl(int left_loop_index)
 {
@@ -323,14 +344,23 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
 double System::compute_slide_S(Strand* left_strand, Strand* right_strand,double dl) const
 {
   // left strand is always a loop
-  if(left_strand->get_ell_coordinate_0()-(left_strand->get_ell_coordinate_1()+dl)<=1)
+  if(
+    // if the slided linker touches its left neighbor
+    left_strand->get_ell_coordinate_0()-(left_strand->get_ell_coordinate_1()+dl)<=1 or 
+    // uf the slided linker touches its right neighbor
+    (right_strand->get_ell_coordinate_0()+dl)-right_strand->get_ell_coordinate_1()<=1 or
+    // if the left strand is not long enough anymore:
+    left_strand->get_ell_coordinate_0()-(left_strand->get_ell_coordinate_1()+dl)<diff(left_strand->get_Rleft()->r(),left_strand->get_Rright()->r())
+    )
   {
     throw invalid_argument("the two left linkers overlap");
   }
-  if((right_strand->get_ell_coordinate_0()+dl)-right_strand->get_ell_coordinate_1()<=1)
-  {
-    throw invalid_argument("the two right linkers overlap");
-  }
+  try{right_strand->get_Rright();}
+  catch(out_of_range oor){return left_strand->get_S(-dl)+right_strand->get_S(dl)-//slide right
+                                  (left_strand->get_S(0)+right_strand->get_S(0));}
+  // if the right strand is not long enough anymore:
+  if((right_strand->get_ell_coordinate_0()+dl)-right_strand->get_ell_coordinate_1()<diff(right_strand->get_Rleft()->r(),right_strand->get_Rright()->r()))
+  {return 0.;}
   return left_strand->get_S(-dl)+right_strand->get_S(dl)-//slide right
          (left_strand->get_S(0)+right_strand->get_S(0));
 
