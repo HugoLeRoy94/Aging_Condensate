@@ -8,15 +8,13 @@ int main(int argc, char* argv[]){
   double BindingEnergy(-10);
   bool bind(true);
   double* R;
-  System* S = new System(ell_tot,rho0,BindingEnergy,19880,true);
+  System* S = new System(ell_tot,rho0,BindingEnergy,1.,19880,true);
   for(int n(0);n<t_tot;n++){
   double time(S->evolve(&bind));
   //cout<<bind<<endl;
   //cout<<time<<endl;
-  if(isnan(time)){break;}
   //cout<<S->get_F()<<endl;
   }
-  S->reset_crosslinkers();
   delete S;
 
   /*

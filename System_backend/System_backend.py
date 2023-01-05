@@ -13,7 +13,7 @@ from ctypes import c_bool
 from ctypes import byref
 lib = cdll.LoadLibrary(str(pathlib.Path(__file__).parent.absolute())+'/../System_cpp/lib.so')
 
-lib.create_system.argtypes=[c_double,c_double,c_double,c_int,c_bool]
+lib.create_system.argtypes=[c_double,c_double,c_double,c_double,c_int,c_bool]
 lib.create_system.restype=POINTER(c_void_p)
 lib.CopySystem.argtypes = [POINTER(c_void_p)]
 lib.CopySystem.restype = POINTER(c_void_p)
@@ -42,10 +42,10 @@ lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
 lib.print_random_stuff.argtypes=[POINTER(c_void_p)]
 
 class System:
-    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,seed=19874,sliding=False,old_system=None):
+    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,kdiff=1.,seed=19874,sliding=False,old_system=None):
         if old_system is None:
-            self.ell_tot,self.rho0,self.binding_energy = ell_tot,rho0,BindingEnergy
-            self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,seed,sliding)
+            self.ell_tot,self.rho0,self.binding_energy,self.k_diff = ell_tot,rho0,BindingEnergy,kdiff
+            self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,self.k_diff,seed,sliding)
         else:
             self.copy(old_system)
     
@@ -53,6 +53,7 @@ class System:
         self.ell_tot = old_system.ell_tot
         self.rho0 = old_system.rho0
         self.binding_energy = old_system.binding_energy
+        self.k_diff = old_system.k_diff
         self.Address = lib.CopySystem(old_system.Address)
     
     def __del__(self):

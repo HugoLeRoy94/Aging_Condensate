@@ -36,7 +36,7 @@ private:
   double Omega(double ell) const;
   // use random_in_sphere to generate  a number of linkers
    // build le vector p_linkers from the overall map of the system:
-  double compute_binding_rate(double li, Linker* rlinker) override;
+  double compute_binding_rate(double li, Linker* rlinker) const override;
   
 };
 #endif

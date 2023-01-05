@@ -16,7 +16,7 @@ reset_linker_time = 10 # number of time per simulation the crosslinkers are rese
 filename = 'rho/N_E_L50_rho2_5_E-4.npy'
 
 def get_N(BindingEnergy,seed):
-    S = backend.System(ell_tot,rho0,BindingEnergy,seed=seed)
+    S = backend.System(ell_tot,rho0,BindingEnergy,seed=seed,sliding=False)
     for t in range(teq):
         if t%t_compute//reset_linker_time==0 and t!=0:
             S.reset_crosslinkers()

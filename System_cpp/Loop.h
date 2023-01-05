@@ -41,7 +41,7 @@ private:
   // number of configuration of a polymer bound in r1 and r2 and length ell
   double Omega(Linker* r1, Linker* r2, double ell) const;
   // inner function to compute all rates of the loop
-  double compute_binding_rate(double li, Linker* linker) override;
+  double compute_binding_rate(double li, Linker* linker) const override;
   
 };
 #endif

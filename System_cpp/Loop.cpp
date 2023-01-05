@@ -144,8 +144,10 @@ unique_ptr<Strand> Loop::do_slide(double dl,bool right) const
     return make_unique<Loop>(Rleft,Rright,ell_coordinate_0+dl,ell_coordinate_1,rho0,slide);
   }
 }
-double Loop::compute_binding_rate(double li, Linker* linker)
+double Loop::compute_binding_rate(double li, Linker* linker) const
 {
+  if(diff(Rleft->r(), linker->r())>li or diff(linker->r(), Rright->r())>ell - li)
+  {return 0.;}
   return exp(1.5 * log(3 * ell / (2 * Pi * li * (ell - li))) - 1.5 * (get_square_diff(Rleft->r(), linker->r()) / li + get_square_diff(linker->r(), Rright->r()) / (ell - li)) + unbound_term);
 }
 void Loop::Check_integrity() const

@@ -9,13 +9,14 @@ class Linker
     public:
         Linker(std::array<double,3> r_c);
         std::array<double,3> r() const;
-        void set_free(); // also 
+        void set_free();
         void set_bounded();
         bool is_free() const;
         void add_strand(Strand* strand);
         void remove_strand(Strand* strand);
         std::set<Strand*,LessLoop> get_strands() const;
         void print_position(std::string sep)const;
+        void diffuse();
 };
 class map3dLink : public map3d<double,double,double,Linker*>
 {
