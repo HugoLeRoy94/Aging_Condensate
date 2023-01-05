@@ -4,7 +4,7 @@ class System{
 public:
     System(double ell_tot,double rho0,double BindingEnergy,double k_diff,int seed,bool sliding=0); // constructor with the Parameters
     ~System(); // destructor that have to delete all the loops
-    double evolve(bool* bind); // make the system evolve and return the time increment.
+    double evolve(int* bind); // make the system evolve and return the time increment.
     void reset_crosslinkers();
     // -----------------------------------------------------------------------------
     // -----------------------------accessor----------------------------------------

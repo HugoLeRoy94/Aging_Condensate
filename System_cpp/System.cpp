@@ -95,7 +95,7 @@ int System::pick_random_process(vector<double>& cum_rates) const
   return distance(cum_rates.begin(),rate_selec);
 }
 
-double System::evolve(bool *bind)
+double System::evolve(int *bind)
 {
   IF(true){cout<<"-------------------------------------------------"<<endl;}
   IF(true) { cout << "System : start evolve" << endl; }
@@ -130,13 +130,13 @@ double System::evolve(bool *bind)
     IF(true) { cout << "System : remove a bond" << endl; }
     // unbind
     unbind_random_loop();
-    *bind = false;
+    *bind = 0;
   }
   else if(rate_select == 1)
   {
     IF(true){cout<<"System : move the linkers"<<endl;}
     move_linkers();
-    *bind = false;
+    *bind = 1;
   }
   else if(rate_select>=loop_link.get_strand_size()+2)
   {
@@ -144,7 +144,7 @@ double System::evolve(bool *bind)
     IF(true){cout<<"System : slide a bond"<<endl;}
     int loop_index_left(rate_select-loop_link.get_strand_size()-2);
     slide_bond(loop_index_left);
-    *bind=false;
+    *bind=2;
   }
   else
   {
@@ -153,7 +153,7 @@ double System::evolve(bool *bind)
     int loop_index(rate_select-2); // rate_select = 1 => first bond
 
     add_bond(loop_index);
-    *bind = true;
+    *bind = 3;
   }
   // remake the strands whose rates have been modified by the event.
   IF(true){check_loops_integrity();}

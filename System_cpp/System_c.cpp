@@ -35,7 +35,7 @@ extern "C"
     return system->get_N_strand();
   }
   
-  double evolve(void* ptr, bool* bind)
+  double evolve(void* ptr, int* bind)
   {
     System* system = reinterpret_cast<System*>(ptr);
     return system->evolve(bind);

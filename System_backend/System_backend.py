@@ -18,7 +18,7 @@ lib.create_system.restype=POINTER(c_void_p)
 lib.CopySystem.argtypes = [POINTER(c_void_p)]
 lib.CopySystem.restype = POINTER(c_void_p)
 
-lib.evolve.argtypes=[POINTER(c_void_p),POINTER(c_bool)]
+lib.evolve.argtypes=[POINTER(c_void_p),POINTER(c_int)]
 lib.evolve.restype=c_double
 lib.delete_System.argtypes = [POINTER(c_void_p)]
 lib.reset_crosslinkers.argypes = POINTER(c_void_p)
@@ -64,14 +64,14 @@ class System:
         Make the system evolves 
         """
         if steps>1:
-            binds,time = np.zeros(steps,dtype=bool),np.zeros(steps,dtype=float)
+            binds,time = np.zeros(steps,dtype=int),np.zeros(steps,dtype=float)
             for dt in range(steps):
-                bind = c_bool(False)
+                bind = c_int(0)
                 time[dt] = lib.evolve(self.Address,byref(bind))
                 binds[dt] = bind.value
             return binds,time
         else:
-            bind = c_bool(False)
+            bind = c_int(0)
             time = lib.evolve(self.Address,byref(bind))
             return bind.value, time
     
