@@ -43,16 +43,13 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
 {
   IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
   cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
-  cum_rates[1] = kdiff;
+  cum_rates[1] = kdiff+cum_rates[0];
   int n(2);
   for (auto &it : loop_link.get_strands())
   {
     cum_rates[n] = cum_rates[n - 1] + it->get_total_binding_rates();
     n++;
   }
-  double previous(0);
-  //--------------- check if the ell_cordinate of the linkers are consistent
-  //-----------------------------------------------------------
   if(slide)
   {
   // iterate over each loop and the next one (skip the last)
@@ -77,6 +74,7 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
     {cout<<loop->get_r().size()<<endl;}}
     throw invalid_argument("cum_rates.back()=0 no available process"); 
   }
+  //for(auto& rate : cum_rates){cout<<rate<<endl;}
 }
 
 int System::pick_random_process(vector<double>& cum_rates) const
@@ -105,15 +103,15 @@ double System::evolve(int *bind)
   // -----------------------------------------------------------------------------
   // compute the cumulative transition rates for each loop
   vector<double> cum_rates;
-  if(slide)
+  if(slide){
   // the +1 is for removing a bond
   // the -1 is for the (0,0,0) linker that cannot be slide
   // +1 is for diffusion of free linkers
-    cum_rates.resize(loop_link.get_strand_size()*2 + 1-1+1,0); 
-  else
+    cum_rates.resize(loop_link.get_strand_size()*2 + 1-1+1,0);}
+  else{
     // the +1 is for removing a bond
     // the +1 is for diffusion
-    cum_rates.resize(loop_link.get_strand_size() + 1 +1 ,0); 
+    cum_rates.resize(loop_link.get_strand_size() + 1 +1 ,0);}
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
   try{compute_cum_rates(cum_rates);}
