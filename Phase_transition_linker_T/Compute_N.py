@@ -4,16 +4,16 @@ sys.path.append('/home/hcleroy/PostDoc/Simulation/Aging_Condensates/System_backe
 import System_backend as backend
 from multiprocessing import Pool
 
-Emin,Emax = -400.,0
+Emin,Emax = -50.,0
 Npoints = 100
 ell_tot = 50
 #distance_anchor = 1000.
-rho0 = 2.5*10**-4
+rho0 = 6*10**-4
 teq = 1000
 t_compute = 1000
 Nreplica = 100 # number of copy of the system we generate to overcome nonergodicity
 reset_linker_time = 10 # number of time per simulation the crosslinkers are reset
-filename = 'rho/N_E_L50_rho2_5_E-4.npy'
+filename = 'rho/N_E_L50_rho6_E-4.npy'
 
 def get_N(BindingEnergy,seed):
     S = backend.System(ell_tot,rho0,BindingEnergy,seed=seed,sliding=False)
