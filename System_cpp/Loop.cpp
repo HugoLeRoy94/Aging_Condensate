@@ -148,7 +148,7 @@ double Loop::compute_binding_rate(double li, Linker* linker) const
 {
   if(diff(Rleft->r(), linker->r())>li or diff(linker->r(), Rright->r())>ell - li)
   {return 0.;}
-  return exp(1.5 * log(3 * ell / (2 * Pi * li * (ell - li))) - 1.5 * (get_square_diff(Rleft->r(), linker->r()) / li + get_square_diff(linker->r(), Rright->r()) / (ell - li)) + unbound_term);
+  return 1/ell*exp(1.5 * log(3 * ell / (2 * Pi * li * (ell - li))) - 1.5 * (get_square_diff(Rleft->r(), linker->r()) / li + get_square_diff(linker->r(), Rright->r()) / (ell - li)) + unbound_term);
 }
 void Loop::Check_integrity() const
 {

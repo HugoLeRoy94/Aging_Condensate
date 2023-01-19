@@ -2,21 +2,26 @@
 #define Linker_h
 class Linker
 {
+    friend class LoopLinkWrap;
+    friend class map3dLink;
     private:
         std::array<double,3> R;
         bool free;
         std::set<Strand*,LessLoop> strands;
-    public:
-        Linker(std::array<double,3> r_c);
-        std::array<double,3> r() const;
         void set_free();
         void set_bounded();
-        bool is_free() const;
         void add_strand(Strand* strand);
+        void diffuse();        
+        Linker(std::array<double,3> r_c);
+        ~Linker();
+    public:                
+        std::array<double,3> r() const;
+        bool is_free() const;
         void remove_strand(Strand* strand);
         std::set<Strand*,LessLoop> get_strands() const;
         void print_position(std::string sep)const;
-        void diffuse();
+        static int counter;
+    
 };
 class map3dLink : public map3d<double,double,double,Linker*>
 {
@@ -29,6 +34,37 @@ class map3dLink : public map3d<double,double,double,Linker*>
                 }
             }
             }}
+        Linker* get_random_free_linker()
+        {
+            Linker* random_linker; // the result
+            bool free(false); // while the linker isn't free keep drawing random linkers
+            int step(0);
+            while (!free && step<pow(10.,7.))
+            {
+            auto item1(m.begin());            
+            std::uniform_int_distribution<int> distribution(0,m.size()-1);
+            std::advance(item1, distribution(generator));
+
+            auto item2((*item1).second.begin());
+            distribution = std::uniform_int_distribution<int>(0,(*item1).second.size()-1);
+            std::advance(item2,distribution(generator));
+
+            auto item3((*item2).second.begin());
+            distribution = std::uniform_int_distribution<int>(0,(*item2).second.size()-1);
+            std::advance(item3,distribution(generator));
+
+            free = (*item3).second->is_free();
+            random_linker = (*item3).second;
+            step++;
+            }
+            if (step>=pow(10.,7.)){
+                std::cout<<"no free linker to draw Nfree_linker certainly wrong"<<std::endl;
+                throw std::out_of_range("Nfree_wrong ?");
+                }
+
+            return random_linker;
+
+        }
         void slice_free(double key_0_min, double key_0_max, 
                             double key_1_min,double key_1_max,
                             double key_2_min, double key_2_max,

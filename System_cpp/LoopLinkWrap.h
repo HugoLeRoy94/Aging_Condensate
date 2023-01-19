@@ -6,9 +6,10 @@ class LoopLinkWrap
     private:
         map3dLink linkers;
         std::set<Strand*,LessLoop> strands;
-
+        int Nfree_linker;
         void set_p_linkers(Strand* newly_created_strand);
     public:
+        LoopLinkWrap();
         ~LoopLinkWrap();
         /*
             (~_|_ _ _  _  _| _
@@ -35,6 +36,12 @@ class LoopLinkWrap
                 
         //void add_linker(Linker* to_add);
 
+        void set_free(Linker* link);
+
+        void set_occupied(Linker* link);
+
+        int get_N_free_linker() const;
+
         void create_new_free_linker(double x,double y, double z);
         
         void create_new_occupied_linker(double x,double y,double z);
@@ -47,7 +54,7 @@ class LoopLinkWrap
         
         map3dLink get_linkers3d() const;
 
-        void diffuse_linkers();
+        Linker* diffuse_random_free_linker();
         
         /*
         |\/|. _ _ _ || _  _  _  _     _

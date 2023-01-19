@@ -10,7 +10,7 @@ Strand* Accessor::clone(const Strand& strand_to_clone)
 {
     return strand_to_clone.clone();
 }
-
+LoopLinkWrap::LoopLinkWrap(){Nfree_linker=0.;}
 LoopLinkWrap::~LoopLinkWrap()
 {
     //delete_pointers();
@@ -80,11 +80,27 @@ set<Strand*,LessLoop> const & LoopLinkWrap::get_strands() const {return strands;
     |_|| ||<(/_| _\                    
 */
 
+void LoopLinkWrap::set_free(Linker* link)
+{
+    Nfree_linker++;
+    link->set_free();
+}
 
+void LoopLinkWrap::set_occupied(Linker* link)
+{
+    Nfree_linker--;
+    link->set_bounded();
+}
 
 void LoopLinkWrap::create_new_free_linker(double x,double y, double z)
 {
     linkers.add(x,y,z,new Linker({x,y,z}));
+    Nfree_linker++;
+}
+
+int LoopLinkWrap::get_N_free_linker() const
+{
+    return Nfree_linker;
 }
 
 void LoopLinkWrap::create_new_occupied_linker(double x, double y, double z)
@@ -99,6 +115,7 @@ void LoopLinkWrap::delete_linkers()
     // Simply delete all the pointer in linkers and initialize a new empty map
     IF(true){cout<<"LoopLinkWrap : delete the linkers pointer"<<endl;}
     // doesn t delete them from the strands objects
+    Nfree_linker = 0.;
     linkers.delete_pointers();
     map3dLink newlinkers; // make a new empty map3d
     linkers = newlinkers;
@@ -121,7 +138,21 @@ int LoopLinkWrap::get_linker_size() const{
 //                to_add->r()[2],
 //                to_add);
 //}
+Linker* LoopLinkWrap::diffuse_random_free_linker(){
+    //cout<<"looplink::diffuse_random_free_linker : Nfree = "<<Nfree_linker<<endl;
+    //cout<<"looplink::diffuse_random_free_linker : select a linker"<<endl;
 
+    Linker* random_link(linkers.get_random_free_linker());
+    //cout<<"looplink::diffuse_random_free_linker : remove it from the map"<<endl;
+    linkers.remove(random_link->r()[0],random_link->r()[1],random_link->r()[2]);
+    //cout<<"looplink::diffuse_random_free_linker : move the linker"<<endl;
+    random_link->diffuse();
+    //cout<<"looplink::diffuse_random_free_linker : add the linker into the map with new key"<<endl;
+    linkers.add(random_link->r()[0],random_link->r()[1],random_link->r()[2],random_link);
+    //cout<<"looplink::diffuse_random_free_linker : return the linker"<<endl;
+    return random_link;
+}
+/*
 void LoopLinkWrap::diffuse_linkers(){
     // make a new map3d
     map3dLink new_map3d;
@@ -144,6 +175,7 @@ for(auto& slice1 : linkers.underlying_array()){
     }
     linkers = new_map3d;
 }
+*/
 /*
     |\/|. _ _ _ || _  _  _  _     _
     |  ||_\(_(/_||(_|| |(/_(_)|_|_\

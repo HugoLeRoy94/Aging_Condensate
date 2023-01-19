@@ -27,7 +27,7 @@ public:
     T operator() (T0 x, T1 y, T2 z) { // C++23 required
         return m[x][y][z];
     }
-    void print()const{for(auto& it : m){for(auto& it2 : it.second){for(auto& it3 : it2.second){std::cout<<it3.second[0]<<" "<<it3.second[1]<<" "<<it3.second[2]<<std::endl;}}}}
+    //void print()const{for(auto& it : m){for(auto& it2 : it.second){for(auto& it3 : it2.second){std::cout<<it3.second[0]<<" "<<it3.second[1]<<" "<<it3.second[2]<<std::endl;}}}}
     auto& underlying_array() const{ return m; }
     std::vector<T> slice(T0 key_0_min, T0 key_0_max, 
                         T1 key_1_min,T1 key_1_max,
@@ -118,6 +118,8 @@ public:
     void remove(T0 key1, T1 key2, T2 key3)
     {
         m[key1][key2].erase(key3);
+        if(m[key1][key2].size()==0){m[key1].erase(key2);}
+        if(m[key1].size()==0){m.erase(key1);}
     }
     int get_number_of_elements() const
     {
@@ -127,6 +129,17 @@ public:
           size+=it2.second.size();
         }}
       return size;
+    }
+    void print() const
+    {
+      for(auto& it : m){
+        for(auto& it2: it.second){
+          for(auto& it3: it2.second){
+            std::cout<<m.size()<<" "<<it.second.size()<<" "<<it2.second.size()<<std::endl;
+            std::cout<<it.first<<" "<<it2.first<<" "<<it3.first<<" "<<it3.second<<std::endl;
+          }
+        }
+      }
     }
 };
 #endif

@@ -32,7 +32,7 @@ private:
     void add_bond(int loop_selected);
     void unbind_random_loop();
     void slide_bond(int left_loop);
-    void move_linkers();
+    void move_random_free_linkers();
 
     double choose_dl(int left_loop_index);
     double compute_slide_S(Strand* left_strand, Strand* right_strand,double dl) const;

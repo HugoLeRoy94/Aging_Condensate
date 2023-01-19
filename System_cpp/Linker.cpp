@@ -2,7 +2,8 @@
 
 using namespace std;
 
-Linker::Linker(std::array<double,3> r_c){R = r_c;free=true;}
+Linker::Linker(std::array<double,3> r_c){R = r_c;free=true; Linker::counter++;}
+Linker::~Linker(){Linker::counter--;}
 
 array<double,3> Linker::r() const{return R;}
 

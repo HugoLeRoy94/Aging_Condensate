@@ -76,7 +76,7 @@ double Dangling::compute_binding_rate(double li, Linker* rlinker)const
 {
   if(diff(Rleft->r(), rlinker->r())>li)
   {return 0.;}
-  return exp(1.5*log(1.5/(Pi*li))-1.5*get_square_diff(Rleft->r(),rlinker->r())/li);
+  return exp(1.5*log(1.5/(Pi*li))-1.5*get_square_diff(Rleft->r(),rlinker->r())/li)/ell;
 }
 
 pair<unique_ptr<Strand>,unique_ptr<Strand>> Dangling::bind() const
@@ -88,7 +88,7 @@ pair<unique_ptr<Strand>,unique_ptr<Strand>> Dangling::bind() const
   Linker* linker_selected;
   double length;
   select_link_length(length,linker_selected);
-  linker_selected->set_bounded();
+  //linker_selected->set_bounded();
   unique_ptr<Loop> left_loop = make_unique<Loop>(Rleft,linker_selected,ell_coordinate_0,ell_coordinate_0+length,rho0,slide);
   unique_ptr<Dangling> dangling = make_unique<Dangling>(linker_selected,ell_coordinate_0+length,ell-length,rho0,slide);
   return  {move(left_loop),move(dangling)};

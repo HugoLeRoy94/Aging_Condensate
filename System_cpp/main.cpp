@@ -1,17 +1,17 @@
 #include "Header.h"
 using namespace std;
 int main(int argc, char* argv[]){
-  int t_tot(100);
+  int t_tot(10000);
   double ell_tot(100.);
   //double distance_anchor(1000.);
   double rho0(pow(10,-2));
   double BindingEnergy(-10);
   int bind(0.);
   double* R;
-  System* S = new System(ell_tot,rho0,BindingEnergy,1.,19880,true);
+  System* S = new System(ell_tot,rho0,BindingEnergy,exp(BindingEnergy),19880,false);
   for(int n(0);n<t_tot;n++){
   double time(S->evolve(&bind));
-  //cout<<bind<<endl;
+  cout<<bind<<endl;
   //cout<<time<<endl;
   //cout<<S->get_F()<<endl;
   }

@@ -14,12 +14,14 @@ System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, 
     slide=sliding;
     binding_energy = BindingEnergy;
     kdiff = k_diff;
-    Linker* R0 = new Linker({0, 0, 0});
+    loop_link.create_new_occupied_linker(0.,0.,0.);
+    Linker* R0 = loop_link.get_linkers3d()(0.,0.,0.);
     Dangling dummy_dangling(R0, 0., ell, rho,slide); // dummy dangling that helps generate crosslinkers but has none initially
     Strand* dummy_strand(loop_link.Create_Strand(dummy_dangling));
     // ---------------------------------------------------------------------------
     //-----------------------------initialize crosslinkers------------------------
     set<array<double,3>> linkers(generate_crosslinkers(0));
+  
     for(auto& linker : linkers)
     {
       loop_link.create_new_free_linker(linker.at(0),linker.at(1),linker.at(2));// the linker is free by default
@@ -37,13 +39,14 @@ System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, 
 System::~System()
 {
   loop_link.delete_pointers();
+  Linker::counter = 0;
 }
 
 void System::compute_cum_rates(vector<double>& cum_rates) const
 {
   IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
   cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
-  cum_rates[1] = kdiff+cum_rates[0];
+  cum_rates[1] = kdiff*loop_link.get_N_free_linker()+cum_rates[0];
   int n(2);
   for (auto &it : loop_link.get_strands())
   {
@@ -133,7 +136,7 @@ double System::evolve(int *bind)
   else if(rate_select == 1)
   {
     IF(true){cout<<"System : move the linkers"<<endl;}
-    move_linkers();
+    move_random_free_linkers();
     *bind = 1;
   }
   else if(rate_select>=loop_link.get_strand_size()+2)
@@ -170,7 +173,8 @@ void System::add_bond(int loop_index)
     IF(true) { cout << "System : select a length and a r" << endl; }
     // select a link to bind to and ask the selected loop to return two new loops.
     pair<unique_ptr<Strand>,unique_ptr<Strand>> new_strands((*loop_selec)->bind());
-    new_strands.first->get_Rright()->set_bounded(); // set the linker to bounded
+    //new_strands.first->get_Rright()->set_bounded(); // set the linker to bounded
+    loop_link.set_occupied(new_strands.first->get_Rright());
     // Create the pointers in the wrapper
     IF(true){cout<< "System : add_bond : build the list of strands that are affected"<<endl;}
     Strand* strand_left = loop_link.Create_Strand(*new_strands.first);
@@ -200,7 +204,8 @@ void System::unbind_random_loop()
   IF(true) { cout << "System : unbind loop from the loop_left : "<<loop_selec_left<<" and the right : "<<loop_selec_right << endl; }
 
   // set the linker that was bound to unbound
-  loop_selec_left->get_Rright()->set_free();
+  //loop_selec_left->get_Rright()->set_free();
+  loop_link.set_free(loop_selec_left->get_Rright());
   // create a new loop that is the combination of both inputs
 
   Strand* loop(loop_link.Create_Strand(*loop_selec_right->unbind_from(loop_selec_left)));
@@ -238,16 +243,25 @@ void System::slide_bond(int left_loop_index)
   loop_link.Remove_Strand(right_strand);
 }
 
-void System::move_linkers()
+void System::move_random_free_linkers()
 {
   //LoopLinkWrap new_loop_link;
   // move the linkers
   IF(true){cout<<"System : Move_linkers : diffuse linkers"<<endl;}
-  loop_link.diffuse_linkers();
+  IF(true){cout<<"System : move_random_free_linker : select a Linker"<<endl;}
+  Linker* moved_linker(loop_link.diffuse_random_free_linker());
+  // actualize the vicinity
+  // 1) access all the affected strands in the neighboring
+  IF(true){cout<<"System : move_random_free_linker : move the linker"<<endl;}
+  set<Strand*,LessLoop> strands_affected = moved_linker->get_strands();    
+  // 3) recompute the rates
+  IF(true){cout<<"System : move_random_free_linker : remake the affected strands"<<endl;}
+  loop_link.remake_strands(strands_affected);
+  // check if the 
   // remake all the strands
-  set<Strand*,LessLoop> newstrands;
-  IF(true){cout<<"System : move_linkers :recreate the links"<<endl;}
-  loop_link.remake_strands(loop_link.get_strands());
+  //set<Strand*,LessLoop> newstrands;
+  //IF(true){cout<<"System : move_linkers :recreate the links"<<endl;}
+  //loop_link.remake_strands(loop_link.get_strands());
 }
 
 double System::choose_dl(int left_loop_index)
@@ -320,7 +334,9 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
   // compute the volume and draw a number of linkers
   double V((xmax-xmin)*(ymax-ymin)*(zmax-zmin));
   poisson_distribution<int> distribution(rho * V);
-  int N_crosslinker = max(0,distribution(generator)-N_linker_already);
+  int N_crosslinker;
+  if(Linker::counter<=1){N_crosslinker= 1;}//N_crosslinker = max(0,distribution(generator)-N_linker_already);}
+  else{N_crosslinker = 0;}
   // add all the occupied linkers of the strands :
   set<array<double,3>> res; // the result is a set of coordinates
   // draw a set of random position and create a linker at this position
