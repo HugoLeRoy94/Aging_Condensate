@@ -1,6 +1,6 @@
 #include "Header.h"
 using namespace std;
-
+int Linker::counter = 0.;
 Loop::Loop(Linker* R0,
            Linker* R1,
            double ell_0,
