@@ -2,7 +2,7 @@
 
 using namespace std;
 
-System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, int seed,bool sliding) : distrib(1, 10000000)
+System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, int seed,bool sliding, int Nlinker) : distrib(1, 10000000)
 {
     IF(true) { cout << "System : creator" << endl; }
     // srand(seed);
@@ -12,6 +12,8 @@ System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, 
     ell = ell_tot;
     rho = rho0;
     slide=sliding;
+    N_linker_max = Nlinker;
+    Linker::counter = 0;
     binding_energy = BindingEnergy;
     kdiff = k_diff;
     loop_link.create_new_occupied_linker(0.,0.,0.);
@@ -250,18 +252,18 @@ void System::move_random_free_linkers()
   IF(true){cout<<"System : Move_linkers : diffuse linkers"<<endl;}
   IF(true){cout<<"System : move_random_free_linker : select a Linker"<<endl;}
   Linker* moved_linker(loop_link.diffuse_random_free_linker());
-  // actualize the vicinity
   // 1) access all the affected strands in the neighboring
   IF(true){cout<<"System : move_random_free_linker : move the linker"<<endl;}
   set<Strand*,LessLoop> strands_affected = moved_linker->get_strands();    
   // 3) recompute the rates
   IF(true){cout<<"System : move_random_free_linker : remake the affected strands"<<endl;}
   loop_link.remake_strands(strands_affected);
-  // check if the 
-  // remake all the strands
-  //set<Strand*,LessLoop> newstrands;
-  //IF(true){cout<<"System : move_linkers :recreate the links"<<endl;}
-  //loop_link.remake_strands(loop_link.get_strands());
+  // check if the linkers still belong to a loop:
+  // check if the linker belong somewhere
+  if(moved_linker->get_strands().size()==0){
+    //remake a linker in the vicinity of one of the strand
+    reset_crosslinkers();
+  }
 }
 
 double System::choose_dl(int left_loop_index)
@@ -335,8 +337,16 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
   double V((xmax-xmin)*(ymax-ymin)*(zmax-zmin));
   poisson_distribution<int> distribution(rho * V);
   int N_crosslinker;
-  if(Linker::counter<=1){N_crosslinker= 1;}//N_crosslinker = max(0,distribution(generator)-N_linker_already);}
-  else{N_crosslinker = 0;}
+  if(N_linker_max>0)
+  {
+    N_crosslinker = N_linker_max-Linker::counter;
+    //if(Linker::counter<=N_linker_max){N_crosslinker= 1;}
+    //else{N_crosslinker = 0;}
+  }
+  else
+  {
+    N_crosslinker = max(0,distribution(generator)-N_linker_already);
+  }
   // add all the occupied linkers of the strands :
   set<array<double,3>> res; // the result is a set of coordinates
   // draw a set of random position and create a linker at this position
