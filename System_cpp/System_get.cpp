@@ -193,16 +193,10 @@ void System::get_r_system(double *r, int size)const
   int n(0);
   for(auto& it : loop_link.get_linkers())
   {
-    for(auto& it2 : it.second)
-    {
-      for(auto& it3 : it2.second)
-      {
-        r[3*n] = it3.second->r()[0];
-        r[3*n+1] = it3.second->r()[1];
-        r[3*n+2] = it3.second->r()[2];
+        r[3*n]    =   it.second->r()[0];
+        r[3*n+1]  =   it.second->r()[1];
+        r[3*n+2]  =   it.second->r()[2];
         n++;
-      }
-    }
   }
 }
 

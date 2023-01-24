@@ -4,10 +4,17 @@
 class LoopLinkWrap
 {
     private:
-        map3dLink linkers;
+        std::map<std::array<double,3>,Linker*> linkers;
         std::set<Strand*,LessLoop> strands;
         int Nfree_linker;
         void set_p_linkers(Strand* newly_created_strand);
+        Linker* get_random_free_linker()const;
+        void get_in_ellipse(    std::array<double,3> ctr_mass,
+                                std::array<double,3> main_ax,
+                                double a,
+                                double b,
+                                std::vector<Linker*>& free_linkers,
+                                std::vector<Linker*>& occ_linkers) const;
     public:
         LoopLinkWrap();
         ~LoopLinkWrap();
@@ -29,6 +36,7 @@ class LoopLinkWrap
 
         int get_strand_size() const;
         
+
        /*
             | . _ |  _  _ _
             |_|| ||<(/_| _\                    
@@ -50,9 +58,9 @@ class LoopLinkWrap
         
         int get_linker_size() const;
         
-        std::map<double,std::map<double,std::map<double,Linker*>>>const &  get_linkers() const;
+        std::map<std::array<double,3>,Linker*>const &  get_linkers() const;
         
-        map3dLink get_linkers3d() const;
+        std::map<std::array<double,3>,Linker*> get_linkers3d() const;
 
         Linker* diffuse_random_free_linker();
         
@@ -61,11 +69,6 @@ class LoopLinkWrap
         |  ||_\(_(/_||(_|| |(/_(_)|_|_\
         */
 
-        void slice_free(double key_0_min, double key_0_max, 
-                                        double key_1_min,double key_1_max,
-                                        double key_2_min, double key_2_max,
-                                        std::vector<Linker*>& free_linkers,
-                                        std::vector<Linker*>& occ_linkers) const;
 
         void remake_strands(std::set<Strand*,LessLoop> to_remake);
 

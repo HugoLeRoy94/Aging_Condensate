@@ -93,7 +93,12 @@ array<double,3> Minus(array<double,3> a, array<double,3> b)
   for(int i =0;i<3;i++){res[i] = a[i]-b[i];}
   return res;
 }
-void generate_point_in_ellipse(array<double,3> main_ax,array<double,3> ctr_mass,double a, double b,set<array<double,3>>& res,int N_linker)
+void generate_point_in_ellipse( array<double,3> main_ax,
+                                array<double,3> ctr_mass,
+                                double a, 
+                                double b,
+                                set<array<double,3>>& res,
+                                int N_linker)
 {
   double n(norm(main_ax));
   if(n!=0){
@@ -127,4 +132,23 @@ void generate_point_in_ellipse(array<double,3> main_ax,array<double,3> ctr_mass,
 
     res.insert(Plus(ctr_mass,dot(OmZ,dot(OmY,dot(axes,{x,y,z})))));
   }
+}
+array<double,3> rotate_point(array<double,3> pts, 
+                             array<double,3> main_ax,
+                             array<double,3> ctr_mass)
+{
+  //double n(norm(main_ax));
+  //if(n!=0){
+  //  for(int i=0;i<3;i++){
+  //    main_ax[i] = main_ax[i]/n;}
+  //}
+  double theta = atan2(main_ax[1],main_ax[0]);
+  
+  array<array<double,3>,3> OmZ(OmegaZ(-theta));
+  
+  double phi = atan2(sqrt(pow(main_ax[0],2)+pow(main_ax[1],2)),main_ax[2])-acos(-1)/2;
+
+  array<array<double,3>,3> OmY(OmegaY(-phi));
+
+  return dot(OmY,dot(OmZ,Minus(pts,ctr_mass)));
 }

@@ -21,7 +21,7 @@ int main(int argc, char* argv[]){
   double a = 25;
   double b = 7.5;
 
-  generate_point_in_ellipse(main_ax,ctr_mass,a,b,res);
+  generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,1000);
 
   ofstream file;
   file.open("data.txt",ios::trunc);

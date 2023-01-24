@@ -20,15 +20,13 @@ void LoopLinkWrap::set_p_linkers(Strand* newly_created_strand)
 {
   IF(true){cout<<"set_p_linkers"<<endl;}
   // get the volume limit
-  double key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max;
-  newly_created_strand->get_volume_limit(key_0_min,key_0_max,key_1_min,key_1_max,key_2_min,key_2_max);
+  array<double,3> main_ax,ctr_mass;
+  double a,b;
+  newly_created_strand->get_volume_limit(main_ax,ctr_mass,a,b);
   // select the linkers in the vicinity
-  vector<Linker*> free_linkers,occ_linkers;
+  std::vector<Linker*> free_linkers,occ_linkers;
   IF(true){cout<<"Strand : slice"<<endl;}
-  slice_free(key_0_min,key_0_max,
-             key_1_min,key_1_max,
-             key_2_min,key_2_max,
-             free_linkers,occ_linkers);
+  get_in_ellipse(ctr_mass,main_ax,a,b,free_linkers,occ_linkers);
   // tell the linkers that this strand is around
   for(auto& linker : free_linkers){linker->add_strand(newly_created_strand);}
   for(auto& linker : occ_linkers){linker->add_strand(newly_created_strand);}
@@ -94,7 +92,7 @@ void LoopLinkWrap::set_occupied(Linker* link)
 
 void LoopLinkWrap::create_new_free_linker(double x,double y, double z)
 {
-    linkers.add(x,y,z,new Linker({x,y,z}));
+    linkers[{x,y,z}] = new Linker({x,y,z});
     Nfree_linker++;
 }
 
@@ -107,7 +105,7 @@ void LoopLinkWrap::create_new_occupied_linker(double x, double y, double z)
 {
     Linker* link = new Linker({x,y,z});
     link->set_bounded();
-    linkers.add(x,y,z,link);
+    linkers[{x,y,z}] = link;
 }
 
 void LoopLinkWrap::delete_linkers()
@@ -116,20 +114,37 @@ void LoopLinkWrap::delete_linkers()
     IF(true){cout<<"LoopLinkWrap : delete the linkers pointer"<<endl;}
     // doesn t delete them from the strands objects
     Nfree_linker = 0.;
-    linkers.delete_pointers();
-    map3dLink newlinkers; // make a new empty map3d
+    for(auto& linker : linkers){
+        delete linker.second;
+    }
+    map<array<double,3>,Linker*> newlinkers; // make a new empty map3d
     linkers = newlinkers;
 }
 
-map<double,map<double,map<double,Linker*>>> const &LoopLinkWrap::get_linkers() const
+map<array<double,3>,Linker*> const &LoopLinkWrap::get_linkers() const
 {
-    return linkers.underlying_array();
+    return linkers;
 }
 
-map3dLink LoopLinkWrap::get_linkers3d() const { return linkers;}
+Linker* LoopLinkWrap::get_random_free_linker() const
+{
+    int step(0);
+    while(step<pow(10.,17.))
+    {
+        auto item(linkers.begin());
+        std::uniform_int_distribution<int> distribution(0,linkers.size()-1);
+        std::advance(item, distribution(generator));
+        if((*item).second->is_free())
+        {
+            return (*item).second;
+        }
+    }
+    std::cout<<"no free linker to draw Nfree_linker certainly wrong"<<std::endl;
+    throw std::out_of_range("Nfree_wrong ?");
+}
 
 int LoopLinkWrap::get_linker_size() const{
-    return linkers.get_number_of_elements();
+    return linkers.size();
 }
 
 //void LoopLinkWrap::add_linker(Linker* to_add){
@@ -142,13 +157,13 @@ Linker* LoopLinkWrap::diffuse_random_free_linker(){
     //cout<<"looplink::diffuse_random_free_linker : Nfree = "<<Nfree_linker<<endl;
     //cout<<"looplink::diffuse_random_free_linker : select a linker"<<endl;
 
-    Linker* random_link(linkers.get_random_free_linker());
+    Linker* random_link(get_random_free_linker());
     //cout<<"looplink::diffuse_random_free_linker : remove it from the map"<<endl;
-    linkers.remove(random_link->r()[0],random_link->r()[1],random_link->r()[2]);
+    linkers.erase({random_link->r()[0],random_link->r()[1],random_link->r()[2]});
     //cout<<"looplink::diffuse_random_free_linker : move the linker"<<endl;
     random_link->diffuse();
     //cout<<"looplink::diffuse_random_free_linker : add the linker into the map with new key"<<endl;
-    linkers.add(random_link->r()[0],random_link->r()[1],random_link->r()[2],random_link);
+    linkers[{random_link->r()[0],random_link->r()[1],random_link->r()[2]}] = random_link;
     //cout<<"looplink::diffuse_random_free_linker : return the linker"<<endl;
     return random_link;
 }
@@ -187,17 +202,24 @@ void LoopLinkWrap::delete_pointers()
     delete_linkers();
 }
 
-void LoopLinkWrap::slice_free(double key_0_min, double key_0_max, 
-                                        double key_1_min,double key_1_max,
-                                        double key_2_min, double key_2_max,
-                                        std::vector<Linker*>& free_linkers,
-                                        std::vector<Linker*>& occ_linkers) const
+void LoopLinkWrap::get_in_ellipse(  std::array<double,3> ctr_mass,
+                                    std::array<double,3> main_ax,
+                                    double a,
+                                    double b,
+                                    std::vector<Linker*>& free_linkers,
+                                    std::vector<Linker*>& occ_linkers)const
 {
-    return linkers.slice_free(key_0_min,key_0_max,
-                        key_1_min,key_1_max,
-                        key_2_min,key_2_max,
-                        free_linkers,
-                        occ_linkers);
+    for(auto& linker: linkers)
+    {  
+        array<double,3> r(rotate_point(linker.second->r(),main_ax,ctr_mass));
+        if(pow(r[0]/a,2)+pow(r[1]/b,2)+pow(r[2]/b,2) <= 1)
+        {
+            if(linker.second->is_free()){
+                free_linkers.push_back(linker.second);}
+            else{
+                occ_linkers.push_back(linker.second);}
+        }
+    }
 }
 
 void LoopLinkWrap::remake_strands(set<Strand*,LessLoop> to_remake)

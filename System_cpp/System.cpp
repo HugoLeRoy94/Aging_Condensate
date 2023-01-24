@@ -17,7 +17,7 @@ System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, 
     binding_energy = BindingEnergy;
     kdiff = k_diff;
     loop_link.create_new_occupied_linker(0.,0.,0.);
-    Linker* R0 = loop_link.get_linkers3d()(0.,0.,0.);
+    Linker* R0 = loop_link.get_linkers().at({0.,0.,0.});
     Dangling dummy_dangling(R0, 0., ell, rho,slide); // dummy dangling that helps generate crosslinkers but has none initially
     Strand* dummy_strand(loop_link.Create_Strand(dummy_dangling));
     // ---------------------------------------------------------------------------
@@ -365,7 +365,7 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
 */
 set<array<double,3>> System::generate_crosslinkers(int N_to_remake){
 // loop over all the strand, and generate crosslinkers within their ellipse.
-set<array<double,3>> res;
+  set<array<double,3>> res;
   for(auto & strand : loop_link.get_strands())
   {
     double a,b;
@@ -377,7 +377,7 @@ set<array<double,3>> res;
     {N_crosslinker = N_linker_max-Linker::counter;}
     else{N_crosslinker = max(0,distribution(generator)-N_linker_already);}
     strand->get_volume_limit(main_ax,ctr_mass,a,b);
-    generate_point_in_ellipse(main_ax,ctr_mass,a,b,res);
+    generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,N_crosslinker);
   }
   return res;
 }
@@ -437,12 +437,12 @@ void System::reset_loops(LoopLinkWrap& new_loop_link)
       {
           strand->get_Rright(); // check to know if it's dangling
           // access the new linker via the coordinate of the old one : should always be valid
-          Linker* const new_linker_right = new_loop_link.get_linkers3d()(strand->get_Rright()->r().at(0),
+          Linker* const new_linker_right = new_loop_link.get_linkers().at({strand->get_Rright()->r().at(0),
                                                                          strand->get_Rright()->r().at(1),
-                                                                         strand->get_Rright()->r().at(2));
-          Linker* const new_linker_left = new_loop_link.get_linkers3d()(strand->get_Rleft()->r().at(0),
+                                                                         strand->get_Rright()->r().at(2)});
+          Linker* const new_linker_left = new_loop_link.get_linkers().at({strand->get_Rleft()->r().at(0),
                                                                         strand->get_Rleft()->r().at(1),
-                                                                        strand->get_Rleft()->r().at(2));
+                                                                        strand->get_Rleft()->r().at(2)});
           
           // seems that the new_linkers are invalid ?
           Strand* newloop(new_loop_link.Create_Strand(Loop(*reinterpret_cast<Loop*>(strand),
@@ -451,9 +451,9 @@ void System::reset_loops(LoopLinkWrap& new_loop_link)
       catch(out_of_range oor)
       {
         // access the new linker via the coordinate of the old one : should always be valid          
-          Linker* const new_linker_left = new_loop_link.get_linkers3d()(strand->get_Rleft()->r().at(0),
+          Linker* const new_linker_left = new_loop_link.get_linkers().at({strand->get_Rleft()->r().at(0),
                                                           strand->get_Rleft()->r().at(1),
-                                                          strand->get_Rleft()->r().at(2));
+                                                          strand->get_Rleft()->r().at(2)});
           
           Strand* newloop(new_loop_link.Create_Strand(Dangling(*reinterpret_cast<Dangling*>(strand),
                                                             new_linker_left)));
