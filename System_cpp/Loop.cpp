@@ -21,6 +21,7 @@ Loop::Loop(Linker* R0,
   {
     V = 0.;
   }
+  
   else if (diff(Rleft->r(), Rright->r()) < 0.1 * ell)
   {
     //V = 4 / 3 * Pi * pow(2*ell, 1.5);

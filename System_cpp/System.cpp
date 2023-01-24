@@ -319,14 +319,18 @@ void System::reset_crosslinkers()
 }
 
 set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
+  /*
+  This function generates crosslinker at random position within a sphere of given radius
+  */
   IF(true){cout<<"System : generate crosslinkers"<<endl;}
   // create a set with all the limits
   set<double> xminl,xmaxl,yminl,ymaxl,zminl,zmaxl;
-  for(auto& loop : loop_link.get_strands()){
+  
+  for(auto& strand : loop_link.get_strands()){
     double ximin,ximax,yimin,yimax,zimin,zimax;
     //try{cout<<loop->get_Rright()->r().at(0)<<" "<<loop->get_Rright()->r().at(1)<<" "<<loop->get_Rright()->r().at(2)<<endl;}
     //catch(out_of_range oor){cout<<endl;}
-    loop->get_volume_limit(ximin,ximax,yimin,yimax,zimin,zimax);
+    strand->get_volume_limit(ximin,ximax,yimin,yimax,zimin,zimax);
     xminl.insert(ximin);xmaxl.insert(ximax);yminl.insert(yimin);ymaxl.insert(yimax);zminl.insert(zimin);zmaxl.insert(zimax);
   }
   // select the min and max value
