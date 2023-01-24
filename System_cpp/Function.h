@@ -6,6 +6,15 @@ extern std::mt19937 generator;
 extern std::array<double,3> anchor;
 double get_square_diff(std::array<double,3> v1,std::array<double,3> v2);
 double diff(std::array<double,3> v1,std::array<double,3> v2);
+
+std::array<double,3> dot(std::array<std::array<double,3>,3> Matrice,std::array<double,3> vect);
+std::array<std::array<double,3>,3> OmegaY(double theta);
+std::array<std::array<double,3>,3> OmegaZ(double theta);
+double norm(std::array<double,3> u);
+std::array<std::array<double,3>,3> ax_from_main_ax(std::array<double,3> u,double a,double b);
+std::array<double,3> Plus(std::array<double,3> a, std::array<double,3> b);
+std::array<double,3> Minus(std::array<double,3> a, std::array<double,3> b);
+void generate_point_in_ellipse(std::array<double,3> main_ax,std::array<double,3> ctr_mass,double a, double b,std::set<std::array<double,3>>& res);
 struct {
         bool operator()(std::array<double,3> a, std::array<double,3> b) const { return a[0] < b[0]; }
     } customLess;

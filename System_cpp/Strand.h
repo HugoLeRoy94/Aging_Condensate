@@ -33,9 +33,7 @@ class Strand
         virtual double get_S(double dl=0) const =0;
         // surrounding linkers interaction
         void set_linkers(std::vector<Linker*> new_free_linkers,std::vector<Linker*> occupied_linkers);
-        virtual void get_volume_limit(double& key_0_min,double& key_0_max,
-                                      double& key_1_min,double& key_1_max,
-                                      double& key_2_min,double& key_2_max) const =0;
+        virtual void get_volume_limit(std::array<double,3>& main_ax, std::array<double,3>& ctr_mass,double& a, double& b) const =0;
         void remove_from_linkers();
         virtual void Check_integrity() const;
     protected:

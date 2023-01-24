@@ -19,9 +19,7 @@ public:
             Linker* new_left_linker);
   double get_S(double dl=0)const override; // entropy of the polymer.
 
-  void get_volume_limit(double& key_0_min,double& key_0_max,
-                        double& key_1_min,double& key_1_max,
-                        double& key_2_min,double& key_2_max) const override;
+  void get_volume_limit(std::array<double,3>& main_ax, std::array<double,3>& ctr_mass,double& a, double& b) const override;
   Linker* get_Rright() const;
   std::unique_ptr<Strand> unbind_from(Strand* left_strand) const override;
   std::pair<std::unique_ptr<Strand>,std::unique_ptr<Strand>> bind() const override;

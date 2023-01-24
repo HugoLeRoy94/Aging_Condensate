@@ -11,7 +11,7 @@ Dangling::Dangling(Linker* R0,
 {
   IF(true) { cout << "Dangling : creator" << endl; }
   ell = ell_in;
-  radius = 2*sqrt(ell);
+  radius = sqrt(ell/2.);
   rho0 = rho;
   //V = 4 / 3 * Pi * pow(2 * ell, 1.5);
   V = pow(radius,3); // linkers are generated into a squared box
@@ -57,18 +57,14 @@ array<double, 3> Dangling::random_in_volume()
   return res;
 }
 
-void Dangling::get_volume_limit(double& key_0_min,double& key_0_max,
-                                double& key_1_min,double& key_1_max,
-                                double& key_2_min,double& key_2_max) const
+void Dangling::get_volume_limit(array<double,3>& main_ax, 
+                                array<double,3>& ctr_mass,
+                                double& a, double& b) const
 {
-  key_0_min = xg - radius;
-  key_0_max = xg + radius;
-
-  key_1_min = yg - radius;
-  key_1_max = yg + radius;
-
-  key_2_min = zg - radius;
-  key_2_max = zg + radius;
+  ctr_mass={xg,yg,zg};
+  a=radius;
+  b=radius;
+  main_ax = {1.,1.,1.}; // the main ax does not matter when a = b
 }
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------

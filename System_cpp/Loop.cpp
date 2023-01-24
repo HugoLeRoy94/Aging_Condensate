@@ -32,7 +32,7 @@ Loop::Loop(Linker* R0,
   else
   {
     //V = Pi / 6 * diff(Rleft, Rright)*1.5 * ell*2;
-    a = diff(Rleft->r(), Rright->r()) *3/4;
+    a = norm(Minus(Rleft->r(), Rright->r()))/2.;
     b = sqrt(ell);
     V = a*b*b;
   }
@@ -91,22 +91,15 @@ array<double, 3> Loop::random_in_volume()
   return res;
 }
 
-void Loop::get_volume_limit(double& key_0_min,double& key_0_max,
-                            double& key_1_min,double& key_1_max,
-                            double& key_2_min,double& key_2_max) const
+void Loop::get_volume_limit(array<double,3>& main_ax, 
+                            array<double,3>& ctr_mass,
+                            double& a, double& b) const
 {
   IF(true){cout<<"loop : get_volume_limit"<<endl;}
-  // gives the slicing limits(must be a square) in which crosslinkers are going to be 
-  // constructed and destructed when forming a loop
-  //cout<<"xg, yg, zg "<<xg<<" "<<yg<<" "<<zg<<endl;
-  key_0_min = xg - 2*sqrt(ell)-abs(Rleft->r().at(0)-Rright->r().at(0));
-  key_0_max = xg + 2*sqrt(ell)+abs(Rleft->r().at(0)-Rright->r().at(0));
-
-  key_1_min = yg - 2*sqrt(ell)-abs(Rleft->r().at(1)-Rright->r().at(1));
-  key_1_max = yg + 2*sqrt(ell)+abs(Rleft->r().at(1)-Rright->r().at(1));
-
-  key_2_min = zg - 2*sqrt(ell)-abs(Rleft->r().at(2)-Rright->r().at(2));
-  key_2_max = zg + 2*sqrt(ell)+abs(Rleft->r().at(2)-Rright->r().at(2));
+  ctr_mass = {xg,yg,zg};
+  a = norm(Minus(Rleft->r(),Rright->r()))*0.5;
+  b = sqrt(ell/2);
+  main_ax = Minus(Rleft->r(),Rright->r());
 }
                        
 

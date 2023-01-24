@@ -304,7 +304,7 @@ void System::reset_crosslinkers()
     new_loop_link.create_new_occupied_linker(linker.at(0),linker.at(1),linker.at(2));
   }
   // generate a bunch of free linkers
-  set<array<double,3>> free_linkers_to_remake(generate_crosslinkers(occ_linkers_to_remake.size()));
+  set<array<double,3>> free_linkers_to_remake(generate_crosslinkers(loop_link.get_N_free_linker()));
   IF(true){cout<<"Number of free linkers to remake : "<<free_linkers_to_remake.size()<<endl;}
   // new create the associated linkers. carefull, they are free !
   for(auto& linker : free_linkers_to_remake){
@@ -313,15 +313,13 @@ void System::reset_crosslinkers()
   // set all the crosslinker into the linker_to_strand
   // which also add the bound extremities
   reset_loops(new_loop_link);
-  loop_link.delete_linkers(); 
+  loop_link.delete_linkers();
   loop_link = new_loop_link;
   IF(true){check_loops_integrity();}
 }
-
+/*
 set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
-  /*
-  This function generates crosslinker at random position within a sphere of given radius
-  */
+  //This function generates crosslinker at random position within a sphere of given radius
   IF(true){cout<<"System : generate crosslinkers"<<endl;}
   // create a set with all the limits
   set<double> xminl,xmaxl,yminl,ymaxl,zminl,zmaxl;
@@ -361,6 +359,25 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
     double y(distribution(generator) * (ymax-ymin)+ymin);
     double z(distribution(generator) * (zmax-zmin)+zmin);
     res.insert({x,y,z});
+  }
+  return res;
+}
+*/
+set<array<double,3>> System::generate_crosslinkers(int N_to_remake){
+// loop over all the strand, and generate crosslinkers within their ellipse.
+set<array<double,3>> res;
+  for(auto & strand : loop_link.get_strands())
+  {
+    double a,b;
+    array<double,3> ctr_mass,main_ax;
+    poisson_distribution<int> distribution(rho * strand->get_V());
+    int N_crosslinker;
+    int N_linker_already(strand->get_r().size()+strand->get_occ_r().size()-N_to_remake);
+    if(N_linker_max>0)
+    {N_crosslinker = N_linker_max-Linker::counter;}
+    else{N_crosslinker = max(0,distribution(generator)-N_linker_already);}
+    strand->get_volume_limit(main_ax,ctr_mass,a,b);
+    generate_point_in_ellipse(main_ax,ctr_mass,a,b,res);
   }
   return res;
 }
