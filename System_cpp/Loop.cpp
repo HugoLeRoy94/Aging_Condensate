@@ -22,19 +22,20 @@ Loop::Loop(Linker* R0,
     V = 0.;
   }
   
-  else if (diff(Rleft->r(), Rright->r()) < 0.1 * ell)
+  //else if (diff(Rleft->r(), Rright->r()) < 0.1 * ell)
+  else if(diff(Rleft->r(), Rright->r())/2.<sqrt(ell/2.))
   {
     //V = 4 / 3 * Pi * pow(2*ell, 1.5);
-    a = sqrt(ell);
-    b = sqrt(ell);
-    V = a*b*b;
+    a = sqrt(ell/2.);
+    b = sqrt(ell/2.);
+    V = 4/3*Pi*a*b*b;
   }
   else
   {
     //V = Pi / 6 * diff(Rleft, Rright)*1.5 * ell*2;
     a = norm(Minus(Rleft->r(), Rright->r()))/2.;
-    b = sqrt(ell);
-    V = a*b*b;
+    b = sqrt(ell/2.);
+    V = 4/3*Pi*a*b*b;
   }
   xg = 0.5 * (Rright->r().at(0) + Rleft->r().at(0));
   yg = 0.5 * (Rright->r().at(1) + Rleft->r().at(1));
@@ -93,12 +94,14 @@ array<double, 3> Loop::random_in_volume()
 
 void Loop::get_volume_limit(array<double,3>& main_ax, 
                             array<double,3>& ctr_mass,
-                            double& a, double& b) const
+                            double& a_in, double& b_in) const
 {
   IF(true){cout<<"loop : get_volume_limit"<<endl;}
   ctr_mass = {xg,yg,zg};
-  a = norm(Minus(Rleft->r(),Rright->r()))*0.5;
-  b = sqrt(ell/2);
+  //a = norm(Minus(Rleft->r(),Rright->r()))*0.5;
+  //b = sqrt(ell/2);
+  a_in = a;
+  b_in = b;
   main_ax = Minus(Rleft->r(),Rright->r());
 }
                        

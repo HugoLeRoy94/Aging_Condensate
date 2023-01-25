@@ -363,21 +363,45 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
   return res;
 }
 */
-set<array<double,3>> System::generate_crosslinkers(int N_to_remake){
+set<array<double,3>> System::generate_crosslinkers(bool remake){
 // loop over all the strand, and generate crosslinkers within their ellipse.
   set<array<double,3>> res;
+  int N_linker_to_make(0.);
+  // if we generate a fixed number of linkers
+  if(N_linker_max>0)
+    {
+      N_linker_to_make = N_linker_max-Linker::counter; // total number of linkers that has to be added
+      cout<<"counter : "<<Linker::counter<<endl;
+      cout<<"N_linker_max :"<<N_linker_max<<endl;
+      cout<<N_linker_to_make<<endl;
+      // compute the probability to place N linkers propto the volume of each strands
+      double total_volume(0.);
+      for(auto& strand : loop_link.get_strands()){total_volume+=strand->get_V();}
+      for(auto& strand : loop_link.get_strands())
+      {
+        double a,b;
+        array<double,3> ctr_mass,main_ax;
+        // number of linker to add to this specific strand
+        int Nlinkers_strand(round(strand->get_V()/total_volume * N_linker_to_make));
+        strand->get_volume_limit(main_ax,ctr_mass,a,b);
+        generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,N_linker_to_make);
+      }
+    }
+  else
+  {
   for(auto & strand : loop_link.get_strands())
   {
     double a,b;
     array<double,3> ctr_mass,main_ax;
     poisson_distribution<int> distribution(rho * strand->get_V());
-    int N_crosslinker;
-    int N_linker_already(strand->get_r().size()+strand->get_occ_r().size()-N_to_remake);
-    if(N_linker_max>0)
-    {N_crosslinker = N_linker_max-Linker::counter;}
-    else{N_crosslinker = max(0,distribution(generator)-N_linker_already);}
+    cout<<"volume of the strand "<<strand->get_V()<<endl;
+    
+    if(remake){N_linker_to_make =N_linker_to_make = max(0.,distribution(generator)-(double)strand->get_occ_r().size());}
+    else{N_linker_to_make = max(0.,distribution(generator)-(double)strand->get_r().size()-(double)strand->get_occ_r().size());}
+    
     strand->get_volume_limit(main_ax,ctr_mass,a,b);
-    generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,N_crosslinker);
+    generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,N_linker_to_make);
+  }
   }
   return res;
 }

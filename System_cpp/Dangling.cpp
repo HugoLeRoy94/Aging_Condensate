@@ -14,7 +14,7 @@ Dangling::Dangling(Linker* R0,
   radius = sqrt(ell/2.);
   rho0 = rho;
   //V = 4 / 3 * Pi * pow(2 * ell, 1.5);
-  V = pow(radius,3); // linkers are generated into a squared box
+  V = 4./3.*Pi*pow(radius,3); // linkers are generated into a squared box
   xg = R0->r().at(0);
   yg = R0->r().at(1);
   zg = R0->r().at(2);

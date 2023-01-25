@@ -38,7 +38,7 @@ private:
     double compute_slide_S(Strand* left_strand, Strand* right_strand,double dl) const;
     double get_slide_rate(Strand* left_strand, Strand* right_strand,double dl) const;
 
-    std::set<std::array<double,3>>  generate_crosslinkers(int N_to_remake);
+    std::set<std::array<double,3>>  generate_crosslinkers(bool remake);
     void reset_loops(LoopLinkWrap& new_loop_link);
     double draw_time(double rate) const;
 
