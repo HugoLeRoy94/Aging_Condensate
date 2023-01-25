@@ -303,6 +303,7 @@ void System::reset_crosslinkers()
   for(auto& linker : occ_linkers_to_remake){
     new_loop_link.create_new_occupied_linker(linker.at(0),linker.at(1),linker.at(2));
   }
+  // delete the linkers before
   // generate a bunch of free linkers
   set<array<double,3>> free_linkers_to_remake(generate_crosslinkers(loop_link.get_N_free_linker()));
   IF(true){cout<<"Number of free linkers to remake : "<<free_linkers_to_remake.size()<<endl;}
@@ -370,10 +371,11 @@ set<array<double,3>> System::generate_crosslinkers(bool remake){
   // if we generate a fixed number of linkers
   if(N_linker_max>0)
     {
+      Linker::counter = loop_link.get_linker_size()-loop_link.get_N_free_linker();// number of occupied linkers
       N_linker_to_make = N_linker_max-Linker::counter; // total number of linkers that has to be added
-      cout<<"counter : "<<Linker::counter<<endl;
-      cout<<"N_linker_max :"<<N_linker_max<<endl;
-      cout<<N_linker_to_make<<endl;
+      //cout<<"counter : "<<Linker::counter<<endl;
+      //cout<<"N_linker_max :"<<N_linker_max<<endl;
+      //cout<<N_linker_to_make<<endl;
       // compute the probability to place N linkers propto the volume of each strands
       double total_volume(0.);
       for(auto& strand : loop_link.get_strands()){total_volume+=strand->get_V();}
@@ -383,8 +385,10 @@ set<array<double,3>> System::generate_crosslinkers(bool remake){
         array<double,3> ctr_mass,main_ax;
         // number of linker to add to this specific strand
         int Nlinkers_strand(round(strand->get_V()/total_volume * N_linker_to_make));
+        //cout<<strand->get_V()/total_volume * N_linker_to_make<<endl;
+        //cout<<Nlinkers_strand<<endl;
         strand->get_volume_limit(main_ax,ctr_mass,a,b);
-        generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,N_linker_to_make);
+        generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,Nlinkers_strand);
       }
     }
   else
