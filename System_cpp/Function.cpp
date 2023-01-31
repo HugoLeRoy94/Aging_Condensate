@@ -132,6 +132,9 @@ void generate_point_in_ellipse( array<double,3> main_ax,
 
     res.insert(Plus(ctr_mass,dot(OmZ,dot(OmY,dot(axes,{x,y,z})))));
   }
+  //ofstream file;
+  //file.open("trash.txt",std::ios::app);
+  //for(auto& pts : res){file<<pts[0]<<" "<<pts[1]<<" "<<pts[2]<<endl;}
 }
 array<double,3> rotate_point(array<double,3> pts, 
                              array<double,3> main_ax,

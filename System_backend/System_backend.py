@@ -43,7 +43,7 @@ lib.print_random_stuff.argtypes=[POINTER(c_void_p)]
 
 class System:
     def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,kdiff=1.,seed=19874,sliding=False,Nlinker=0,old_system=None):
-        self.move_type = {0 : 'unbind', 1:'diffuse', 2:'slide', 3:'bind'}
+        self.move_types = {0 : 'unbind', 1:'diffuse', 2:'slide', 3:'bind'}
         if old_system is None:
             self.ell_tot,self.rho0,self.binding_energy,self.k_diff = ell_tot,rho0,BindingEnergy,kdiff
             self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,self.k_diff,seed,sliding,Nlinker)
