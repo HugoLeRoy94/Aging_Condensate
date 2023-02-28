@@ -4,7 +4,8 @@ import sys
 #import System_backend as Sys
 def Vol(R) : 
     return np.arccos(-1)*4./3. * R**3
-
+def get_non_zero(r_array):
+    return r_array[np.argwhere([np.any((r_array-np.array([0.,0.,0.]))!=0, axis=1)])[:,1]]
 class Simulation:
     def __init__(self,step_tot,size,L_size,System):
         """
@@ -42,7 +43,7 @@ class Simulation:
         """
         av_dist = 0.
         # remove the [0.,0.,0.] linker :
-        r_array = r_array[np.argwhere([np.any((r_array-np.array([0.,0.,0.]))!=0, axis=1)])[:,1]]
+        r_array = get_non_zero(r_array)
         N_linker = r_array.shape[0]
         # iterate over every linker
         for r in r_array:
@@ -62,45 +63,29 @@ class Simulation:
         This function computes the probability density to be at a certain distance
         from the centerlinker. 
         """
-        self.PL = np.zeros(self.L_size,dtype=float)
-        self.PR = np.zeros(self.size,dtype=float)
+        #self.PL = np.zeros(self.L_size,dtype=float)
+        #self.PR = np.zeros(self.size,dtype=float)
+        self.R = np.zeros((self.step_tot,self.System.Nlinker-1),dtype=float) # store the position of the linkers
         self.dt = np.zeros(self.step_tot,dtype=float)
         self.move = np.zeros(4,dtype=float)
-        prev_R = self.average_distance(self.System.get_r())
+        self.prev_R = np.linalg.norm(get_non_zero(self.System.get_r()),axis=1)#self.average_distance(self.System.get_r())
         tot_bound_time=0
         for i in range(self.step_tot):
             movetype,Dt = self.System.evolve()
             self.dt[i] = Dt
             if np.isnan(Dt):
                 raise ValueError
-            try:
-                if self.I(prev_R)!=0:
-                    self.PR[self.I(prev_R)]+=Dt#/(4*np.arccos(-1)*self.dr*(self.I(prev_R)*self.dr)**2)
-                else :
-                    self.PR[self.I(prev_R)]+=Dt#/(4/3*np.arccos(-1)*self.dr**3)            
-            except IndexError:
-                self.PR.resize(self.I(prev_R)+1)
-                self.PR[self.I(prev_R)]+=Dt#/(4*np.arccos(-1)*self.dr*(self.I(prev_R)*self.dr)**2)
-            if self.System.move_types[movetype] == 'bind':
-                stored_ell = set(self.System.get_ell_coordinates())
-            if self.System.move_types[movetype] == 'unbind':
-                try:                    
-                    ell_affected = stored_ell - set(self.System.get_ell_coordinates())
-                    stored_ell = set(self.System.get_ell_coordinates())
-                    self.PL[int(list(ell_affected)[0]/(self.System.ell_tot/self.L_size))-1]+=Dt
-                except IndexError:
-                    print(self.System.get_ell())
-                    print(self.System.get_ell()/(self.System.ell_tot/self.L_size))
-                    raise
-                tot_bound_time += Dt
-            prev_R = self.average_distance(self.System.get_r())
+            self.R[i] = self.prev_R#np.linalg.norm(get_non_zero(self.System.get_r()))
+            #self.compute_statistics(Dt,movetype)
+            tot_bound_time += Dt
+            self.prev_R = np.linalg.norm(get_non_zero(self.System.get_r()))#self.average_distance(self.System.get_r())
             self.move[movetype] +=1
-        self.PL = self.PL/tot_bound_time
+        #self.PL = self.PL/tot_bound_time
         self.time = np.cumsum(self.dt)
-        self.PR = self.PR/self.time[-1]                
-        self.PR,self.IX = self.rescale_with_r(self.PR,np.array([i*self.dr for i in range(self.PR.shape[0]+1)]))
+        #self.PR = self.PR/self.time[-1]                
+        #self.PR,self.IX = self.rescale_with_r(self.PR,np.array([i*self.dr for i in range(self.PR.shape[0]+1)]))
         self.move = self.move/self.step_tot           
-        self.Mean_distance = self.integrate_density(self.PR*self.get_X(self.PR.shape[0]))#np.sum(self.PR*self.get_X(self.PR.shape[0]))
+        #self.Mean_distance = self.integrate_density(self.PR*self.get_X(self.PR.shape[0]))#np.sum(self.PR*self.get_X(self.PR.shape[0]))
     def integrate_density(self,P):
         if self.System.dimension==3:
             return np.sum([P[i]*(Vol(self.dr*(i+1))-Vol(self.dr*i)) for i in range(P.shape[0])])
@@ -118,3 +103,23 @@ class Simulation:
         volume that define the region where linkers are generated
         """
         raise NotImplementedError
+    def compute_statistics(self,Dt,movetype):
+        try:
+            if self.I(self.prev_R)!=0:
+                self.PR[self.I(self.prev_R)]+=Dt#/(4*np.arccos(-1)*self.dr*(self.I(prev_R)*self.dr)**2)
+            else :
+                self.PR[self.I(self.prev_R)]+=Dt#/(4/3*np.arccos(-1)*self.dr**3)            
+        except IndexError:
+            self.PR.resize(self.I(self.prev_R)+1)
+            self.PR[self.I(self.prev_R)]+=Dt#/(4*np.arccos(-1)*self.dr*(self.I(prev_R)*self.dr)**2)
+        if self.System.move_types[movetype] == 'bind':
+            stored_ell = set(self.System.get_ell_coordinates())
+        if self.System.move_types[movetype] == 'unbind':
+            try:                    
+                ell_affected = stored_ell - set(self.System.get_ell_coordinates())
+                stored_ell = set(self.System.get_ell_coordinates())
+                self.PL[int(list(ell_affected)[0]/(self.System.ell_tot/self.L_size))-1]+=Dt
+            except IndexError:
+                print(self.System.get_ell())
+                print(self.System.get_ell()/(self.System.ell_tot/self.L_size))
+                raise
