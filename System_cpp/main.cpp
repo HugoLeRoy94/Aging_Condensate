@@ -8,25 +8,25 @@ int main(int argc, char* argv[]){
   double BindingEnergy(-10);
   int bind(0.);
   double* R;
-  /*System* S = new System(ell_tot,rho0,BindingEnergy,exp(BindingEnergy),19880,false);
+  System* S = new System(ell_tot,rho0,BindingEnergy,exp(BindingEnergy),19880,false,0,1);
   for(int n(0);n<t_tot;n++){
+  cout<<n<<endl;
   double time(S->evolve(&bind));
-  cout<<bind<<endl;
+  //S->reset_crosslinkers();
   }
   delete S;
-  */
-  set<array<double,3>> res;
-  array<double,3> main_ax = {1.,1.,1.};
-  array<double,3> ctr_mass = {1.,2.,3.};
-  double a = 25;
-  double b = 7.5;
-
-  generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,1000);
-
-  ofstream file;
-  file.open("data.txt",ios::trunc);
-  for(auto pts  : res)
-  {
-    file<<pts[0]<<" "<<pts[1]<<" "<<pts[2]<<endl;;
-  }
+  //set<array<double,3>> res;
+  //array<double,3> main_ax = {1.,1.,1.};
+  //array<double,3> ctr_mass = {1.,2.,3.};
+  //double a = 25;
+  //double b = 7.5;
+//
+  //generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,1000);
+//
+  //ofstream file;
+  //file.open("data.txt",ios::trunc);
+  //for(auto pts  : res)
+  //{
+  //  file<<pts[0]<<" "<<pts[1]<<" "<<pts[2]<<endl;;
+  //}
   }

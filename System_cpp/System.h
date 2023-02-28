@@ -2,7 +2,8 @@
 #define System_h
 class System{
 public:
-    System(double ell_tot,double rho0,double BindingEnergy,double k_diff,int seed,bool sliding=0,int Nlinker=0); // constructor with the Parameters
+    inline static int dimension;
+    System(double ell_tot,double rho0,double BindingEnergy,double k_diff,int seed,bool sliding=0,int Nlinker=0,int dimension=3); // constructor with the Parameters
     ~System(); // destructor that have to delete all the loops
     double evolve(int* bind); // make the system evolve and return the time increment.
     void reset_crosslinkers();
@@ -47,7 +48,7 @@ private:
     std::uniform_int_distribution<int> distrib;
     double ell,D,rho,binding_energy,kdiff;
     bool slide;
-    int N_linker_max;
+    int N_linker_max;    
 
     LoopLinkWrap loop_link;
 

@@ -4,17 +4,7 @@ import sys
 #import System_backend as Sys
 def Vol(R) : 
     return np.arccos(-1)*4./3. * R**3
-def rescale_with_r(H,R):
-    """
-    R.shape[0] = H.sape[0] +1 
-    R is the list of the bar's extremities 
-    """
-    Hres = np.zeros(H.shape,dtype=float)
-    Rres = np.zeros(R.shape,dtype=float)
-    for i in range(H.shape[0]):
-        Hres[i] = H[i] / (Vol(R[i+1])-Vol(R[i]))
-        Rres[i] = 0.5*(R[i+1]+R[i])
-    return Hres,Rres
+
 class Simulation:
     def __init__(self,step_tot,size,L_size,System):
         """
@@ -28,21 +18,39 @@ class Simulation:
         #self.dr = (2*np.sqrt(self.System.ell_tot)) / self.size
         self.dr = np.sqrt(System.ell_tot/2)/self.size
         self.X = np.array([i*self.dr for i in range(self.size)])
+    def rescale_with_r(self,H,R):
+        """
+        R.shape[0] = H.sape[0] +1 
+        R is the list of the bar's extremities 
+        """
+        if self.System.dimension==3:
+            Hres = np.zeros(H.shape,dtype=float)
+            Rres = np.zeros(R.shape,dtype=float)
+            for i in range(H.shape[0]):
+                Hres[i] = H[i] / (Vol(R[i+1])-Vol(R[i]))
+                Rres[i] = 0.5*(R[i+1]+R[i])
+        if self.System.dimension==1:
+            Hres = np.zeros(H.shape,dtype=float)
+            Rres = np.zeros(R.shape,dtype=float)
+            for i in range(H.shape[0]):
+                Hres[i] = H[i] / ((R[i+1])-(R[i]))
+                Rres[i] = 0.5*(R[i+1]+R[i])
+        return Hres,Rres
     def average_distance(self,r_array):
         """
         This function compute the distance between the [0.,0.,0.] linker 
         """
         av_dist = 0.
         # remove the [0.,0.,0.] linker :
-        r_array = r_array[np.argwhere([np.all((r_array-np.array([0.,0.,0.]))!=0, axis=1)])[:,1]]
+        r_array = r_array[np.argwhere([np.any((r_array-np.array([0.,0.,0.]))!=0, axis=1)])[:,1]]
         N_linker = r_array.shape[0]
         # iterate over every linker
         for r in r_array:
             # compute the distance with [0.,0.,0.]
             av_dist+=np.linalg.norm(r)/N_linker
         return av_dist
-    def average_ell_coordinate(self):
-        return np.mean(self.System.get_ell_coordinates())
+    def average_ell_coordinate(self):        
+        return np.mean(self.System.get_ell_coordinates()[1:])
     def I(self,r):
             #return the PR index corresponding to a position
             # the maximum posision 2*sqrt(System.ell)
@@ -72,10 +80,14 @@ class Simulation:
                     self.PR[self.I(prev_R)]+=Dt#/(4/3*np.arccos(-1)*self.dr**3)            
             except IndexError:
                 self.PR.resize(self.I(prev_R)+1)
-                self.PR[self.I(prev_R)]+=Dt/(4*np.arccos(-1)*self.dr*(self.I(prev_R)*self.dr)**2)
+                self.PR[self.I(prev_R)]+=Dt#/(4*np.arccos(-1)*self.dr*(self.I(prev_R)*self.dr)**2)
+            if self.System.move_types[movetype] == 'bind':
+                stored_ell = set(self.System.get_ell_coordinates())
             if self.System.move_types[movetype] == 'unbind':
-                try:
-                    self.PL[int(self.average_ell_coordinate()/(self.System.ell_tot/self.L_size))-1]+=Dt
+                try:                    
+                    ell_affected = stored_ell - set(self.System.get_ell_coordinates())
+                    stored_ell = set(self.System.get_ell_coordinates())
+                    self.PL[int(list(ell_affected)[0]/(self.System.ell_tot/self.L_size))-1]+=Dt
                 except IndexError:
                     print(self.System.get_ell())
                     print(self.System.get_ell()/(self.System.ell_tot/self.L_size))
@@ -85,12 +97,17 @@ class Simulation:
             self.move[movetype] +=1
         self.PL = self.PL/tot_bound_time
         self.time = np.cumsum(self.dt)
-        self.PR = self.PR/self.time[-1]
-        self.PR,self.IX = rescale_with_r(self.PR,np.array([i*self.dr for i in range(self.PR.shape[0]+1)]))
+        self.PR = self.PR/self.time[-1]                
+        self.PR,self.IX = self.rescale_with_r(self.PR,np.array([i*self.dr for i in range(self.PR.shape[0]+1)]))
         self.move = self.move/self.step_tot           
         self.Mean_distance = self.integrate_density(self.PR*self.get_X(self.PR.shape[0]))#np.sum(self.PR*self.get_X(self.PR.shape[0]))
     def integrate_density(self,P):
-        return np.sum([P[i]*(Vol(self.dr*(i+1))-Vol(self.dr*i)) for i in range(P.shape[0])])
+        if self.System.dimension==3:
+            return np.sum([P[i]*(Vol(self.dr*(i+1))-Vol(self.dr*i)) for i in range(P.shape[0])])
+        elif self.System.dimension==1:
+            return np.sum([P[i]*self.dr for i in range(P.shape[0])])
+        else:
+            raise NotImplementedError
     def density_to_probability(self):
         return np.array([self.PR[i]*(4*np.arccos(-1)*self.dr*(i*self.dr)**2) for i in range(self.PR.shape[0])])
     def Pmeet(r,l,):

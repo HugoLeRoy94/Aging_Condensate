@@ -4,11 +4,10 @@ extern "C"
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
   // ---------------------------------------------------------------------------
-  void* create_system(double ell_tot,double rho0,double BindingEnergy,double k_diff,int seed,bool slide,int Nlinker)
+  void* create_system(double ell_tot,double rho0,double BindingEnergy,double k_diff,int seed,bool slide,int Nlinker,int dimension)
   {
-    return new System(ell_tot, rho0, BindingEnergy,k_diff,seed,slide,Nlinker);
+    return new System(ell_tot, rho0, BindingEnergy,k_diff,seed,slide,Nlinker,dimension);
   }
-  
   void* CopySystem(void* ptr)
   {
     System* system = reinterpret_cast<System* >(ptr);

@@ -5,7 +5,17 @@ using namespace std;
 Linker::Linker(std::array<double,3> r_c){R = r_c;free=true; Linker::counter++;}
 Linker::~Linker(){Linker::counter--;}
 
-array<double,3> Linker::r() const{return R;}
+array<double,3> Linker::r() const{
+    if(System::dimension == 3){
+        return R;}
+    else if(System::dimension == 2){
+        return {R[0],R[1],0.};
+    }
+    else if(System::dimension == 1){
+        return {R[0],0.,0.};
+    }
+    else{throw invalid_argument("invalid dimension value");}
+}
 
 void Linker::set_free(){free = true;}
 

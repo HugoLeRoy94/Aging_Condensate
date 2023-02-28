@@ -2,7 +2,7 @@
 
 using namespace std;
 
-System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, int seed,bool sliding, int Nlinker) : distrib(1, 10000000)
+System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, int seed,bool sliding, int Nlinker,int dimension) : distrib(1, 10000000)
 {
     IF(true) { cout << "System : creator" << endl; }
     // srand(seed);
@@ -12,6 +12,7 @@ System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, 
     ell = ell_tot;
     rho = rho0;
     slide=sliding;
+    System::dimension=dimension;
     N_linker_max = Nlinker;
     Linker::counter = 0;
     binding_energy = BindingEnergy;
@@ -103,7 +104,7 @@ double System::evolve(int *bind)
   IF(true){cout<<"-------------------------------------------------"<<endl;}
   IF(true) { cout << "System : start evolve" << endl; }
   IF(true){cout<<"-------------------------------------------------"<<endl;}
-  IF(true){check_loops_integrity();}
+  //IF(true){check_loops_integrity();}
   // -----------------------------------------------------------------------------
   // -----------------------------------------------------------------------------
   // compute the cumulative transition rates for each loop
@@ -159,7 +160,7 @@ double System::evolve(int *bind)
     *bind = 3;
   }
   // remake the strands whose rates have been modified by the event.
-  IF(true){check_loops_integrity();}
+  //IF(true){check_loops_integrity();}
   IF(true){cout<<"output the value of the rates"<<endl;}
   IF(true){for(auto& rates : cum_rates){cout<<rates<<endl;}}
   return draw_time(cum_rates.back());
@@ -364,6 +365,7 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
   return res;
 }
 */
+
 set<array<double,3>> System::generate_crosslinkers(bool remake){
 // loop over all the strand, and generate crosslinkers within their ellipse.
   set<array<double,3>> res;
@@ -371,11 +373,10 @@ set<array<double,3>> System::generate_crosslinkers(bool remake){
   // if we generate a fixed number of linkers
   if(N_linker_max>0)
     {
-      Linker::counter = loop_link.get_linker_size()-loop_link.get_N_free_linker();// number of occupied linkers
+      Linker::counter = loop_link.get_linker_size()-loop_link.get_N_free_linker();// number of occupied linkers      
       N_linker_to_make = N_linker_max-Linker::counter; // total number of linkers that has to be added
       //cout<<"counter : "<<Linker::counter<<endl;
-      //cout<<"N_linker_max :"<<N_linker_max<<endl;
-      //cout<<N_linker_to_make<<endl;
+      //cout<<"N_linker_max :"<<N_linker_max<<endl;      
       // compute the probability to place N linkers propto the volume of each strands
       double total_volume(0.);
       for(auto& strand : loop_link.get_strands()){total_volume+=strand->get_V();}
@@ -407,7 +408,12 @@ set<array<double,3>> System::generate_crosslinkers(bool remake){
     generate_point_in_ellipse(main_ax,ctr_mass,a,b,res,N_linker_to_make);
   }
   }
-  return res;
+  // transform res depending on the dimension
+  set<array<double,3>> dimensional_res;
+  if (System::dimension == 2){for(auto& xyz: res){dimensional_res.insert({xyz[0],xyz[1],0.});}}
+  else if(System::dimension==1){for(auto& xyz: res){dimensional_res.insert({xyz[0],0.,0.});}}
+  else{return res;}
+  return dimensional_res;
 }
 /*
 set<array<double,3>> System::generate_crosslinkers(int N_linker_already){

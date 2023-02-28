@@ -13,7 +13,7 @@ from ctypes import c_bool
 from ctypes import byref
 lib = cdll.LoadLibrary(str(pathlib.Path(__file__).parent.absolute())+'/../System_cpp/lib.so')
 
-lib.create_system.argtypes=[c_double,c_double,c_double,c_double,c_int,c_bool,c_int]
+lib.create_system.argtypes=[c_double,c_double,c_double,c_double,c_int,c_bool,c_int,c_int]
 lib.create_system.restype=POINTER(c_void_p)
 lib.CopySystem.argtypes = [POINTER(c_void_p)]
 lib.CopySystem.restype = POINTER(c_void_p)
@@ -42,11 +42,12 @@ lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
 lib.print_random_stuff.argtypes=[POINTER(c_void_p)]
 
 class System:
-    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,kdiff=1.,seed=19874,sliding=False,Nlinker=0,old_system=None):
+    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,kdiff=1.,seed=19874,sliding=False,Nlinker=0,old_system=None,dimension=3):
         self.move_types = {0 : 'unbind', 1:'diffuse', 2:'slide', 3:'bind'}
         if old_system is None:
             self.ell_tot,self.rho0,self.binding_energy,self.k_diff = ell_tot,rho0,BindingEnergy,kdiff
-            self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,self.k_diff,seed,sliding,Nlinker)
+            self.Nlinker,self.dimension = Nlinker,dimension
+            self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,self.k_diff,seed,sliding,self.Nlinker,self.dimension)            
         else:
             self.copy(old_system)
 
