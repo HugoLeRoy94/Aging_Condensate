@@ -1,10 +1,11 @@
-#include "Header.h"
+#include "../Shared_Objects/Header.h"
+#include "Gillespie.h"
 
 using namespace std;
 
-System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, int seed,bool sliding, int Nlinker,int dimension) : distrib(1, 10000000)
+Gillespie::Gillespie(double ell_tot, double rho0, double BindingEnergy,double k_diff, int seed,bool sliding, int Nlinker,int dimension) : distrib(1, 10000000)
 {
-    IF(true) { cout << "System : creator" << endl; }
+    IF(true) { cout << "Gillespie : creator" << endl; }
     // srand(seed);
     generator.seed(seed);
     // ---------------------------------------------------------------------------
@@ -12,7 +13,7 @@ System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, 
     ell = ell_tot;
     rho = rho0;
     slide=sliding;
-    System::dimension=dimension;
+    LoopLinkWrap::dimension=dimension;
     N_linker_max = Nlinker;
     Linker::counter = 0;
     binding_energy = BindingEnergy;
@@ -32,22 +33,22 @@ System::System(double ell_tot, double rho0, double BindingEnergy,double k_diff, 
     loop_link.Remove_Strand(dummy_strand);
     // ---------------------------------------------------------------------------
     //-----------------------------initialize dangling----------------------------
-    IF(true){cout<< "System : create dangling" << endl;}
+    IF(true){cout<< "Gillespie : create dangling" << endl;}
     loop_link.Create_Strand(Dangling(R0, 0., ell, rho,slide));
     //print_random_stuff();
     //for(auto& it : linker_to_strand){for(auto& it2 : it.second){cout<<it2->get_Rleft()[0]<<" "<<it2->get_Rleft()[1]<<" "<<it2->get_Rleft()[2]<<endl;}}
-    IF(true) { cout << "System : created" << endl; }
+    IF(true) { cout << "Gillespie : created" << endl; }
 }
 
-System::~System()
+Gillespie::~Gillespie()
 {
   loop_link.delete_pointers();
   Linker::counter = 0;
 }
 
-void System::compute_cum_rates(vector<double>& cum_rates) const
+void Gillespie::compute_cum_rates(vector<double>& cum_rates) const
 {
-  IF(true) { cout << "System : Start computing the cumulative probability array" << endl; }
+  IF(true) { cout << "Gillespie : Start computing the cumulative probability array" << endl; }
   cum_rates[0] = (loop_link.get_strand_size()-1)  * exp(binding_energy);
   cum_rates[1] = kdiff*loop_link.get_N_free_linker()+cum_rates[0];
   int n(2);
@@ -83,9 +84,9 @@ void System::compute_cum_rates(vector<double>& cum_rates) const
   //for(auto& rate : cum_rates){cout<<rate<<endl;}
 }
 
-int System::pick_random_process(vector<double>& cum_rates) const
+int Gillespie::pick_random_process(vector<double>& cum_rates) const
 {
-   IF(true) { cout << "System : draw a random process" << endl; }
+   IF(true) { cout << "Gillespie : draw a random process" << endl; }
   uniform_real_distribution<double> distribution(0, cum_rates.back());
   double pick_rate = distribution(generator);
   // becareful : if the rate_selec number is higher than cum_rates.back()  lower_bound returns cum_rates.back()
@@ -99,10 +100,10 @@ int System::pick_random_process(vector<double>& cum_rates) const
   return distance(cum_rates.begin(),rate_selec);
 }
 
-double System::evolve(int *bind)
+double Gillespie::evolve(int *bind)
 {
   IF(true){cout<<"-------------------------------------------------"<<endl;}
-  IF(true) { cout << "System : start evolve" << endl; }
+  IF(true) { cout << "Gillespie : start evolve" << endl; }
   IF(true){cout<<"-------------------------------------------------"<<endl;}
   //IF(true){check_loops_integrity();}
   // -----------------------------------------------------------------------------
@@ -131,21 +132,21 @@ double System::evolve(int *bind)
   if (rate_select == 0)
   {
         // Unbind a loop
-    IF(true) { cout << "System : remove a bond" << endl; }
+    IF(true) { cout << "Gillespie : remove a bond" << endl; }
     // unbind
     unbind_random_loop();
     *bind = 0;
   }
   else if(rate_select == 1)
   {
-    IF(true){cout<<"System : move the linkers"<<endl;}
+    IF(true){cout<<"Gillespie : move the linkers"<<endl;}
     move_random_free_linkers();
     *bind = 1;
   }
   else if(rate_select>=loop_link.get_strand_size()+2)
   {
     // slide
-    IF(true){cout<<"System : slide a bond"<<endl;}
+    IF(true){cout<<"Gillespie : slide a bond"<<endl;}
     int loop_index_left(rate_select-loop_link.get_strand_size()-2);
     slide_bond(loop_index_left);
     *bind=2;
@@ -153,7 +154,7 @@ double System::evolve(int *bind)
   else
   {
     // add a linker to a strand or slide it
-    IF(true) { cout << "System : add a bond" << endl; }
+    IF(true) { cout << "Gillespie : add a bond" << endl; }
     int loop_index(rate_select-2); // rate_select = 1 => first bond
 
     add_bond(loop_index);
@@ -166,23 +167,23 @@ double System::evolve(int *bind)
   return draw_time(cum_rates.back());
 }
 
-void System::add_bond(int loop_index)
+void Gillespie::add_bond(int loop_index)
 {
-    IF(true) { cout << "System : select the associated loop" << endl;}
+    IF(true) { cout << "Gillespie : select the associated loop" << endl;}
     // cum_rates.begin() is unbinding
     set<Strand*,LessLoop>::iterator loop_selec(loop_link.get_strand(loop_index));
     IF(true){cout<<"the affected loop id is : "<<*loop_selec<<endl;}
     // ask the loop for a random linker, and a random length
-    IF(true) { cout << "System : select a length and a r" << endl; }
+    IF(true) { cout << "Gillespie : select a length and a r" << endl; }
     // select a link to bind to and ask the selected loop to return two new loops.
     pair<unique_ptr<Strand>,unique_ptr<Strand>> new_strands((*loop_selec)->bind());
     //new_strands.first->get_Rright()->set_bounded(); // set the linker to bounded
     loop_link.set_occupied(new_strands.first->get_Rright());
     // Create the pointers in the wrapper
-    IF(true){cout<< "System : add_bond : build the list of strands that are affected"<<endl;}
+    IF(true){cout<< "Gillespie : add_bond : build the list of strands that are affected"<<endl;}
     Strand* strand_left = loop_link.Create_Strand(*new_strands.first);
     Strand* strand_right = loop_link.Create_Strand(*new_strands.second);
-    IF(true) { cout << "System : add_bond : delete the old loop" << endl; }
+    IF(true) { cout << "Gillespie : add_bond : delete the old loop" << endl; }
     // delete the loop
     loop_link.Remove_Strand((*loop_selec));
     // actualize the rates of the vicinity of the move
@@ -195,7 +196,7 @@ void System::add_bond(int loop_index)
     loop_link.remake_strands(strands_affected);
 }
 
-void System::unbind_random_loop()
+void Gillespie::unbind_random_loop()
 {
   // select the index of the left bond to remove
   // last index is loop.size-1
@@ -204,7 +205,7 @@ void System::unbind_random_loop()
   int index(distribution(generator));
   Strand* loop_selec_left(*loop_link.get_strand(index));
   Strand* loop_selec_right(*loop_link.get_strand(index+1));
-  IF(true) { cout << "System : unbind loop from the loop_left : "<<loop_selec_left<<" and the right : "<<loop_selec_right << endl; }
+  IF(true) { cout << "Gillespie : unbind loop from the loop_left : "<<loop_selec_left<<" and the right : "<<loop_selec_right << endl; }
 
   // set the linker that was bound to unbound
   //loop_selec_left->get_Rright()->set_free();
@@ -212,13 +213,13 @@ void System::unbind_random_loop()
   // create a new loop that is the combination of both inputs
 
   Strand* loop(loop_link.Create_Strand(*loop_selec_right->unbind_from(loop_selec_left)));
-  IF(true){cout<<"System : remove the old strand from loop_link"<<endl;}
+  IF(true){cout<<"Gillespie : remove the old strand from loop_link"<<endl;}
   // save the reference of the linker to actualize the linker's state
   Linker* freed((loop_selec_right)->get_Rleft());
   // delete the loop before actualize vicinity.
   loop_link.Remove_Strand(loop_selec_left);
   loop_link.Remove_Strand(loop_selec_right);
-  IF(true){cout<<"System : unbind_loop actualize vicinity"<<endl;}
+  IF(true){cout<<"Gillespie : unbind_loop actualize vicinity"<<endl;}
   // 1) access all the affected strands in the neighboring
   set<Strand*,LessLoop> strands_affected = freed->get_strands();
   // 2) remove those that have just been created
@@ -227,7 +228,7 @@ void System::unbind_random_loop()
   loop_link.remake_strands(strands_affected);
 }
 
-void System::slide_bond(int left_loop_index)
+void Gillespie::slide_bond(int left_loop_index)
 { 
   double dl(choose_dl(left_loop_index));
   IF(true){cout<<"slide a bond by a dl = "<<dl<<endl;}
@@ -246,18 +247,18 @@ void System::slide_bond(int left_loop_index)
   loop_link.Remove_Strand(right_strand);
 }
 
-void System::move_random_free_linkers()
+void Gillespie::move_random_free_linkers()
 {
   //LoopLinkWrap new_loop_link;
   // move the linkers
-  IF(true){cout<<"System : Move_linkers : diffuse linkers"<<endl;}
-  IF(true){cout<<"System : move_random_free_linker : select a Linker"<<endl;}
+  IF(true){cout<<"Gillespie : Move_linkers : diffuse linkers"<<endl;}
+  IF(true){cout<<"Gillespie : move_random_free_linker : select a Linker"<<endl;}
   Linker* moved_linker(loop_link.diffuse_random_free_linker());
   // 1) access all the affected strands in the neighboring
-  IF(true){cout<<"System : move_random_free_linker : move the linker"<<endl;}
+  IF(true){cout<<"Gillespie : move_random_free_linker : move the linker"<<endl;}
   set<Strand*,LessLoop> strands_affected = moved_linker->get_strands();    
   // 3) recompute the rates
-  IF(true){cout<<"System : move_random_free_linker : remake the affected strands"<<endl;}
+  IF(true){cout<<"Gillespie : move_random_free_linker : remake the affected strands"<<endl;}
   loop_link.remake_strands(strands_affected);
   // check if the linkers still belong to a loop:
   // check if the linker belong somewhere
@@ -267,7 +268,7 @@ void System::move_random_free_linkers()
   }
 }
 
-double System::choose_dl(int left_loop_index)
+double Gillespie::choose_dl(int left_loop_index)
 {
   set<Strand*,LessLoop>::iterator left_loop(loop_link.get_strand(left_loop_index));
   set<Strand*,LessLoop>::iterator right_loop(loop_link.get_strand(left_loop_index+1));
@@ -280,14 +281,14 @@ double System::choose_dl(int left_loop_index)
   else{ return -1;}
 }
 
-double System::draw_time(double rate) const
+double Gillespie::draw_time(double rate) const
 {
   uniform_real_distribution<double> distrib;
   double xi(distrib(generator));
   return -log(1 - xi) / rate;
 }
 
-void System::reset_crosslinkers()
+void Gillespie::reset_crosslinkers()
 {
   IF(true){cout<<"------------------------------------------------------"<<endl;}
   IF(true){cout<<"reset all the crosslinkers"<<endl;}
@@ -320,9 +321,9 @@ void System::reset_crosslinkers()
   IF(true){check_loops_integrity();}
 }
 /*
-set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
+set<array<double,3>> Gillespie::generate_crosslinkers(int N_linker_already){
   //This function generates crosslinker at random position within a sphere of given radius
-  IF(true){cout<<"System : generate crosslinkers"<<endl;}
+  IF(true){cout<<"Gillespie : generate crosslinkers"<<endl;}
   // create a set with all the limits
   set<double> xminl,xmaxl,yminl,ymaxl,zminl,zmaxl;
   
@@ -366,7 +367,7 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
 }
 */
 
-set<array<double,3>> System::generate_crosslinkers(bool remake){
+set<array<double,3>> Gillespie::generate_crosslinkers(bool remake){
 // loop over all the strand, and generate crosslinkers within their ellipse.
   set<array<double,3>> res;
   int N_linker_to_make(0.);
@@ -410,13 +411,13 @@ set<array<double,3>> System::generate_crosslinkers(bool remake){
   }
   // transform res depending on the dimension
   set<array<double,3>> dimensional_res;
-  if (System::dimension == 2){for(auto& xyz: res){dimensional_res.insert({xyz[0],xyz[1],0.});}}
-  else if(System::dimension==1){for(auto& xyz: res){dimensional_res.insert({xyz[0],0.,0.});}}
+  if (LoopLinkWrap::dimension == 2){for(auto& xyz: res){dimensional_res.insert({xyz[0],xyz[1],0.});}}
+  else if(LoopLinkWrap::dimension==1){for(auto& xyz: res){dimensional_res.insert({xyz[0],0.,0.});}}
   else{return res;}
   return dimensional_res;
 }
 /*
-set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
+set<array<double,3>> Gillespie::generate_crosslinkers(int N_linker_already){
   set<array<double,3>> res; // the result is a set of coordinates
   for(int n =1; n<rho*2*sqrt(ell);n++){
     double x(n/rho),y(0),z(0);
@@ -426,7 +427,7 @@ set<array<double,3>> System::generate_crosslinkers(int N_linker_already){
 }
 */
 
-double System::compute_slide_S(Strand* left_strand, Strand* right_strand,double dl) const
+double Gillespie::compute_slide_S(Strand* left_strand, Strand* right_strand,double dl) const
 {
   // left strand is always a loop
   if(
@@ -451,7 +452,7 @@ double System::compute_slide_S(Strand* left_strand, Strand* right_strand,double 
 
 }
 
-double System::get_slide_rate(Strand* left_strand, Strand* right_strand,double dl) const
+double Gillespie::get_slide_rate(Strand* left_strand, Strand* right_strand,double dl) const
 {
   // This function simply returns the rate of sliding
   // if it is a forbiden move it returns 0;
@@ -461,10 +462,10 @@ double System::get_slide_rate(Strand* left_strand, Strand* right_strand,double d
   catch(invalid_argument ia){return 0.;}
 }
 
-void System::reset_loops(LoopLinkWrap& new_loop_link)
+void Gillespie::reset_loops(LoopLinkWrap& new_loop_link)
 {
   // recreate all the loops while changing the extremities to bounded
-  IF(true){cout<<"System : reset loops"<<endl;}
+  IF(true){cout<<"Gillespie : reset loops"<<endl;}
   for(auto& strand : loop_link.get_strands())
   {
       try
@@ -493,11 +494,11 @@ void System::reset_loops(LoopLinkWrap& new_loop_link)
                                                             new_linker_left)));
       }
   }
-  IF(true){cout<<"System : copy finished : delete old strands"<<endl;}
+  IF(true){cout<<"Gillespie : copy finished : delete old strands"<<endl;}
   loop_link.delete_strands();
 }
 /*
-set<Strand*,LessLoop> System::get_vicinity(Linker* modified_linker,set<Strand*,LessLoop> strand_created)
+set<Strand*,LessLoop> Gillespie::get_vicinity(Linker* modified_linker,set<Strand*,LessLoop> strand_created)
 {
   set<Strand*,LessLoop>  modified(modified_linker->get_strands());//.begin(),modified_linker->get_strands().end());
   for(auto& it : modified_linker->get_strands()){modified.insert(it);}

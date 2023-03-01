@@ -6,13 +6,13 @@ using namespace std;
 // -----------------------------accessor----------------------------------------
 // -----------------------------------------------------------------------------
 
-int System::get_N_strand() const { return loop_link.get_strand_size(); }
+int Gillespie::get_N_strand() const { return loop_link.get_strand_size(); }
 
-void System::get_R(double *R, int size) const
+void Gillespie::get_R(double *R, int size) const
 {
   if (size != 3 * (loop_link.get_strand_size()))
   {
-    throw invalid_argument("invalid size in System::get_R");
+    throw invalid_argument("invalid size in Gillespie::get_R");
   }
   // We construct an vector of the x,y,z coordinates to sort them according to x
   // for( auto& it : R_to_sort){for(auto& it2 : it){cout<<it2<<" ";}cout<<endl;}
@@ -27,9 +27,9 @@ void System::get_R(double *R, int size) const
   }
 }
 
-void System::get_ell_coordinates(double* ell_coordinate,int size)const 
+void Gillespie::get_ell_coordinates(double* ell_coordinate,int size)const 
 {
-  if(size != loop_link.get_strand_size()){throw invalid_argument("invalid size in System::get_R");}
+  if(size != loop_link.get_strand_size()){throw invalid_argument("invalid size in Gillespie::get_R");}
 int n(0);
   for(auto& loop : loop_link.get_strands()){
     ell_coordinate[n] = loop->get_ell_coordinate_0();
@@ -37,11 +37,11 @@ int n(0);
   }
 }
 
-void System::get_ell(double *ells, int size) const
+void Gillespie::get_ell(double *ells, int size) const
 {
   if (size != loop_link.get_strand_size())
   {
-    throw invalid_argument("invalid size in System::get_ell");
+    throw invalid_argument("invalid size in Gillespie::get_ell");
   }
   int n(0);
   for (auto &it : loop_link.get_strands())
@@ -51,11 +51,11 @@ void System::get_ell(double *ells, int size) const
   }
 }
 
-void System::get_r(double *r, int size) const
+void Gillespie::get_r(double *r, int size) const
 {
   if (size != get_r_size())
   {
-    throw invalid_argument("invalid size in System::get_r");
+    throw invalid_argument("invalid size in Gillespie::get_r");
   }
   int n(0);
   for (auto &loop : loop_link.get_strands())
@@ -70,7 +70,7 @@ void System::get_r(double *r, int size) const
   }
 }
 
-int System::get_r_size() const
+int Gillespie::get_r_size() const
 {
   int size(0);
   for (auto &it : loop_link.get_strands())
@@ -80,7 +80,7 @@ int System::get_r_size() const
   return 3 * size;
 }
 
-double System::get_F() const
+double Gillespie::get_F() const
 {
   double F(get_N_strand()*binding_energy);
   for (auto &it : loop_link.get_strands())
@@ -90,7 +90,7 @@ double System::get_F() const
   return F;
 }
 
-void System::Print_Loop_positions() const
+void Gillespie::Print_Loop_positions() const
 {
   for (auto &loop : loop_link.get_strands())
   {
@@ -104,9 +104,9 @@ void System::Print_Loop_positions() const
   }
 }
 
-void System::check_loops_integrity()
+void Gillespie::check_loops_integrity()
 {
-  IF(true){cout<<"System : Start checking loops integrity"<<endl;}
+  IF(true){cout<<"Gillespie : Start checking loops integrity"<<endl;}
   // check that the occupied linkers are in strand occupied container
   for(auto& loop: loop_link.get_strands())
   {
@@ -184,11 +184,11 @@ void System::check_loops_integrity()
   */
 }
 
-void System::get_r_system(double *r, int size)const
+void Gillespie::get_r_gillespie(double *r, int size)const
 {
-  if (size != get_r_system_size())
+  if (size != get_r_gillespie_size())
   {
-    throw invalid_argument("invalid size in System::get_r");
+    throw invalid_argument("invalid size in Gillespie::get_r");
   }
   int n(0);
   for(auto& it : loop_link.get_linkers())
@@ -200,12 +200,12 @@ void System::get_r_system(double *r, int size)const
   }
 }
 
-int System::get_r_system_size() const
+int Gillespie::get_r_gillespie_size() const
 {
   return 3*loop_link.get_linker_size();
 }
 
-void System::print_random_stuff() const{
+void Gillespie::print_random_stuff() const{
   //linkers.print();
   cout<<"loops linkers : "<<endl;
   for(auto& it : loop_link.get_strands()){for(auto& link : it->get_r()){

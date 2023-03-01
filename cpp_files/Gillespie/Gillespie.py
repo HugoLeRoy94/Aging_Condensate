@@ -3,11 +3,11 @@ from numpy.linalg import norm
 
 pi = np.arcos(-1)
 
-class System:
+class Gillespie:
     def __init__(self,xy,L,*args,**kwargs):
         """
-        The system is a polymer chain that is bound at its two ends.
-        The state of the system is defined by a list of 3d vectors that defined
+        The gillespie is a polymer chain that is bound at its two ends.
+        The state of the gillespie is defined by a list of 3d vectors that defined
         the coordinates of binding points, and a distance L that correspond to
         the length of polymer associated to each distance.
         We start with a single R and L.
@@ -38,7 +38,7 @@ class System:
     def _DrawProcess(self):
         """
         Private function to draw a random process within the list of available
-        ones. change the system accordingly, and return the time increment.
+        ones. change the gillespie accordingly, and return the time increment.
         """
     def Evolv(self):
         self._ComputeProcessesList()

@@ -16,6 +16,7 @@ class LoopLinkWrap
                                 std::vector<Linker*>& free_linkers,
                                 std::vector<Linker*>& occ_linkers) const;
     public:
+        inline static int dimension;
         LoopLinkWrap();
         ~LoopLinkWrap();
         /*

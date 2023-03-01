@@ -1,6 +1,6 @@
 from ctypes.wintypes import POINT
 import numpy as np
-import ellipse as ell # module to plot the system
+import ellipse as ell # module to plot the gillespie
 import matplotlib.pyplot as plt
 import pathlib
 from ctypes import cdll
@@ -11,16 +11,16 @@ from ctypes import c_void_p
 from ctypes import c_char_p
 from ctypes import c_bool
 from ctypes import byref
-lib = cdll.LoadLibrary(str(pathlib.Path(__file__).parent.absolute())+'/../System_cpp/lib.so')
+lib = cdll.LoadLibrary(str(pathlib.Path(__file__).parent.absolute())+'/../cpp_files/Gillespie.so')
 
-lib.create_system.argtypes=[c_double,c_double,c_double,c_double,c_int,c_bool,c_int,c_int]
-lib.create_system.restype=POINTER(c_void_p)
-lib.CopySystem.argtypes = [POINTER(c_void_p)]
-lib.CopySystem.restype = POINTER(c_void_p)
+lib.create_gillespie.argtypes=[c_double,c_double,c_double,c_double,c_int,c_bool,c_int,c_int]
+lib.create_gillespie.restype=POINTER(c_void_p)
+lib.CopyGillespie.argtypes = [POINTER(c_void_p)]
+lib.CopyGillespie.restype = POINTER(c_void_p)
 
 lib.evolve.argtypes=[POINTER(c_void_p),POINTER(c_int)]
 lib.evolve.restype=c_double
-lib.delete_System.argtypes = [POINTER(c_void_p)]
+lib.delete_Gillespie.argtypes = [POINTER(c_void_p)]
 lib.reset_crosslinkers.argypes = POINTER(c_void_p)
 
 
@@ -28,10 +28,10 @@ lib.get_F.argtypes = [POINTER(c_void_p)]
 lib.get_F.restype = c_double
 lib.get_r_size.argtypes=[POINTER(c_void_p)]
 lib.get_r_size.restype=c_int
-lib.get_r_system_size.argtypes=[POINTER(c_void_p)]
-lib.get_r_system_size.restype=c_int
+lib.get_r_gillespie_size.argtypes=[POINTER(c_void_p)]
+lib.get_r_gillespie_size.restype=c_int
 lib.get_r.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
-lib.get_r_system.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
+lib.get_r_gillespie.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
 lib.get_N_strand.argtypes=[POINTER(c_void_p)]
 lib.get_N_strand.restype=c_int
 lib.get_R.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
@@ -41,30 +41,30 @@ lib.get_ell.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
 lib.Print_Loop_positions.argtypes=[POINTER(c_void_p)]
 lib.print_random_stuff.argtypes=[POINTER(c_void_p)]
 
-class System:
-    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,kdiff=1.,seed=19874,sliding=False,Nlinker=0,old_system=None,dimension=3):
+class Gillespie:
+    def __init__(self,ell_tot=100,rho0=0.1,BindingEnergy=-1.,kdiff=1.,seed=19874,sliding=False,Nlinker=0,old_gillespie=None,dimension=3):
         self.move_types = {0 : 'unbind', 1:'diffuse', 2:'slide', 3:'bind'}
-        if old_system is None:
+        if old_gillespie is None:
             self.ell_tot,self.rho0,self.binding_energy,self.k_diff = ell_tot,rho0,BindingEnergy,kdiff
             self.Nlinker,self.dimension = Nlinker,dimension
-            self.Address = lib.create_system(self.ell_tot,self.rho0,self.binding_energy,self.k_diff,seed,sliding,self.Nlinker,self.dimension)            
+            self.Address = lib.create_gillespie(self.ell_tot,self.rho0,self.binding_energy,self.k_diff,seed,sliding,self.Nlinker,self.dimension)            
         else:
-            self.copy(old_system)
+            self.copy(old_gillespie)
 
-    def copy(self,old_system):
+    def copy(self,old_gillespie):
         raise NotImplemented
-        self.ell_tot = old_system.ell_tot
-        self.rho0 = old_system.rho0
-        self.binding_energy = old_system.binding_energy
-        self.k_diff = old_system.k_diff
-        self.Address = lib.CopySystem(old_system.Address)
+        self.ell_tot = old_gillespie.ell_tot
+        self.rho0 = old_gillespie.rho0
+        self.binding_energy = old_gillespie.binding_energy
+        self.k_diff = old_gillespie.k_diff
+        self.Address = lib.CopyGillespie(old_gillespie.Address)
     
     def __del__(self):
-        lib.delete_System(self.Address) # deleting pointers is important in c++
+        lib.delete_Gillespie(self.Address) # deleting pointers is important in c++
     
     def evolve(self,steps=1):
         """
-        Make the system evolves 
+        Make the gillespie evolves 
         """
         if steps>1:
             binds,time = np.zeros(steps,dtype=int),np.zeros(steps,dtype=float)
@@ -103,10 +103,10 @@ class System:
         return ell
 
     def get_r(self):    
-        size = lib.get_r_system_size(self.Address)
+        size = lib.get_r_gillespie_size(self.Address)
         r = np.zeros(size,dtype=np.double)
-        # r_system access the linkers that are owned by the system
-        lib.get_r_system(self.Address,r.ctypes.data_as(POINTER(c_double)),size)
+        # r_gillespie access the linkers that are owned by the gillespie
+        lib.get_r_gillespie(self.Address,r.ctypes.data_as(POINTER(c_double)),size)
         return np.reshape(r,(-1,3))
     
     def get_r_from_loops(self):
@@ -118,8 +118,8 @@ class System:
     def get_r_size(self):
         return lib.get_r_size(self.Address)
     
-    def get_r_system_size(self):
-        return lib.get_r_system_size(self.Address)
+    def get_r_gillespie_size(self):
+        return lib.get_r_gillespie_size(self.Address)
     
     def Print_loop_positions(self):
         lib.Print_Loop_positions(self.Address)
@@ -133,7 +133,7 @@ class System:
             position[n] = position[n-1]+l
         return position
     
-    def Plot3DSystem(self,*arg,**kwargs):
+    def Plot3DGillespie(self,*arg,**kwargs):
         fig = plt.figure(*arg,**kwargs)
         ax = fig.add_subplot(projection='3d')
         Ell = self.get_ell()
@@ -176,7 +176,7 @@ class System:
         This function return the radial distribution function in any dimension
 
         Parameter: Array : 
-                SystemSize:
+                GillespieSize:
                 bins:
                 distmax:
         return:

@@ -2,9 +2,9 @@
 
 This programm is a gillespie algorithm that simulate the aging/equilibration of an associative polymer gel.
 
-## The System
+## The Gillespie
 
-the system is a polymer chain that is anchored at one extremity, the other being dangling. Additional binding occurs as the simulation progress. A state of the system is described by a list of sub-polymer chain that represent the free strands in between two binding points and called a Loop. the state of the system can be denoted:
+the gillespie is a polymer chain that is anchored at one extremity, the other being dangling. Additional binding occurs as the simulation progress. A state of the gillespie is described by a list of sub-polymer chain that represent the free strands in between two binding points and called a Loop. the state of the gillespie can be denoted:
 $$ \mathcal{C} = \{ \mathbf{R}_i,\{ \mathbf{r}_n\}_{n \in [0,k_i]},\ell_i \}_{i \in [0,N]}$$
 Where $\mathbf{R}_i$ is a 3D vector that represent the position of the $i$ th anchoring point. $k_i$ is the number of binding sites in the vicinity of the loop $i$, and $\mathbf{r}_n$ their position. $\ell_i$ is the length of the loop $i$. The final dangling part of the polymer is also fully determined with this notation.
 
@@ -15,7 +15,7 @@ $$P_i = \frac{r_i}{\sum_j r_j}$$
 where $P_i$ is the probability of picking the rate $i$ and $r_i$ its rate.
 
 ## Parameters of the simulation
-- $\rho_0$ is either the volume fraction of crosslinkers in the system, or the initial volume fraction when the system evolve.
+- $\rho_0$ is either the volume fraction of crosslinkers in the gillespie, or the initial volume fraction when the gillespie evolve.
 - $\ell_{tot}$ the length of the total loop.
 - $a$ is the size of the crosslinkers, $b$ is the size of the monomers. We assume that they are equal and define the unit length so far.
 - $\tau_0$ is the characteristic time for the rates. It defines the unit time of the simulation.
@@ -30,7 +30,7 @@ We start with a single polymer chain bound at its two extremities. The initializ
 >    - Select the chain i  
 >    - Compute the probability of the chain i to have a binding point according to the formula :  
 >   - $$P_\text{binding} = V_\text{free} \rho_\text{stickers}$$  
->   - with $V_\text{free}$ the free volume occupied by the ellipse of the chain, and $\rho_\text{stickers}$ the density of sticker in the system (which is a free parameter).  
+>   - with $V_\text{free}$ the free volume occupied by the ellipse of the chain, and $\rho_\text{stickers}$ the density of sticker in the gillespie (which is a free parameter).  
 >   - draw a random number : RAND between 0 and 1.
 >       - if RAND < $P_\text{binding}$ then the chain is
  splitted into two sub chains  
@@ -43,7 +43,7 @@ The initialization stops when all the chains / sub-chains etc... answer False to
 
 ## Moves
 
-We do not simulate the polymer dynamic, one of the main assumption is that the polymer dynamic occurs on smaller timescale than the one of binding / unbinding dynamic. Therefore, the only time consuming moves are the binding/unbinding ones, that are thus assumed to dominate the dynamic of the system.
+We do not simulate the polymer dynamic, one of the main assumption is that the polymer dynamic occurs on smaller timescale than the one of binding / unbinding dynamic. Therefore, the only time consuming moves are the binding/unbinding ones, that are thus assumed to dominate the dynamic of the gillespie.
 
 We start by creating a list of possible moves.
 
@@ -89,12 +89,12 @@ A linker is a proper object, its main parameter is its position : three double x
 
 # Python and C++ objects
 :warning:Not updated !:warning:
-## System
-The private variable of the system is:
-- A **set<loop*>** of all the *loop* of the system. Think about allocating the memory we call it *loops*. plus 
+## Gillespie
+The private variable of the gillespie is:
+- A **set<loop*>** of all the *loop* of the gillespie. Think about allocating the memory we call it *loops*. plus 
 
 
-The function of the system is:
+The function of the gillespie is:
 
 - *evolve* function that
   - recompute *cum_rates* by iterating over *loops* and accessing the associated total rate.
@@ -115,7 +115,7 @@ The function of the system is:
 
 ## Loop
 
-The main part of the system is a **vector<loop>** of loop. Each loop $i$ contains the following private variables:
+The main part of the gillespie is a **vector<loop>** of loop. Each loop $i$ contains the following private variables:
 - $\mathbf{R}$ : is a **array<double,3>** the right crosslinker. is called *R*
 - $\ell$ : the length of the loop is a double called *ell_loop*
 - $\{r_n\}_{n \in [0,k]}$ : an **vector<array<3>,k>** of the position of all binding points called *r*
@@ -135,7 +135,7 @@ The following functions:
 
 ## Dangling
 
-The end of the polymer. It is a single object owned by the System. Very similar to a loop. It always evolves following an alternative path
+The end of the polymer. It is a single object owned by the Gillespie. Very similar to a loop. It always evolves following an alternative path
 
 ## Function
 
@@ -148,14 +148,14 @@ The end of the polymer. It is a single object owned by the System. Very similar 
 ## Miscellaneous remarks
 
 - the loops are sorted by curvilinear coordinates along the polymer length in the set
-- The system know a reference to all the crosslinkers. However it is ask to each loop and dangling to create their own linkers, at a distance set in their own object.
+- The gillespie know a reference to all the crosslinkers. However it is ask to each loop and dangling to create their own linkers, at a distance set in their own object.
 - We arange the linkers in the map with : $key = x+y\ell=z\ell^2$
 
 ## *Strands*, *Dangling* and *Loops*
 
 ### crosslinkers :
 
-crosslinkers are generated in a volume around each loops and dangling bond, but also stored in the system. each time a loop or a strand is generated, we draw $N_\text{link}$ linkers from a Poisson distribution of mean $\rho V$ where V is the volume in which the crosslinkers are generated. We do not generate crosslinkers in the whole volume which would be very large, while the system only occupies a negligible part of the total volume.
+crosslinkers are generated in a volume around each loops and dangling bond, but also stored in the gillespie. each time a loop or a strand is generated, we draw $N_\text{link}$ linkers from a Poisson distribution of mean $\rho V$ where V is the volume in which the crosslinkers are generated. We do not generate crosslinkers in the whole volume which would be very large, while the gillespie only occupies a negligible part of the total volume.
 
 We generate crosslinkers in :
 - a cube of side $R = 2 \sqrt{\ell}$ for the dangling bond

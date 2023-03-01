@@ -6,12 +6,12 @@ Linker::Linker(std::array<double,3> r_c){R = r_c;free=true; Linker::counter++;}
 Linker::~Linker(){Linker::counter--;}
 
 array<double,3> Linker::r() const{
-    if(System::dimension == 3){
+    if(LoopLinkWrap::dimension == 3){
         return R;}
-    else if(System::dimension == 2){
+    else if(LoopLinkWrap::dimension == 2){
         return {R[0],R[1],0.};
     }
-    else if(System::dimension == 1){
+    else if(LoopLinkWrap::dimension == 1){
         return {R[0],0.,0.};
     }
     else{throw invalid_argument("invalid dimension value");}

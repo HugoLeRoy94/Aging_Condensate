@@ -46,6 +46,5 @@ struct LessLoop{
 
 #include "Loop.h"
 #include "Dangling.h"
-#include "System.h"
 
 #endif

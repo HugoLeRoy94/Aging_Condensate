@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 sys.path.append('/home/hcleroy/PostDoc/Simulation/Aging_Condensate/')
-import System_backend as backend
+import Gillespie_backend as backend
 
 
 temperature = 0.15
@@ -16,7 +16,7 @@ N_rho = list()
 
 for rho0 in np.linspace(rho00,100*rho00,100):
     print(rho0)
-    S = backend.System(ell_tot,rho0,temperature)
+    S = backend.Gillespie(ell_tot,rho0,temperature)
     for t in range(teq):
         S.evolve()
     Nav = 0

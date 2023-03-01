@@ -33,7 +33,7 @@ private:
   // number of configuration of a polymer bound in r1 and length ell
   double Omega(double ell) const;
   // use random_in_sphere to generate  a number of linkers
-   // build le vector p_linkers from the overall map of the system:
+   // build le vector p_linkers from the overall map of the gillespie:
   double compute_binding_rate(double li, Linker* rlinker) const override;
   
 };

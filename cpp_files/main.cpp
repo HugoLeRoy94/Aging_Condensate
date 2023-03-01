@@ -8,7 +8,7 @@ int main(int argc, char* argv[]){
   double BindingEnergy(-10);
   int bind(0.);
   double* R;
-  System* S = new System(ell_tot,rho0,BindingEnergy,exp(BindingEnergy),19880,false,0,1);
+  Gillespie* S = new Gillespie(ell_tot,rho0,BindingEnergy,exp(BindingEnergy),19880,false,0,1);
   for(int n(0);n<t_tot;n++){
   cout<<n<<endl;
   double time(S->evolve(&bind));
