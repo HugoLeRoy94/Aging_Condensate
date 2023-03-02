@@ -65,20 +65,26 @@ class Simulation:
         """
         #self.PL = np.zeros(self.L_size,dtype=float)
         #self.PR = np.zeros(self.size,dtype=float)
-        self.R = np.zeros((self.step_tot,self.Gillespie.Nlinker-1),dtype=float) # store the position of the linkers
+        self.R = np.zeros((self.step_tot,self.Gillespie.Nlinker-1,3),dtype=float) # store the position of the linkers
         self.dt = np.zeros(self.step_tot,dtype=float)
         self.move = np.zeros(4,dtype=float)
-        self.prev_R = np.linalg.norm(get_non_zero(self.Gillespie.get_r()),axis=1)#self.average_distance(self.Gillespie.get_r())
+        self.prev_R = get_non_zero(self.Gillespie.get_r())#self.average_distance(self.Gillespie.get_r())
         tot_bound_time=0
         for i in range(self.step_tot):
             movetype,Dt = self.Gillespie.evolve()
             self.dt[i] = Dt
             if np.isnan(Dt):
                 raise ValueError
-            self.R[i] = self.prev_R#np.linalg.norm(get_non_zero(self.Gillespie.get_r()))
+            try:
+                self.R[i] = self.prev_R#np.linalg.norm(get_non_zero(self.Gillespie.get_r()))
+            except ValueError:
+                print(self.Gillespie.get_r())
+                print(self.prev_R)
+                raise
             #self.compute_statistics(Dt,movetype)
             tot_bound_time += Dt
-            self.prev_R = np.linalg.norm(get_non_zero(self.Gillespie.get_r()),axis=1)#self.average_distance(self.Gillespie.get_r())
+            self.prev_R = get_non_zero(self.Gillespie.get_r())#self.average_distance(self.Gillespie.get_r())
+
             self.move[movetype] +=1
         #self.PL = self.PL/tot_bound_time
         self.time = np.cumsum(self.dt)
