@@ -1,3 +1,9 @@
 [submodule "cpp_files"]
 	path = cpp_files
 	url = https://github.com/cachetdaspirine/cpp_file_aging_condensate.git
+[submodule "Understand_aging_model"]
+	path = Understand_aging_model
+	url = https://github.com/cachetdaspirine/Understand_aging_model.git
+[submodule "Analysis_cluster"]
+	path = Analysis_cluster
+	url = https://github.com/cachetdaspirine/Analysis_cluster.git
