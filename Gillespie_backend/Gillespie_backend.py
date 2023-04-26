@@ -66,20 +66,20 @@ class Gillespie:
         """
         Make the gillespie evolves 
         """
-        if steps>1:
-            binds,time = np.zeros(steps,dtype=int),np.zeros(steps,dtype=float)
-            for dt in range(steps):
-                bind = c_int(0)
-                time[dt] = lib.evolve(self.Address,byref(bind))
-                binds[dt] = bind.value
-                if self.get_r().shape[0] != self.Nlinker:
-                    print(dt)
-                    raise ValueError('wrong number of linkers')
-            return binds,time
-        else:
+        #if steps>1:
+        binds,time = np.zeros(steps,dtype=int),np.zeros(steps,dtype=float)
+        for dt in range(steps):
             bind = c_int(0)
-            time = lib.evolve(self.Address,byref(bind))
-            return bind.value, time
+            time[dt] = lib.evolve(self.Address,byref(bind))
+            binds[dt] = bind.value
+            if self.get_r().shape[0] != self.Nlinker:
+                print(dt)
+                raise ValueError('wrong number of linkers')
+        return binds,time
+        #else:
+        #    bind = c_int(0)
+        #    time = lib.evolve(self.Address,byref(bind))
+        #    return bind.value, time
     def get_N_loop(self):
         return lib.get_N_strand(self.Address)
     
