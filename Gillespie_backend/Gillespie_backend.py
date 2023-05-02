@@ -24,6 +24,8 @@ lib.delete_Gillespie.argtypes = [POINTER(c_void_p)]
 lib.reset_crosslinkers.argypes = POINTER(c_void_p)
 
 
+lib.get_S.argtypes = [POINTER(c_void_p)]
+lib.get_S.restype = c_double
 lib.get_F.argtypes = [POINTER(c_void_p)]
 lib.get_F.restype = c_double
 lib.get_r_size.argtypes=[POINTER(c_void_p)]
@@ -80,11 +82,14 @@ class Gillespie:
         #    bind = c_int(0)
         #    time = lib.evolve(self.Address,byref(bind))
         #    return bind.value, time
+   
     def get_N_loop(self):
         return lib.get_N_strand(self.Address)
     
     def get_F(self):
         return lib.get_F(self.Address)
+    def get_S(self):
+        return lib.get_S(self.Address) 
     
     def get_R(self):
         size = (self.get_N_loop())*3
