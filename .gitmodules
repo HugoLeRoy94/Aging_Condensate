@@ -5,5 +5,5 @@
 	path = Understand_aging_model
 	url = https://github.com/cachetdaspirine/Understand_aging_model.git
 [submodule "Analysis_cluster"]
-	path = Analysis_cluster
+	path = Analysis
 	url = https://github.com/cachetdaspirine/Analysis_cluster.git
