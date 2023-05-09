@@ -77,7 +77,7 @@ class Gillespie:
             if self.get_r().shape[0] != self.Nlinker:
                 print(dt)
                 raise ValueError('wrong number of linkers')
-        return binds,time
+        return binds,time*np.exp(self.binding_energy)
         #else:
         #    bind = c_int(0)
         #    time = lib.evolve(self.Address,byref(bind))
