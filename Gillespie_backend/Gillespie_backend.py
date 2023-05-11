@@ -152,7 +152,7 @@ class Gillespie:
         except KeyError:
             draw_ellipse = True
         # plot all the loops
-        for i in range(0,R.shape[0]-1):
+        for i in range(1,R.shape[0]-1):
             #axes = ell.construct_axes_from_main_axe((R[i+1]-R[i])/2,np.sqrt(Ell[i])/2)
             #print(axes)
             if np.linalg.norm(R[i+1]-R[i]) < Ell[i]*0.1:
@@ -165,9 +165,12 @@ class Gillespie:
                 xel,yel,zel = ell.ellipse_from_main_ax(-(R[i+1]-R[i])/2,a,b,[0.5*(R[i,0]+R[i+1,0]),0.5*(R[i+1,1]+R[i,1]),(R[i+1,2]+R[i,2])*0.5])
                 ax.plot_wireframe(xel, yel, zel,  rstride=4, cstride=4, color='#2980b9', alpha=0.2)
         # plot the dangling end :
-        Ell_dangling = self.ell_tot -sum( Ell )
-        xel,yel,zel = ell.ellipse_from_main_ax([0,0,0],np.sqrt(Ell_dangling),np.sqrt(Ell_dangling),R[-1])
-        ax.plot_wireframe(xel, yel, zel,  rstride=4, cstride=4, color='r', alpha=0.2)
+        Ell_dangling_left = Ell[0]
+        Ell_dangling_right = Ell[-1]
+        xel,yel,zel = ell.ellipse_from_main_ax([0,0,0],np.sqrt(Ell_dangling_right),np.sqrt(Ell_dangling_left),R[0])
+        ax.plot_wireframe(xel, yel, zel,  rstride=4, cstride=4, color='red', alpha=0.2)
+        xel,yel,zel = ell.ellipse_from_main_ax([0,0,0],np.sqrt(Ell_dangling_right),np.sqrt(Ell_dangling_right),R[-1])
+        ax.plot_wireframe(xel, yel, zel,  rstride=4, cstride=4, color='black', alpha=0.2)
         ax.set_xlim(min(np.append(R,r)),max(np.append(r,R)))
         ax.set_ylim(min(np.append(R,r)),max(np.append(r,R)))
         ax.set_zlim(min(np.append(R,r)),max(np.append(r,R)))
