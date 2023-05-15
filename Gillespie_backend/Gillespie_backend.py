@@ -88,11 +88,12 @@ class Gillespie:
     
     def get_F(self):
         return lib.get_F(self.Address)
+    
     def get_S(self):
         return lib.get_S(self.Address) 
     
     def get_R(self):
-        size = (self.get_N_loop())*3
+        size = (self.get_N_loop()-1)*3 # there are two dangling loop, thus one less binding points that loops
         R = np.zeros(size,dtype=np.double)
         lib.get_R(self.Address,R.ctypes.data_as(POINTER(c_double)),size)
         R = np.reshape(R, (-1, 3))
