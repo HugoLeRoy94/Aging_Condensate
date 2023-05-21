@@ -107,7 +107,7 @@ class Gillespie:
         return R
     
     def get_ell_coordinates(self):
-        size = self.get_N_loop()
+        size = self.get_N_loop()-1
         ell_coordinates = np.zeros(size,dtype=np.double)
         lib.get_ell_coordinates(self.Address,ell_coordinates.ctypes.data_as(POINTER(c_double)),size)
         return ell_coordinates
