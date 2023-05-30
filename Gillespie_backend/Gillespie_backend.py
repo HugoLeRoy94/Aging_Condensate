@@ -48,7 +48,7 @@ class Gillespie:
     def __init__(self,ell_tot=100,rho0=0.,BindingEnergy=-1.,kdiff=1.,seed=19874,sliding=False,Nlinker=0,old_gillespie=None,dimension=3):
         self.move_types = {0 : 'unbind', 1:'diffuse', 2:'slide', 3:'bind'}
         if old_gillespie is None:
-            self.ell_tot,self.rho0,self.binding_energy,self.k_diff = ell_tot,rho0,BindingEnergy,kdiff
+            self.ell_tot,self.rho0,self.binding_energy,self.k_diff,self.seed = ell_tot,rho0,BindingEnergy,kdiff,seed
             self.Nlinker,self.dimension = Nlinker,dimension
             self.Address = lib.create_gillespie(self.ell_tot,self.rho0,self.binding_energy,self.k_diff,seed,sliding,self.Nlinker,self.dimension)            
         else:
