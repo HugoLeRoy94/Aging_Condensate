@@ -33,8 +33,8 @@ lib.get_r_size.argtypes=[POINTER(c_void_p)]
 lib.get_r_size.restype=c_int
 lib.get_r_gillespie_size.argtypes=[POINTER(c_void_p)]
 lib.get_r_gillespie_size.restype=c_int
-lib.get_r.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
-lib.get_r_gillespie.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int]
+lib.get_r.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int,c_bool]
+lib.get_r_gillespie.argtypes = [POINTER(c_void_p),POINTER(c_double),c_int,c_bool]
 lib.get_N_strand.argtypes=[POINTER(c_void_p)]
 lib.get_N_strand.restype=c_int
 lib.get_R.argtypes=[POINTER(c_void_p),POINTER(c_double),c_int]
@@ -118,17 +118,17 @@ class Gillespie:
         lib.get_ell(self.Address,ell.ctypes.data_as(POINTER(c_double)),size)
         return ell
 
-    def get_r(self):    
+    def get_r(self,periodic=False):    
         size = lib.get_r_gillespie_size(self.Address)
         r = np.zeros(size,dtype=np.double)
         # r_gillespie access the linkers that are owned by the gillespie
-        lib.get_r_gillespie(self.Address,r.ctypes.data_as(POINTER(c_double)),size)
+        lib.get_r_gillespie(self.Address,r.ctypes.data_as(POINTER(c_double)),size,periodic)
         return np.reshape(r,(-1,3))
     
-    def get_r_from_loops(self):
+    def get_r_from_loops(self,periodic=False):
         size = lib.get_r_size(self.Address)
         r = np.zeros(size,dtype=np.double)
-        lib.get_r(self.Address,r.ctypes.data_as(POINTER(c_double)),size)
+        lib.get_r(self.Address,r.ctypes.data_as(POINTER(c_double)),size,periodic)
         return np.reshape(r,(-1,3))
     
     def get_r_size(self):
