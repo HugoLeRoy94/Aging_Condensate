@@ -46,6 +46,8 @@ lib.print_random_stuff.argtypes=[POINTER(c_void_p)]
 
 class Gillespie:
     def __init__(self,ell_tot=100,rho0=0.,BindingEnergy=-1.,kdiff=1.,seed=19874,sliding=False,Nlinker=0,old_gillespie=None,dimension=3):
+        if Nlinker <=1:
+            raise ValueError("Nlinker should be greater than 1")
         self.move_types = {0 : 'unbind', 1:'diffuse', 2:'slide', 3:'bind'}
         if old_gillespie is None:
             self.ell_tot,self.rho0,self.binding_energy,self.k_diff,self.seed = ell_tot,rho0,BindingEnergy,kdiff,seed
